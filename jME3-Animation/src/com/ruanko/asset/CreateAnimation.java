@@ -15,7 +15,9 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Box;
 import com.jme3.util.BufferUtils;
@@ -143,7 +145,7 @@ public class CreateAnimation {
 			times[i] = i;
 			translations[i] = translations[i-1].add(new Vector3f(0.4f, 0, 0f));
 			rotations[i] = rotations[i-1];
-			scales[i] = scales[i-1];
+			scales[i] = scales[i-1].mult(1.1f);
 		}
 		
 		BoneTrack track = new BoneTrack(2, times, translations, rotations, scales);
@@ -155,7 +157,9 @@ public class CreateAnimation {
 		Node model = new Node("model");
 		
 		Box box = new Box(0.1f, 0.1f, 0.1f);
-		// should I use it this way?
+		
+		reCalculateVertex(box, new Vector3f(0, 0, 1));
+		
 		box.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)0));
 		box.setBuffer(Type.BoneWeight, 4, createBoneWeight());
 		box.setMaxNumWeights(4);
@@ -165,9 +169,11 @@ public class CreateAnimation {
 		Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat1.setColor("Color", ColorRGBA.Green);
 		box01.setMaterial(mat1);
-		box01.setLocalTranslation(0, 0, 1);
 		
 		Box box2 = new Box(0.1f, 0.1f, 0.1f);
+		
+		reCalculateVertex(box2, new Vector3f(0.74f, 0.74f, 1f));
+		
 		box2.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)1));
 		box2.setBuffer(Type.BoneWeight, 4, createBoneWeight());
 		box2.setMaxNumWeights(4);
@@ -177,9 +183,11 @@ public class CreateAnimation {
 		Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat2.setColor("Color", ColorRGBA.Blue);
 		box02.setMaterial(mat2);
-		box02.setLocalTranslation(0.74f, 0.74f, 1);
 		
 		Box box3 = new Box(0.1f, 0.1f, 0.1f);
+		
+		reCalculateVertex(box3, new Vector3f(0.74f, 1.74f, 1f));
+		
 		box3.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)2));
 		box3.setBuffer(Type.BoneWeight, 4, createBoneWeight());
 		box3.setMaxNumWeights(4);
@@ -189,7 +197,6 @@ public class CreateAnimation {
 		Material mat3 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat3.setColor("Color", ColorRGBA.Red);
 		box03.setMaterial(mat3);
-		box03.setLocalTranslation(0.74f, 1.74f, 1f);
 		
 		model.attachChild(box01);
 		model.attachChild(box02);
@@ -212,5 +219,30 @@ public class CreateAnimation {
 			boneWeight[i] = 1;
 		}
 		return BufferUtils.createFloatBuffer(boneWeight);
+	}
+	
+	/**
+	 * recalculate the vertex coordinate
+	 * @param mesh
+	 * @param translation
+	 */
+	private void reCalculateVertex(Mesh mesh, Vector3f translation) {
+
+		// get vertex data
+		VertexBuffer vb = mesh.getBuffer(Type.Position);
+		FloatBuffer fb = (FloatBuffer)vb.getData();
+		
+		// ready for read
+		fb.flip();
+		int length = fb.limit();
+		for(int i=0; i<length; i+=3) {
+			float x = fb.get() + translation.x;
+			float y = fb.get() + translation.y;
+			float z = fb.get() + translation.z;
+			
+			fb.put(i, x);
+			fb.put(i+1, y);
+			fb.put(i+2, z);
+		}
 	}
 }
