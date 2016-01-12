@@ -84,7 +84,7 @@ public class CreateAnimation {
 		
 		// initBindTransform
 		times[0] = 0;
-		translations[0] = new Vector3f(0, 0, 1);
+		translations[0] = new Vector3f(0, 0, 0);
 		rotations[0] = new Quaternion(0, 0, 0, 1);
 		scales[0] = new Vector3f(1, 1, 1);
 		
@@ -111,7 +111,7 @@ public class CreateAnimation {
 		
 		// initBindTransform
 		times[0] = 0;
-		translations[0] = new Vector3f(0.74f, 0.74f, 0);
+		translations[0] = new Vector3f(0f, 0f, 0f);
 		rotations[0] = new Quaternion(0, 0, 0, 1);
 		scales[0] = new Vector3f(1, 1, 1);
 		
@@ -137,18 +137,18 @@ public class CreateAnimation {
 		
 		// initBindTransform
 		times[0] = 0;
-		translations[0] = new Vector3f(0.74f, 0.74f, 0);
+		translations[0] = new Vector3f(0, 0, 0);
 		rotations[0] = new Quaternion(0, 0, 0, 1);
 		scales[0] = new Vector3f(1, 1, 1);
 		
 		for(int i=1; i<size; i++) {
 			times[i] = i;
-			translations[i] = translations[i-1];
+			translations[i] = translations[i-1].add(new Vector3f(0.4f, 0, 0.4f));
 			rotations[i] = rotations[i-1];
 			scales[i] = scales[i-1].mult(0.01f);
 		}
 		
-		BoneTrack track = new BoneTrack(1, times, translations, rotations, scales);
+		BoneTrack track = new BoneTrack(2, times, translations, rotations, scales);
 		
 		return track;
 	}
@@ -157,12 +157,10 @@ public class CreateAnimation {
 		Node model = new Node("model");
 		
 		Box box = new Box(0.25f, 0.25f, 0.25f);
-		
-		// show I use it this way?
+		// should I use it this way?
 		box.setBuffer(Type.BoneIndex, 1, createBoneIndex(0));
-//		box.getBuffer(Type.BoneIndex).setUsage(Usage.CpuOnly);
-//		box.setBuffer(Type.BoneWeight, 4, createBoneWeight());
-		box.setMaxNumWeights(0);
+		box.setBuffer(Type.BoneWeight, 1, createBoneWeight());
+		box.setMaxNumWeights(1);
 		
 		Geometry box01 = new Geometry("box01", box);
 		Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -172,7 +170,8 @@ public class CreateAnimation {
 		
 		Box box2 = new Box(0.25f, 0.25f, 0.25f);
 		box2.setBuffer(Type.BoneIndex, 1, createBoneIndex(1));
-		box2.setMaxNumWeights(0);
+		box2.setBuffer(Type.BoneWeight, 1, createBoneWeight());
+		box2.setMaxNumWeights(1);
 		
 		Geometry box02 = new Geometry("box02", box2);
 		Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -182,7 +181,8 @@ public class CreateAnimation {
 		
 		Box box3 = new Box(0.25f, 0.25f, 0.25f);
 		box3.setBuffer(Type.BoneIndex, 1, createBoneIndex(2));
-		box3.setMaxNumWeights(0);
+		box3.setBuffer(Type.BoneWeight, 1, createBoneWeight());
+		box3.setMaxNumWeights(1);
 		
 		Geometry box03 = new Geometry("box03", box3);
 		Material mat3 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -206,8 +206,8 @@ public class CreateAnimation {
 	}
 	
 	private FloatBuffer createBoneWeight() {
-		float[] boneWeight = new float[96];// 24个顶点
-		for(int i=0; i<96; i++) {
+		float[] boneWeight = new float[24];// 24个顶点
+		for(int i=0; i<24; i++) {
 			boneWeight[i] = 1;
 		}
 		return BufferUtils.createFloatBuffer(boneWeight);
