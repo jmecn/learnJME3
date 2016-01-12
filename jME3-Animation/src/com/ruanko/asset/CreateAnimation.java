@@ -158,8 +158,8 @@ public class CreateAnimation {
 		
 		Box box = new Box(0.25f, 0.25f, 0.25f);
 		// should I use it this way?
-		box.setBuffer(Type.BoneIndex, 1, createBoneIndex(0));
-		box.setBuffer(Type.BoneWeight, 1, createBoneWeight());
+		box.setBuffer(Type.BoneIndex, 4, createBoneIndex(0));
+		box.setBuffer(Type.BoneWeight, 4, createBoneWeight());
 		box.setMaxNumWeights(1);
 		
 		Geometry box01 = new Geometry("box01", box);
@@ -169,8 +169,8 @@ public class CreateAnimation {
 		box01.move(new Vector3f(0, 0, 1));
 		
 		Box box2 = new Box(0.25f, 0.25f, 0.25f);
-		box2.setBuffer(Type.BoneIndex, 1, createBoneIndex(1));
-		box2.setBuffer(Type.BoneWeight, 1, createBoneWeight());
+		box2.setBuffer(Type.BoneIndex, 4, createBoneIndex(1));
+		box2.setBuffer(Type.BoneWeight, 4, createBoneWeight());
 		box2.setMaxNumWeights(1);
 		
 		Geometry box02 = new Geometry("box02", box2);
@@ -180,8 +180,8 @@ public class CreateAnimation {
 		box02.move(new Vector3f(0.74f, 0.74f, 1));
 		
 		Box box3 = new Box(0.25f, 0.25f, 0.25f);
-		box3.setBuffer(Type.BoneIndex, 1, createBoneIndex(2));
-		box3.setBuffer(Type.BoneWeight, 1, createBoneWeight());
+		box3.setBuffer(Type.BoneIndex, 4, createBoneIndex(2));
+		box3.setBuffer(Type.BoneWeight, 4, createBoneWeight());
 		box3.setMaxNumWeights(1);
 		
 		Geometry box03 = new Geometry("box03", box3);
@@ -198,16 +198,16 @@ public class CreateAnimation {
 	}
 	
 	private IntBuffer createBoneIndex(int n) {
-		int[] boneIndices = new int[24];// 24个顶点
-		for(int i=0; i<24; i++) {
+		int[] boneIndices = new int[24*4];
+		for(int i=0; i<24*4; i++) {
 			boneIndices[i] = n;
 		}
 		return BufferUtils.createIntBuffer(boneIndices);
 	}
 	
 	private FloatBuffer createBoneWeight() {
-		float[] boneWeight = new float[24];// 24个顶点
-		for(int i=0; i<24; i++) {
+		float[] boneWeight = new float[24*4];
+		for(int i=0; i<24*4; i++) {
 			boneWeight[i] = 1;
 		}
 		return BufferUtils.createFloatBuffer(boneWeight);

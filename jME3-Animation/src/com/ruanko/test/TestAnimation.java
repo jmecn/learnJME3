@@ -1,6 +1,7 @@
 package com.ruanko.test;
 
 import com.jme3.animation.AnimControl;
+import com.jme3.animation.SkeletonControl;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
@@ -16,6 +17,10 @@ public class TestAnimation extends TestBaseApp {
 		
 		Node node = ca.createModel();
 		node.addControl(ac);
+		
+		// Add SkeletonControl
+		SkeletonControl sc = new SkeletonControl(ac.getSkeleton());
+		node.addControl(sc);
 		
 		rootNode.attachChild(node);
 		
