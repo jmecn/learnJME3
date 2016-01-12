@@ -144,9 +144,9 @@ public class CreateAnimation {
 		
 		for(int i=1; i<size; i++) {
 			times[i] = i;
-			translations[i] = translations[i-1].add(new Vector3f(0.4f, 0, 0.4f));
+			translations[i] = translations[i-1].add(new Vector3f(0.4f, 0, 0f));
 			rotations[i] = rotations[i-1];
-			scales[i] = scales[i-1].mult(1.1f);
+			scales[i] = scales[i-1];
 		}
 		
 		BoneTrack track = new BoneTrack(2, times, translations, rotations, scales);
