@@ -2,7 +2,6 @@ package com.ruanko.asset;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.Animation;
@@ -17,9 +16,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.VertexBuffer.Usage;
 import com.jme3.scene.shape.Box;
 import com.jme3.util.BufferUtils;
 

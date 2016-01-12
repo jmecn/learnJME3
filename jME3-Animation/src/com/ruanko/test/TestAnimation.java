@@ -18,7 +18,7 @@ public class TestAnimation extends TestBaseApp {
 		Node node = ca.createModel();
 		node.addControl(ac);
 		
-		// Try using SkeletonControl but it still wont work
+		// Create SkeletonControl and add it to Node
 		SkeletonControl sc = new SkeletonControl(ac.getSkeleton());
 		node.addControl(sc);
 		
