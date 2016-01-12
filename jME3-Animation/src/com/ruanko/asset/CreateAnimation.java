@@ -24,15 +24,22 @@ import com.jme3.util.BufferUtils;
 
 public class CreateAnimation {
 
+	AssetManager assetManager;
+
+	// relative vertex coordinates
+	Vector3f bone1_local = new Vector3f(0, 0, 1);
+	Vector3f bone2_local = new Vector3f(0.74f, 0.74f, 0);
+	Vector3f bone3_local = new Vector3f(0, 1, 0);
+
+	// absolute vertex coordinates
+	Vector3f box1_piovt = bone1_local.clone();
+	Vector3f box2_piovt = box1_piovt.add(bone2_local);
+	Vector3f box3_piovt = box2_piovt.add(bone3_local);
+	
 	public CreateAnimation(AssetManager assetManager) {
 		this.assetManager = assetManager;
 	}
-	AssetManager assetManager;
 	
-
-	/**
-	 * ´´½¨¶¯»­
-	 */
 	public AnimControl createAnimControl() {
 		
 		Skeleton ske = buildSkeleton();
@@ -56,13 +63,13 @@ public class CreateAnimation {
 		
 		// create bones
 		Bone bip01 = new Bone("Bip01");
-		bip01.setBindTransforms(new Vector3f(0, 0, 1), new Quaternion(0, 0, 0, 1), new Vector3f(1, 1, 1));
+		bip01.setBindTransforms(bone1_local, new Quaternion(0, 0, 0, 1), new Vector3f(1, 1, 1));
 
 		Bone bip02 = new Bone("Bip02");
-		bip02.setBindTransforms(new Vector3f(0.74f, 0.74f, 0), new Quaternion(0, 0, 0, 1), new Vector3f(1, 1, 1));
+		bip02.setBindTransforms(bone2_local, new Quaternion(0, 0, 0, 1), new Vector3f(1, 1, 1));
 
 		Bone bip03 = new Bone("Bip03");
-		bip03.setBindTransforms(new Vector3f(0, 1, 0), new Quaternion(0, 0, 0, 1), new Vector3f(1, 1, 1));
+		bip03.setBindTransforms(bone3_local, new Quaternion(0, 0, 0, 1), new Vector3f(1, 1, 1));
 		
 		bip01.addChild(bip02);
 		bip02.addChild(bip03);
@@ -84,8 +91,8 @@ public class CreateAnimation {
 		
 		// initBindTransform
 		times[0] = 0;
-		translations[0] = new Vector3f(0, 0, 0);
-		rotations[0] = new Quaternion(0, 0, 0, 1);
+		translations[0] = new Vector3f();
+		rotations[0] = new Quaternion();
 		scales[0] = new Vector3f(1, 1, 1);
 		
 		Quaternion q = new Quaternion().fromAngleAxis(FastMath.PI/3, new Vector3f(0, 1, 0));
@@ -111,8 +118,8 @@ public class CreateAnimation {
 		
 		// initBindTransform
 		times[0] = 0;
-		translations[0] = new Vector3f(0f, 0f, 0f);
-		rotations[0] = new Quaternion(0, 0, 0, 1);
+		translations[0] = new Vector3f();
+		rotations[0] = new Quaternion();
 		scales[0] = new Vector3f(1, 1, 1);
 		
 		for(int i=1; i<size; i++) {
@@ -137,8 +144,8 @@ public class CreateAnimation {
 		
 		// initBindTransform
 		times[0] = 0;
-		translations[0] = new Vector3f(0, 0, 0);
-		rotations[0] = new Quaternion(0, 0, 0, 1);
+		translations[0] = new Vector3f();
+		rotations[0] = new Quaternion();
 		scales[0] = new Vector3f(1, 1, 1);
 		
 		for(int i=1; i<size; i++) {
@@ -158,7 +165,7 @@ public class CreateAnimation {
 		
 		Box box = new Box(0.1f, 0.1f, 0.1f);
 		
-		reCalculateVertex(box, new Vector3f(0, 0, 1));
+		reCalculateVertex(box, box1_piovt);
 		
 		box.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)0));
 		box.setBuffer(Type.BoneWeight, 4, createBoneWeight());
@@ -172,7 +179,7 @@ public class CreateAnimation {
 		
 		Box box2 = new Box(0.1f, 0.1f, 0.1f);
 		
-		reCalculateVertex(box2, new Vector3f(0.74f, 0.74f, 1f));
+		reCalculateVertex(box2, box2_piovt);
 		
 		box2.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)1));
 		box2.setBuffer(Type.BoneWeight, 4, createBoneWeight());
@@ -186,7 +193,7 @@ public class CreateAnimation {
 		
 		Box box3 = new Box(0.1f, 0.1f, 0.1f);
 		
-		reCalculateVertex(box3, new Vector3f(0.74f, 1.74f, 1f));
+		reCalculateVertex(box3, box3_piovt);
 		
 		box3.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)2));
 		box3.setBuffer(Type.BoneWeight, 4, createBoneWeight());
@@ -215,9 +222,31 @@ public class CreateAnimation {
 	
 	private FloatBuffer createBoneWeight() {
 		float[] boneWeight = new float[24*4];
+		
+		//for(int i=0; i<24*4; i++) {
+		//	boneWeight[i] = 1;
+		//}
+		
+		// fix: the total of 4 weights must be 1.
 		for(int i=0; i<24*4; i++) {
-			boneWeight[i] = 1;
+			boneWeight[i] = 1f/4;
 		}
+		
+		// as I have only one bone index for each box, below works just fine.
+		//for(int i=0; i<24*4; i+=4) {
+		//	boneWeight[i] = 0.4f;
+		//	boneWeight[i+1] = 0.3f;
+		//	boneWeight[i+2] = 0.2f;
+		//	boneWeight[i+3] = 0.1f;
+		//}
+		
+	    //for(int i=0; i<24*4; i+=4) {
+	    //	boneWeight[i] = 1;
+	    //	boneWeight[i+1] = 0;
+	    //	boneWeight[i+2] = 0;
+	    //	boneWeight[i+3] = 0;
+	    //}
+		
 		return BufferUtils.createFloatBuffer(boneWeight);
 	}
 	
