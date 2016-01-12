@@ -1,5 +1,6 @@
 package com.ruanko.asset;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -145,7 +146,7 @@ public class CreateAnimation {
 			times[i] = i;
 			translations[i] = translations[i-1].add(new Vector3f(0.4f, 0, 0.4f));
 			rotations[i] = rotations[i-1];
-			scales[i] = scales[i-1].mult(0.01f);
+			scales[i] = scales[i-1].mult(1.1f);
 		}
 		
 		BoneTrack track = new BoneTrack(2, times, translations, rotations, scales);
@@ -156,39 +157,42 @@ public class CreateAnimation {
 	public Node createModel() {
 		Node model = new Node("model");
 		
-		Box box = new Box(0.25f, 0.25f, 0.25f);
+		Box box = new Box(0.1f, 0.1f, 0.1f);
 		// should I use it this way?
-		box.setBuffer(Type.BoneIndex, 4, createBoneIndex(0));
+		box.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)0));
 		box.setBuffer(Type.BoneWeight, 4, createBoneWeight());
-		box.setMaxNumWeights(1);
+		box.setMaxNumWeights(4);
+		box.generateBindPose(true);
 		
 		Geometry box01 = new Geometry("box01", box);
 		Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat1.setColor("Color", ColorRGBA.Green);
 		box01.setMaterial(mat1);
-		box01.move(new Vector3f(0, 0, 1));
+		box01.setLocalTranslation(0, 0, 1);
 		
-		Box box2 = new Box(0.25f, 0.25f, 0.25f);
-		box2.setBuffer(Type.BoneIndex, 4, createBoneIndex(1));
+		Box box2 = new Box(0.1f, 0.1f, 0.1f);
+		box2.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)1));
 		box2.setBuffer(Type.BoneWeight, 4, createBoneWeight());
-		box2.setMaxNumWeights(1);
+		box2.setMaxNumWeights(4);
+		box2.generateBindPose(true);
 		
 		Geometry box02 = new Geometry("box02", box2);
 		Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat2.setColor("Color", ColorRGBA.Blue);
 		box02.setMaterial(mat2);
-		box02.move(new Vector3f(0.74f, 0.74f, 1));
+		box02.setLocalTranslation(0.74f, 0.74f, 1);
 		
-		Box box3 = new Box(0.25f, 0.25f, 0.25f);
-		box3.setBuffer(Type.BoneIndex, 4, createBoneIndex(2));
+		Box box3 = new Box(0.1f, 0.1f, 0.1f);
+		box3.setBuffer(Type.BoneIndex, 4, createBoneIndex((byte)2));
 		box3.setBuffer(Type.BoneWeight, 4, createBoneWeight());
-		box3.setMaxNumWeights(1);
+		box3.setMaxNumWeights(4);
+		box3.generateBindPose(true);
 		
 		Geometry box03 = new Geometry("box03", box3);
 		Material mat3 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat3.setColor("Color", ColorRGBA.Red);
 		box03.setMaterial(mat3);
-		box03.move(new Vector3f(0.74f, 1.74f, 1));
+		box03.setLocalTranslation(0.74f, 1.74f, 1f);
 		
 		model.attachChild(box01);
 		model.attachChild(box02);
@@ -197,12 +201,12 @@ public class CreateAnimation {
 		return model;
 	}
 	
-	private IntBuffer createBoneIndex(int n) {
-		int[] boneIndices = new int[24*4];
+	private ByteBuffer createBoneIndex(byte n) {
+		byte[] boneIndices = new byte[24*4];
 		for(int i=0; i<24*4; i++) {
 			boneIndices[i] = n;
 		}
-		return BufferUtils.createIntBuffer(boneIndices);
+		return BufferUtils.createByteBuffer(boneIndices);
 	}
 	
 	private FloatBuffer createBoneWeight() {
