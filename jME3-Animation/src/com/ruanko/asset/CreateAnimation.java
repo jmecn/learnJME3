@@ -39,7 +39,7 @@ public class CreateAnimation {
 		
 		AnimControl animControl = new AnimControl(ske);
 		
-		float length = 5f;// 动画时间长度
+		float length = 9f;
 		
 		Animation anim = new Animation("Anim", length);
 		
@@ -52,13 +52,9 @@ public class CreateAnimation {
 		return animControl;
 	}
 	
-	/**
-	 * 建造骨骼
-	 * @return
-	 */
 	public Skeleton buildSkeleton() {
 		
-		// 创建关节点
+		// create bones
 		Bone bip01 = new Bone("Bip01");
 		bip01.setBindTransforms(new Vector3f(0, 0, 1), new Quaternion(0, 0, 0, 1), new Vector3f(1, 1, 1));
 
@@ -68,11 +64,10 @@ public class CreateAnimation {
 		Bone bip03 = new Bone("Bip03");
 		bip03.setBindTransforms(new Vector3f(0, 1, 0), new Quaternion(0, 0, 0, 1), new Vector3f(1, 1, 1));
 		
-		// 生成继承关系
 		bip01.addChild(bip02);
 		bip02.addChild(bip03);
 		
-		// 创建骨骼
+		// create skeleton
 		Bone[] bones = new Bone[] {bip01, bip02, bip03};
 		Skeleton ske = new Skeleton(bones);
 
