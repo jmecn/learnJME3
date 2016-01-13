@@ -43,12 +43,12 @@ public class CreateAnimationHW {
 	Vector3f piovt3 = piovt2.add(bone3_local);
 	
 	// Bone name
-	String[] boneNames = {"Bip01", "Bip02", "Bip03"};
 	
 	public CreateAnimationHW(AssetManager assetManager) {
 		this.assetManager = assetManager;
 	}
 	
+	String[] boneNames = {"Bip01", "Bip02", "Bip03"};
 	public Node createModel() {
 		/** create a model */
 		Node model = new Node("model");
@@ -148,6 +148,10 @@ public class CreateAnimationHW {
 		mesh.generateBindPose(true);
 	}
 	
+	/**
+	 * Create an AnimControl, it contains an Animation with 3 BoneTracks.
+	 * @return
+	 */
 	private AnimControl createAnimControl() {
 		
 		Skeleton ske = buildSkeleton();
@@ -167,6 +171,10 @@ public class CreateAnimationHW {
 		return animControl;
 	}
 	
+	/**
+	 * Build a skeleton with 3 Bones.
+	 * @return
+	 */
 	private Skeleton buildSkeleton() {
 		
 		// create bones
@@ -189,6 +197,10 @@ public class CreateAnimationHW {
 		return ske;
 	}
 	
+	/**
+	 * This bone rotate it self
+	 * @return
+	 */
 	private BoneTrack track0() {
 		int size = 10;// numbers of keyframes
 		
@@ -216,6 +228,10 @@ public class CreateAnimationHW {
 		return track;
 	}
 	
+	/**
+	 * This bone rises it self.
+	 * @return
+	 */
 	private BoneTrack track1() {
 		int size = 10;// numbers of keyframes
 		
@@ -242,6 +258,10 @@ public class CreateAnimationHW {
 		return track;
 	}
 	
+	/**
+	 * This bone grows bigger and moves away from parent
+	 * @return
+	 */
 	private BoneTrack track2() {
 		int size = 10;// numbers of keyframes
 		
