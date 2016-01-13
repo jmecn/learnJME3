@@ -30,25 +30,25 @@ import com.jme3.scene.shape.Sphere;
  */
 public class CreateAnimationHW {
 
-	AssetManager assetManager;
+	private AssetManager assetManager;
 
-	// local vertex coordinates
-	Vector3f bone1_local = new Vector3f(0, 0, 1);
-	Vector3f bone2_local = new Vector3f(0.74f, 0.74f, 0);
-	Vector3f bone3_local = new Vector3f(0, 1, 0);
+	// Bone's local vertex coordinates
+	private Vector3f bone1_local = new Vector3f(0, 0, 1);
+	private Vector3f bone2_local = new Vector3f(0.74f, 0.74f, 0);
+	private Vector3f bone3_local = new Vector3f(0, 1, 0);
 
-	// world vertex coordinates
-	Vector3f piovt1 = bone1_local.clone();
-	Vector3f piovt2 = piovt1.add(bone2_local);
-	Vector3f piovt3 = piovt2.add(bone3_local);
+	// Geometry's world vertex coordinates
+	private Vector3f piovt1 = bone1_local.clone();
+	private Vector3f piovt2 = piovt1.add(bone2_local);
+	private Vector3f piovt3 = piovt2.add(bone3_local);
 	
 	// Bone name
+	private String[] boneNames = {"Bip01", "Bip02", "Bip03"};
 	
 	public CreateAnimationHW(AssetManager assetManager) {
 		this.assetManager = assetManager;
 	}
 	
-	String[] boneNames = {"Bip01", "Bip02", "Bip03"};
 	public Node createModel() {
 		/** create a model */
 		Node model = new Node("model");
