@@ -894,4 +894,9 @@ public class SpatialTransformer extends Controller {
         beginPointTime = (PointInTime)capsule.readSavable("beginPointTime", null);
         endPointTime = (PointInTime)capsule.readSavable("endPointTime", null);
     }
+    
+    @Override
+    public SpatialTransformer clone() {
+    	return this;
+    }
 }
