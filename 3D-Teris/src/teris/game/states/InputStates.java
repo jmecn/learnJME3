@@ -24,14 +24,14 @@ public class InputStates extends AbstractAppState implements ActionListener {
 	private final static String MOVE_EAST = "east";// 方块向东移动
 	private final static String MOVE_WEST = "west";// 方块向西移动
 	private final static String MOVE_DOWN = "down";// 方块(快速)向下移动
-	private final static String ROTATE_CONTROL_RIGHT = "rotate_control_right";// 右旋
-	private final static String ROTATE_CONTROL_LEFT = "rotate_control_left";// 左旋
-	private final static String ROTATE_WELL_RIGHT = "rotate_well_right";// 井右旋
-	private final static String ROTATE_WELL_LEFT = "rotate_well_left";// 井左旋
+	private final static String C_ROTATE_R = "rotate_control_right";// 受控节点右旋
+	private final static String C_ROTATE_L = "rotate_control_left";// 受控节点左旋
+	private final static String W_ROTATE_R = "rotate_well_right";// 井右旋
+	private final static String W_ROTATE_L = "rotate_well_left";// 井左旋
 	private final static String PAUSE = "pause";// 游戏暂停
 
 	String[] keys = { MOVE_NORTH, MOVE_SOUTH, MOVE_EAST, MOVE_WEST, MOVE_DOWN,
-			ROTATE_CONTROL_RIGHT, ROTATE_CONTROL_LEFT, ROTATE_WELL_RIGHT, ROTATE_WELL_LEFT, PAUSE };
+			C_ROTATE_R, C_ROTATE_L, W_ROTATE_R, W_ROTATE_L, PAUSE };
 
 	private Game game;
 	private InputManager inputManager;
@@ -48,10 +48,10 @@ public class InputStates extends AbstractAppState implements ActionListener {
 		inputManager.addMapping(MOVE_EAST, new KeyTrigger(KeyInput.KEY_D));
 		inputManager.addMapping(MOVE_WEST, new KeyTrigger(KeyInput.KEY_A));
 		inputManager.addMapping(MOVE_DOWN, new KeyTrigger(KeyInput.KEY_X));
-		inputManager.addMapping(ROTATE_CONTROL_RIGHT, new KeyTrigger(KeyInput.KEY_E));
-		inputManager.addMapping(ROTATE_CONTROL_LEFT, new KeyTrigger(KeyInput.KEY_Q));
-		inputManager.addMapping(ROTATE_WELL_RIGHT, new KeyTrigger(KeyInput.KEY_Z));
-		inputManager.addMapping(ROTATE_WELL_LEFT, new KeyTrigger(KeyInput.KEY_C));
+		inputManager.addMapping(C_ROTATE_R, new KeyTrigger(KeyInput.KEY_E));
+		inputManager.addMapping(C_ROTATE_L, new KeyTrigger(KeyInput.KEY_C));
+		inputManager.addMapping(W_ROTATE_R, new KeyTrigger(KeyInput.KEY_Q));
+		inputManager.addMapping(W_ROTATE_L, new KeyTrigger(KeyInput.KEY_Z));
 		inputManager.addMapping(PAUSE, new KeyTrigger(KeyInput.KEY_P));
 
 		inputManager.addListener(this, keys);
@@ -81,16 +81,16 @@ public class InputStates extends AbstractAppState implements ActionListener {
 				break;
 			case MOVE_DOWN:
 				break;
-			case ROTATE_CONTROL_RIGHT:
+			case C_ROTATE_R:
 				game.getControlNode().getControl(RotateControl.class).rotate(true);
 				break;
-			case ROTATE_CONTROL_LEFT:
+			case C_ROTATE_L:
 				game.getControlNode().getControl(RotateControl.class).rotate(false);
 				break;
-			case ROTATE_WELL_RIGHT:
+			case W_ROTATE_R:
 				game.getWellNode().getControl(RotateControl.class).rotate(true);
 				break;
-			case ROTATE_WELL_LEFT:
+			case W_ROTATE_L:
 				game.getWellNode().getControl(RotateControl.class).rotate(false);
 				break;
 			case PAUSE:

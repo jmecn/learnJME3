@@ -5,7 +5,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import teris.game.shape.BoxGeometry;
+import teris.game.scene.BoxGeometry;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;

@@ -41,6 +41,7 @@ public class Game extends SimpleApplication {
 	
 	@Override
 	public void simpleUpdate(float tpf) {
+
 	}
 
 	private void initCamera() {

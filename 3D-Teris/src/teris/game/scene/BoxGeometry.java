@@ -1,4 +1,4 @@
-package teris.game.shape;
+package teris.game.scene;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
