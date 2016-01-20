@@ -1,6 +1,7 @@
 package teris.game.scene;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.asset.TextureKey;
 import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -17,45 +18,46 @@ public class BoxGeometry extends Geometry{
 
 	private Material material;
 	private Texture tex;
+	private static Texture[] texs;
 	
+	private static TextureKey[] texKeys = {
+		new TextureKey("Textures/red.png"),
+		new TextureKey("Textures/orange.png"),
+		new TextureKey("Textures/blue.png"),
+		new TextureKey("Textures/green.png"),
+		new TextureKey("Textures/purple.png"),
+		new TextureKey("Textures/yellow.png"),
+		new TextureKey("Textures/cyan.png"),
+	};
 	/**
 	 * 创建一个方块形状，通过color参数可以指定这个形状的颜色。
 	 * @param assetManager
 	 * @param color
 	 * "red", "blue", "orange", "cyan", "green", "purple", "yellow"
 	 */
-	public BoxGeometry(AssetManager assetManager, String color) {
+	public BoxGeometry(AssetManager assetManager, int color) {
 		
-		this.setName(color);
+		this.setName("box#" + color);
 		this.setMesh(customMesh());
 		
 		material = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
 		setMaterial(material);
 		
-		switch(color){
-		case "red":
-			tex = assetManager.loadTexture("Textures/red.png");
-			break;
-		case "orange":
-			tex = assetManager.loadTexture("Textures/orange.png");
-			break;
-		case "blue":
-			tex = assetManager.loadTexture("Textures/blue.png");
-			break;
-		case "green":
-			tex = assetManager.loadTexture("Textures/green.png");
-			break;
-		case "purple":
-			tex = assetManager.loadTexture("Textures/purple.png");
-			break;
-		case "yellow":
-			tex = assetManager.loadTexture("Textures/yellow.png");
-			break;
-		case "cyan":
-			tex = assetManager.loadTexture("Textures/cyan.png");
-			break;
-		};
+		if (texs == null) {
+			texs = new Texture[texKeys.length];
+			for(int i=0; i<texKeys.length; i++) {
+				texs[i] = assetManager.loadTexture(texKeys[i]);
+			}
+		}
+		setColor(color);
 		if (tex != null) material.setTexture("DiffuseMap", tex);
+	}
+	
+	public void setColor(int color) {
+		if (color > texKeys.length - 1) {
+			color = 0;
+		}
+		material.setTexture("DiffuseMap", texs[color]);
 	}
 	
 	/**

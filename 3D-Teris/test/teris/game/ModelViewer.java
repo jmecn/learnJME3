@@ -86,37 +86,37 @@ public class ModelViewer extends SimpleApplication {
 		list = new ArrayList<TestLoader>();
 		list.add(new TestLoader("Block") {
 			Spatial load() {
-				return new BoxGeometry(assetManager, "red");
+				return new BoxGeometry(assetManager, 0);
 			}
 		});
 		list.add(new TestLoader("Block") {
 			Spatial load() {
-				return new BoxGeometry(assetManager, "yellow");
+				return new BoxGeometry(assetManager, 1);
 			}
 		});
 		list.add(new TestLoader("Block") {
 			Spatial load() {
-				return new BoxGeometry(assetManager, "blue");
+				return new BoxGeometry(assetManager, 2);
 			}
 		});
 		list.add(new TestLoader("Block") {
 			Spatial load() {
-				return new BoxGeometry(assetManager, "purple");
+				return new BoxGeometry(assetManager, 3);
 			}
 		});
 		list.add(new TestLoader("Block") {
 			Spatial load() {
-				return new BoxGeometry(assetManager, "cyan");
+				return new BoxGeometry(assetManager, 4);
 			}
 		});
 		list.add(new TestLoader("Block") {
 			Spatial load() {
-				return new BoxGeometry(assetManager, "orange");
+				return new BoxGeometry(assetManager, 5);
 			}
 		});
 		list.add(new TestLoader("Block") {
 			Spatial load() {
-				return new BoxGeometry(assetManager, "green");
+				return new BoxGeometry(assetManager, 6);
 			}
 		});
 	}

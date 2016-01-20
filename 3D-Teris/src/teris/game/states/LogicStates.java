@@ -8,7 +8,6 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.FastMath;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
 public class LogicStates extends AbstractAppState {
@@ -22,11 +21,11 @@ public class LogicStates extends AbstractAppState {
 	public final static int SIDE_Z = 6;
 	
 	private int[][][] matrix = new int[SIDE_Y][SIDE_Z][SIDE_X];
+	private BoxGeometry[][][] spatials = new BoxGeometry[SIDE_Y][SIDE_Z][SIDE_X];
 
 	private boolean isChanged = false;
 
 	// 7种方块的形状参数
-	private String[] color = { "red", "blue", "orange", "cyan", "green", "purple", "yellow" };
 	private static int[][] pattern = {
 		{ 0x0f00, 0x4444, 0x0f00, 0x4444 }, // 长条型的四种状态
 		{ 0x04e0, 0x0464, 0x00e4, 0x04c4 }, // 'T'型的四种状态
@@ -59,13 +58,22 @@ public class LogicStates extends AbstractAppState {
 		game = (Game) app;
 		assetManager = game.getAssetManager();
 
+		for(int y=0; y<SIDE_Y; y++) {
+			for(int x=0; x<SIDE_X; x++) {
+				for(int z=0; z<SIDE_Z; z++) {
+					spatials[y][z][x] = new BoxGeometry(assetManager, 0);
+					spatials[y][z][x].setLocalTranslation(x - 2.5f, y, z - 2.5f);
+				}
+			}
+		}
+		
 		newGame();
 
 		Node controlNode = game.getControlNode();
-		BoxGeometry _0 = new BoxGeometry(assetManager, "yellow");
-		BoxGeometry _1 = new BoxGeometry(assetManager, "yellow");
-		BoxGeometry _2 = new BoxGeometry(assetManager, "yellow");
-		BoxGeometry _3 = new BoxGeometry(assetManager, "yellow");
+		BoxGeometry _0 = new BoxGeometry(assetManager, 2);
+		BoxGeometry _1 = new BoxGeometry(assetManager, 2);
+		BoxGeometry _2 = new BoxGeometry(assetManager, 2);
+		BoxGeometry _3 = new BoxGeometry(assetManager, 2);
 		controlNode.attachChild(_0);
 		controlNode.attachChild(_1);
 		controlNode.attachChild(_2);
@@ -76,7 +84,6 @@ public class LogicStates extends AbstractAppState {
 		_3.move(0, 0, 1);
 
 		controlNode.move(0.5f, 13f, 0.5f);
-
 	}
 
 
@@ -92,11 +99,8 @@ public class LogicStates extends AbstractAppState {
 		if (timeInSecond >= rate) {
 			timeInSecond -= rate;
 
-			System.out.println("心跳");
-
 			// 下面开始写逻辑
-
-			if (!fallDown()) {// 方块下落
+			if (!moveDown()) {// 方块下落
 				deleteFullLine();// 尝试消除方块
 
 				if (isGameEnd()) {
@@ -158,6 +162,8 @@ public class LogicStates extends AbstractAppState {
 
 	private void getNextBlock() {
 		nextBlockType = FastMath.rand.nextInt(7);
+		
+		System.out.println("next:"+nextBlockType);
 		nextTurnState = FastMath.rand.nextInt(4);
 	}
 
@@ -194,30 +200,6 @@ public class LogicStates extends AbstractAppState {
 		addScore(full_line_num);
 	}
 
-	/**
-	 * 判断方块是否可以下落
-	 * 
-	 * @return
-	 */
-	private boolean fallDown() {
-		int full_line_num = 0;
-		for (int i = 0; i < SIDE_Z; i++) {
-			boolean isfull = true;
-			for (int j = 0; j < SIDE_X; j++) {
-				if (matrix[posY][i][j] == 0) {
-					isfull = false;
-					continue;
-				}
-			}
-			if (isfull) {
-				newLine(i);// 消除一行
-				full_line_num++;
-			}
-		}
-		addScore(full_line_num);
-		return false;
-	}
-	
 	/**
 	 * 实现块落下的操作的方法
 	 * 
@@ -264,9 +246,10 @@ public class LogicStates extends AbstractAppState {
 					for (int z = 0; z < SIDE_Z; z++) {
 						int index = matrix[y][z][x];
 						if (index > 0) {
-							Geometry box = new BoxGeometry(assetManager, color[index - 1]);
-							box.setLocalTranslation(x - 2.5f, y, z - 2.5f);
-							wellNode.attachChild(box);
+							spatials[y][z][x].setColor(index - 1);
+							wellNode.attachChild(spatials[y][z][x]);
+						} else {
+							wellNode.detachChild(spatials[y][z][x]);
 						}
 					}
 				}
@@ -336,10 +319,10 @@ public class LogicStates extends AbstractAppState {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
 				if ((int) (pattern[blockType][turnState] & k) != 0) {
-					if (posZ + i < 0  || posZ + i >= SIDE_Z || posX + j < 0 || posX + j >= SIDE_X) {
+					if (posY < 0 || posY >= SIDE_Y || posZ + i < 0  || posZ + i >= SIDE_Z || posX + j < 0 || posX + j >= SIDE_X) {
 						return false;
 					}
-					if (matrix[posY][posZ + i][posX + j] > 1)
+					if (matrix[posY][posZ + i][posX + j] > 0)
 						return false;
 				}
 				k = k >> 1;
@@ -359,6 +342,8 @@ public class LogicStates extends AbstractAppState {
 				k = k >> 1;
 			}
 		}
+		
+		isChanged = true;
 	}
 
 }
