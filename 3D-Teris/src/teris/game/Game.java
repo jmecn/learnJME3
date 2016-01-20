@@ -1,5 +1,6 @@
 package teris.game;
 
+import teris.game.control.RotateControl;
 import teris.game.states.InputStates;
 import teris.game.states.LogicStates;
 
@@ -7,6 +8,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
@@ -21,8 +23,14 @@ public class Game extends SimpleApplication {
 	
 	@Override
 	public void simpleInitApp() {
+		wellNode = new Node("well");
+		wellNode.addControl(new RotateControl(FastMath.QUARTER_PI));
+		
+		controlNode = new Node("controll");
+		controlNode.addControl(new RotateControl());
+		
 		rootNode.attachChild(wellNode);
-		rootNode.attachChild(controlNode);
+		wellNode.attachChild(controlNode);
 		
 		stateManager.attach(new LogicStates());
 		stateManager.attach(new InputStates());
@@ -31,6 +39,10 @@ public class Game extends SimpleApplication {
 		initLight();
 	}
 	
+	@Override
+	public void simpleUpdate(float tpf) {
+	}
+
 	private void initCamera() {
 		cam.setLocation(new Vector3f(12, 25, 12));
 		cam.lookAt(new Vector3f(3, 13, 3), cam.getUp());
@@ -50,7 +62,7 @@ public class Game extends SimpleApplication {
 		sun = new DirectionalLight();
 		sun.setColor(ColorRGBA.White);
 		sun.setDirection(new Vector3f(-.5f, -.5f, -.5f).normalizeLocal());
-		rootNode.addLight(sun);
+		wellNode.addLight(sun);
 	}
 	
 	public Node getWellNode() {
