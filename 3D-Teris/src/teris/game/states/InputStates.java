@@ -1,9 +1,6 @@
 package teris.game.states;
 
 import teris.game.Game;
-import teris.game.control.MoveControl;
-import teris.game.control.MoveControl.DIRECTION;
-import teris.game.control.RotateControl;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -30,19 +27,22 @@ public class InputStates extends AbstractAppState implements ActionListener {
 	private final static String C_ROTATE_L = "rotate_control_left";// 受控节点左旋
 	private final static String W_ROTATE_R = "rotate_well_right";// 井右旋
 	private final static String W_ROTATE_L = "rotate_well_left";// 井左旋
+	private final static String DEBUG = "debug";// 调试模式
 	private final static String PAUSE = "pause";// 游戏暂停
 
 	String[] keys = { MOVE_NORTH, MOVE_SOUTH, MOVE_EAST, MOVE_WEST, MOVE_DOWN,
-			C_ROTATE_R, C_ROTATE_L, W_ROTATE_R, W_ROTATE_L, PAUSE };
+			C_ROTATE_R, C_ROTATE_L, W_ROTATE_R, W_ROTATE_L, DEBUG, PAUSE };
 
 	private Game game;
+	private LogicStates logicState;
 	private InputManager inputManager;
 
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 		game = (Game) app;
-
+		logicState = game.getStateManager().getState(LogicStates.class);
+		
 		// 初始化按键
 		inputManager = game.getInputManager();
 		inputManager.addMapping(MOVE_NORTH, new KeyTrigger(KeyInput.KEY_W));
@@ -54,6 +54,7 @@ public class InputStates extends AbstractAppState implements ActionListener {
 		inputManager.addMapping(C_ROTATE_L, new KeyTrigger(KeyInput.KEY_C));
 		inputManager.addMapping(W_ROTATE_R, new KeyTrigger(KeyInput.KEY_Q));
 		inputManager.addMapping(W_ROTATE_L, new KeyTrigger(KeyInput.KEY_Z));
+		inputManager.addMapping(DEBUG, new KeyTrigger(KeyInput.KEY_F2));
 		inputManager.addMapping(PAUSE, new KeyTrigger(KeyInput.KEY_P));
 
 		inputManager.addListener(this, keys);
@@ -74,33 +75,37 @@ public class InputStates extends AbstractAppState implements ActionListener {
 		if (isPressed) {
 			switch (name) {
 			case MOVE_NORTH:
-				game.getStateManager().getState(LogicStates.class).moveNorth();
+				logicState.moveNorth();
 				break;
 			case MOVE_SOUTH:
-				game.getStateManager().getState(LogicStates.class).moveSouth();
+				logicState.moveSouth();
 				break;
 			case MOVE_EAST:
-				game.getStateManager().getState(LogicStates.class).moveEast();
+				logicState.moveEast();
 				break;
 			case MOVE_WEST:
-				game.getStateManager().getState(LogicStates.class).moveWest();
+				logicState.moveWest();
 				break;
 			case MOVE_DOWN:
 				// game.getStateManager().getState(LogicStates.class).moveDown();
 				break;
 			case C_ROTATE_R:
-				game.getStateManager().getState(LogicStates.class).rotateRight();
+				logicState.rotateRight();
 				break;
 			case C_ROTATE_L:
-				game.getStateManager().getState(LogicStates.class).rotateLeft();
+				logicState.rotateLeft();
 				break;
 			case W_ROTATE_R:
-				game.getWellNode().getControl(RotateControl.class).rotate(true);
+				logicState.rotateWellRight();
 				break;
 			case W_ROTATE_L:
-				game.getWellNode().getControl(RotateControl.class).rotate(false);
+				logicState.rotateWellLeft();
+				break;
+			case DEBUG:
+				logicState.showAxis();
 				break;
 			case PAUSE:
+				logicState.pause();
 				break;
 			default:
 				break;

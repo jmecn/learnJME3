@@ -1,61 +1,55 @@
 package teris.game;
 
-import teris.game.control.MoveControl;
-import teris.game.control.RotateControl;
 import teris.game.states.InputStates;
 import teris.game.states.LogicStates;
 
+import com.jme3.app.DebugKeysAppState;
+import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.StatsAppState;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.font.Rectangle;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.KeyTrigger;
-import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.debug.Arrow;
-import com.jme3.scene.debug.Grid;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
+import com.jme3.shadow.DirectionalLightShadowRenderer;
 
 public class Game extends SimpleApplication {
 
-	// Lights
-	private AmbientLight ambient;
-	private DirectionalLight sun;
-	// Axis
-	private Spatial axisNode;
-	
-	private Node wellNode = new Node("well");
-	private Node controlNode = new Node("controll");
-	
 	@Override
 	public void simpleInitApp() {
-		wellNode = new Node("well");
-		wellNode.addControl(new RotateControl(FastMath.QUARTER_PI));
 		
-		controlNode = new Node("controll");
-		controlNode.addControl(new RotateControl());
-		controlNode.addControl(new MoveControl());
-		
-		rootNode.attachChild(wellNode);
-		wellNode.attachChild(controlNode);
-		
-		stateManager.attach(new LogicStates());
-		stateManager.attach(new InputStates());
-		
+		viewPort.setBackgroundColor(new ColorRGBA(0.3f, 0.4f, 0.5f, 1));
 		initGui();
 		initCamera();
 		initLight();
-		initKeys();
-		initViewPort();
-		axisNode = showNodeAxies(50f);
+		
+		// 这个俄罗斯方块游戏不需要FlyCamera，因此我移除了它。
+		FlyCamAppState fcs = stateManager.getState(FlyCamAppState.class);
+		if (fcs != null) stateManager.detach(fcs);
+		
+		// 我也不需要显示调试信息
+		StatsAppState sas = stateManager.getState(StatsAppState.class);
+		if (sas != null) stateManager.detach(sas);
+		
+		// Debug也移除掉
+		DebugKeysAppState dkas = stateManager.getState(DebugKeysAppState.class);
+		if (dkas != null) stateManager.detach(dkas);
+		
+		// TODO 加入主界面
+		// 还没开发
+		
+		// 加入游戏核心逻辑
+		LogicStates logic = new LogicStates();
+		// 先不启动，等初始化结束后再启动。
+		logic.setEnabled(false);
+		stateManager.attach(logic);
+		
+		// 加入输入控制
+		InputStates input = new InputStates();
+		stateManager.attach(input);
 	}
 	
 	@Override
@@ -64,7 +58,7 @@ public class Game extends SimpleApplication {
 	}
 	
 	private void initGui() {
-		String txtB = "KeyPress:\n[J] [K]: Load model.\n[U] [I]: Rotate model.\n[O] [P]: Scale model.\n[F1]: turn on/off wireframe.\n[F2]: turn on/off axis.";
+		String txtB = "KeyPress:\n[A][W][S][D]: move cubes.\n[E][C]: rotate cubes.\n[Q][Z]: rotate camera.\n[P]: pause.\n[F2]: turn on/off axis.";
 		BitmapText txt;
 		BitmapFont fnt = assetManager.loadFont("Interface/Fonts/Default.fnt");
 		txt = new BitmapText(fnt, false);
@@ -76,7 +70,7 @@ public class Game extends SimpleApplication {
 	}
 
 	private void initCamera() {
-		cam.setLocation(new Vector3f(5, 25, 5));
+		cam.setLocation(new Vector3f(10, 25, 10));
 		cam.lookAt(new Vector3f(3, 13, 3), cam.getUp());
 		this.flyCam.setEnabled(false);
 	}
@@ -85,93 +79,20 @@ public class Game extends SimpleApplication {
 	 * Initialize the light
 	 */
 	private void initLight() {
-		// Ambient light
-		ambient = new AmbientLight();
-		ambient.setColor(ColorRGBA.White);
-		rootNode.addLight(ambient);
-
 		// Sun
-		sun = new DirectionalLight();
-		sun.setColor(ColorRGBA.White);
-		sun.setDirection(new Vector3f(-.5f, -.5f, -.5f).normalizeLocal());
-		wellNode.addLight(sun);
-	}
-	
-	private void initViewPort() {
-		viewPort.setBackgroundColor(new ColorRGBA(0.3f, 0.4f, 0.5f, 1));
-	}
-
-	public Spatial showNodeAxies(float axisLen) {
-		Node rootNode = new Node("AxisNode");
-		Geometry grid = new Geometry("Axis_b", new Grid(7, 7, 1f));
-		Material gm = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		gm.setColor("Color", ColorRGBA.White);
-		gm.getAdditionalRenderState().setWireframe(true);
-		grid.setMaterial(gm);
-		grid.center().move(0, -0.5f, 0);
-
-		rootNode.attachChild(grid);
+		DirectionalLight sun = new DirectionalLight();
+		ColorRGBA color = new ColorRGBA(0.5f, 0.5f, 0.5f, 1f);
+		sun.setColor(color);
+		sun.setDirection(new Vector3f(0, -1f, 0).normalizeLocal());
+		rootNode.addLight(sun);
 		
-		//
-		Vector3f v = new Vector3f(axisLen, 0, 0);
-		Arrow a = new Arrow(v);
-		Material mat = new Material(assetManager,
-				"Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Red);
-		Geometry geom = new Geometry(rootNode.getName() + "XAxis", a);
-		geom.setMaterial(mat);
-		rootNode.attachChild(geom);
-
-		//
-		v = new Vector3f(0, axisLen, 0);
-		a = new Arrow(v);
-		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Green);
-		geom = new Geometry(rootNode.getName() + "YAxis", a);
-		geom.setMaterial(mat);
-		rootNode.attachChild(geom);
-
-		//
-		v = new Vector3f(0, 0, axisLen);
-		a = new Arrow(v);
-		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Blue);
-		geom = new Geometry(rootNode.getName() + "ZAxis", a);
-		geom.setMaterial(mat);
-		rootNode.attachChild(geom);
-
-		return rootNode;
+		/* Drop shadows */
+		DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, 1024, 4);
+		dlsr.setLight(sun);
+		viewPort.addProcessor(dlsr);
+		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 	}
 	
-	private void initKeys() {
-		inputManager.addMapping("showAxis", new KeyTrigger(KeyInput.KEY_F2));
-		inputManager.addListener(new ActionListener() {
-			@Override
-			public void onAction(String name, boolean isPressed, float tpf) {
-				if (isPressed) {
-					switch (name) {
-					case "showAxis":
-						if (wellNode.hasChild(axisNode)) {
-							wellNode.detachChild(axisNode);
-						} else {
-							wellNode.attachChild(axisNode);
-						}
-						break;
-					}
-				}
-
-			}
-		}, "showAxis");
-	}
-
-	public Node getWellNode() {
-		return wellNode;
-	}
-	
-	public Node getControlNode() {
-		return controlNode;
-	}
-
 	public static void main(String[] args) {
 		Game app = new Game();
 		app.start();
