@@ -1,6 +1,8 @@
 package teris.game.states;
 
 import teris.game.Game;
+import teris.game.control.MoveControl;
+import teris.game.control.MoveControl.DIRECTION;
 import teris.game.control.RotateControl;
 
 import com.jme3.app.Application;
@@ -72,20 +74,25 @@ public class InputStates extends AbstractAppState implements ActionListener {
 		if (isPressed) {
 			switch (name) {
 			case MOVE_NORTH:
+				game.getStateManager().getState(LogicStates.class).moveNorth();
 				break;
 			case MOVE_SOUTH:
+				game.getStateManager().getState(LogicStates.class).moveSouth();
 				break;
 			case MOVE_EAST:
+				game.getStateManager().getState(LogicStates.class).moveEast();
 				break;
 			case MOVE_WEST:
+				game.getStateManager().getState(LogicStates.class).moveWest();
 				break;
 			case MOVE_DOWN:
+				// game.getStateManager().getState(LogicStates.class).moveDown();
 				break;
 			case C_ROTATE_R:
-				game.getControlNode().getControl(RotateControl.class).rotate(true);
+				game.getStateManager().getState(LogicStates.class).rotateRight();
 				break;
 			case C_ROTATE_L:
-				game.getControlNode().getControl(RotateControl.class).rotate(false);
+				game.getStateManager().getState(LogicStates.class).rotateLeft();
 				break;
 			case W_ROTATE_R:
 				game.getWellNode().getControl(RotateControl.class).rotate(true);

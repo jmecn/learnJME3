@@ -60,28 +60,28 @@ public class RotateControl extends AbstractControl {
 
 	@Override
 	protected void controlUpdate(float tpf) {
-		if (!isRotating)
-			return;
-
-		// 在0.1秒之内旋转90°
-		float angle = angleToRotate * scale * tpf;
-		angleAlreadyRotated += angle;
-
-		// 判断是否已经完成旋转
-		if (angleAlreadyRotated >= angleToRotate) {
-			// 防止旋转过度
-			angle -= angleAlreadyRotated - angleToRotate;
-
-			// 已经完成了一个周期的旋转，将关键参数复位。
-			angleAlreadyRotated = 0f;
-			isRotating = false;
+		// 旋转
+		if (isRotating) {
+			// 在0.1秒之内旋转90°
+			float angle = angleToRotate * scale * tpf;
+			angleAlreadyRotated += angle;
+	
+			// 判断是否已经完成旋转
+			if (angleAlreadyRotated >= angleToRotate) {
+				// 防止旋转过度
+				angle -= angleAlreadyRotated - angleToRotate;
+	
+				// 已经完成了一个周期的旋转，将关键参数复位。
+				angleAlreadyRotated = 0f;
+				isRotating = false;
+			}
+	
+			// 绕Y轴旋转
+			if (clockwise)
+				spatial.rotate(0, -angle, 0);
+			else
+				spatial.rotate(0, angle, 0);
 		}
-
-		// 绕Y轴旋转
-		if (clockwise)
-			spatial.rotate(0, angle, 0);
-		else
-			spatial.rotate(0, -angle, 0);
 	}
 
 	/**
@@ -95,6 +95,10 @@ public class RotateControl extends AbstractControl {
 			this.isRotating = true;
 			this.clockwise = clockwise;
 		}
+	}
+	
+	public boolean isRotating() {
+		return isRotating;
 	}
 
 	@Override
