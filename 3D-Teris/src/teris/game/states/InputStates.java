@@ -87,7 +87,7 @@ public class InputStates extends AbstractAppState implements ActionListener {
 				logicState.moveWest();
 				break;
 			case MOVE_DOWN:
-				// game.getStateManager().getState(LogicStates.class).moveDown();
+				logicState.quickDown();
 				break;
 			case C_ROTATE_R:
 				logicState.rotateRight();

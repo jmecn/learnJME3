@@ -21,19 +21,19 @@ public class BoxGeometry extends Geometry{
 	private static Texture[] texs;
 	
 	private static TextureKey[] texKeys = {
-		new TextureKey("Textures/red.png"),
-		new TextureKey("Textures/orange.png"),
+		new TextureKey("Textures/cyan.png"),
 		new TextureKey("Textures/blue.png"),
+		new TextureKey("Textures/orange.png"),
+		new TextureKey("Textures/yellow.png"),
 		new TextureKey("Textures/green.png"),
 		new TextureKey("Textures/purple.png"),
-		new TextureKey("Textures/yellow.png"),
-		new TextureKey("Textures/cyan.png"),
+		new TextureKey("Textures/red.png")
 	};
 	/**
 	 * 创建一个方块形状，通过color参数可以指定这个形状的颜色。
 	 * @param assetManager
 	 * @param color
-	 * "red", "blue", "orange", "cyan", "green", "purple", "yellow"
+	 * "cyan", "blue", "orange", "yellow", "green", "purple", "red"
 	 */
 	public BoxGeometry(AssetManager assetManager, int color) {
 		

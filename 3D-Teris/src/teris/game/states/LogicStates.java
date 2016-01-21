@@ -10,6 +10,8 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -21,14 +23,18 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
+import com.jme3.shadow.DirectionalLightShadowRenderer;
 
 public class LogicStates extends AbstractAppState {
 
 	private Game game;
 	
-	private Node scene;// 游戏场景
+	private Node rootNode = new Node("logicRoot");;
+	
 	private Node wellNode;// 游戏中的“井”节点
 	private Node controlNode;// 受控节点
+	private Node previewNode;// 预览节点
+	
 	private Node axisNode;// Axis
 	
 	private MoveControl moveControl;// 用于控制方块移动的控制器
@@ -51,13 +57,13 @@ public class LogicStates extends AbstractAppState {
 
 	// 7种方块的形状参数
 	private static int[][] pattern = {
-		{ 0x0f00, 0x2222, 0x00f0, 0x4444 }, // 长条型的四种状态
-		{ 0x0270, 0x0464, 0x0e40, 0x2620 }, // 'T'型的四种状态
-		{ 0x4620, 0x0360, 0x0462, 0x06c0 }, // 'S'型的四种状态
-		{ 0x2640, 0x0630, 0x0264, 0x0c60 }, // 'Z'型的四种状态
-		{ 0x0622, 0x02e0, 0x4460, 0x0740 }, // 'L'型的四种状态
+		{ 0x0f00, 0x2222, 0x00f0, 0x4444 }, // 'I'型的四种状态
 		{ 0x0644, 0x0e20, 0x2260, 0x0470 }, // 'J'型的四种状态
+		{ 0x0622, 0x02e0, 0x4460, 0x0740 }, // 'L'型的四种状态
 		{ 0x0660, 0x0660, 0x0660, 0x0660 }, // 'O'型的四种状态
+		{ 0x4620, 0x0360, 0x0462, 0x06c0 }, // 'S'型的四种状态
+		{ 0x0270, 0x0464, 0x0e40, 0x2620 }, // 'T'型的四种状态
+		{ 0x2640, 0x0630, 0x0264, 0x0c60 }, // 'Z'型的四种状态
 	};
 	
 	// 当前方块参数
@@ -66,7 +72,6 @@ public class LogicStates extends AbstractAppState {
 	private int posX; // 横坐标
 	private int posY; // 纵坐标
 	private int posZ; // 纵坐标
-	private boolean reachBottom; // 下落状态
 
 	// 下一个方块的参数
 	private int nextBlockType; // 方块类型 0-6
@@ -84,8 +89,15 @@ public class LogicStates extends AbstractAppState {
 		
 		// 初始化游戏场景
 		game = (Game) app;
-		game.getRootNode().attachChild(getScene());
-	
+		game.getRootNode().attachChild(rootNode);
+		game.getViewPort().setBackgroundColor(new ColorRGBA(0.3f, 0.4f, 0.5f, 1));
+		
+		initGui();
+		initCamera();
+		initLight();
+		
+		initScene();
+		
 		// 初始化数据结构
 		if (wells == null) {
 			wells = new BoxGeometry[SIDE_Y][SIDE_Z][SIDE_X];
@@ -128,20 +140,60 @@ public class LogicStates extends AbstractAppState {
 		newGame();
 	}
 	
-	private Node getScene() {
-		if (scene == null) {
-			scene = new Node("scene");
-			scene.attachChild(getWellNode());
-			
-			// 添加一个方向光源
-			DirectionalLight light = new DirectionalLight();
-			ColorRGBA color = new ColorRGBA(1, 1, 1, 1);
-			color.mult(0.3f);
-			light.setColor(color);
-			light.setDirection(new Vector3f(-1, -1, -1).normalize());
-			scene.addLight(light);
-		}
-		return scene;
+	private void initGui() {
+		String txtB = "KeyPress:\n[A][W][S][D]: move cubes.\n[E][C]: rotate cubes.\n[Q][Z]: rotate camera.\n[P]: pause.\n[F2]: turn on/off axis.";
+		BitmapText txt;
+		BitmapFont fnt = game.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
+		txt = new BitmapText(fnt, false);
+		txt.setText(txtB);
+		txt.setLocalTranslation(0, txt.getHeight(), 0);
+		game.getGuiNode().attachChild(txt);
+
+	}
+
+	private void initCamera() {
+		game.getCamera().setLocation(new Vector3f(10, 25, 10));
+		game.getCamera().lookAt(new Vector3f(3, 13, 3), game.getCamera().getUp());
+	}
+	
+	/**
+	 * Initialize the light
+	 */
+	private void initLight() {
+		// 创建一个垂直向下的方向光源
+		DirectionalLight light = new DirectionalLight();
+		ColorRGBA color = new ColorRGBA(0.7f, 0.7f, 0.7f, 1f);
+		light.setColor(color);
+		light.setDirection(new Vector3f(0, -1f, 0).normalizeLocal());
+		rootNode.addLight(light);
+		
+		// 这道光将会产生阴影，这样就能预知方块下落的位置。
+		DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(game.getAssetManager(), 1024, 4);
+		dlsr.setLight(light);
+		game.getViewPort().addProcessor(dlsr);
+		rootNode.setShadowMode(ShadowMode.CastAndReceive);
+		
+		// 再添加一个方向光源，让游戏场景稍微亮一些。
+		light = new DirectionalLight();
+		color = new ColorRGBA(0.3f, 0.3f, 0.3f, 1);
+		light.setColor(color);
+		light.setDirection(new Vector3f(-1, -1, -1).normalize());
+		rootNode.addLight(light);
+	}
+	
+	/**
+	 * 初始化场景
+	 */
+	private void initScene() {
+		rootNode.attachChild(getWellNode());
+		
+		// 添加一个方向光源
+		DirectionalLight light = new DirectionalLight();
+		ColorRGBA color = new ColorRGBA(1, 1, 1, 1);
+		color.mult(0.3f);
+		light.setColor(color);
+		light.setDirection(new Vector3f(-1, -1, -1).normalize());
+		rootNode.addLight(light);
 	}
 	
 	private Node getWellNode() {
@@ -166,7 +218,7 @@ public class LogicStates extends AbstractAppState {
 	private Node getControlNode() {
 		if (controlNode == null) {
 			
-			controlNode = new Node("controll");
+			controlNode = new Node("control");
 			
 			// 添加旋转控制器
 			rotateControl = new RotateControl();
@@ -180,6 +232,14 @@ public class LogicStates extends AbstractAppState {
 			controlNode.setShadowMode(ShadowMode.Cast);
 		}
 		return controlNode;
+	}
+	private Node getPreviewNode() {
+		if (previewNode == null) {
+			previewNode = new Node("preview");
+			
+		}
+		
+		return previewNode;
 	}
 
 	private Node showNodeAxies(float axisLen) {
@@ -300,7 +360,6 @@ public class LogicStates extends AbstractAppState {
 		resetControlNode();
 
 		// 初始化受控方块的位置
-		reachBottom = false;
 		posY = SIDE_Y - 1;
 		posX = SIDE_X / 2 - 2;
 		posZ = SIDE_Z / 2 - 2;
@@ -319,7 +378,6 @@ public class LogicStates extends AbstractAppState {
 	}
 
 	private void createNewBlock() {
-		reachBottom = false;
 		posY = SIDE_Y - 1;
 		posX = SIDE_X / 2 - 2;
 		posZ = SIDE_Z / 2 - 2;
@@ -456,6 +514,8 @@ public class LogicStates extends AbstractAppState {
 				rotateControl.rotate(true);
 			}
 		}
+		
+		// 也许可以加入旋转踢墙功能wallkick
 	}
 	/**
 	 * 方块逆时针旋转
@@ -470,21 +530,24 @@ public class LogicStates extends AbstractAppState {
 	}
 
 	/**
+	 * 快速下落
+	 * @return
+	 */
+	public void quickDown() {
+		while(moveDown());
+	}
+	/**
 	 * 方块下落
 	 * 
 	 * @return
 	 */
 	public boolean moveDown() {
 		boolean result = false;
-		if (reachBottom)
-			return result;
 
 		if (assertValid(turnState, posX, posY - 1, posZ)) {
 			posY--;
 			result = true;
 			moveControl.move(DIRECTION.DOWN);
-		} else {
-			reachBottom = true;
 		}
 		return result;
 	}
