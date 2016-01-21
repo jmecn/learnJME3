@@ -1,5 +1,8 @@
 package teris.game.states;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 import teris.game.Game;
 import teris.game.control.MoveControl;
 import teris.game.control.MoveControl.DIRECTION;
@@ -36,6 +39,8 @@ public class LogicStates extends AbstractAppState {
 	private Node previewNode;// 预览节点
 	
 	private Node axisNode;// Axis
+	
+	private BitmapText scoreTxt;
 	
 	private MoveControl moveControl;// 用于控制方块移动的控制器
 	private RotateControl rotateControl;// 用于控制方块旋转的控制器
@@ -91,6 +96,8 @@ public class LogicStates extends AbstractAppState {
 		game = (Game) app;
 		game.getRootNode().attachChild(rootNode);
 		game.getViewPort().setBackgroundColor(new ColorRGBA(0.3f, 0.4f, 0.5f, 1));
+		
+		rootNode.attachChild(getPreviewNode());
 		
 		initGui();
 		initCamera();
@@ -148,6 +155,12 @@ public class LogicStates extends AbstractAppState {
 		txt.setText(txtB);
 		txt.setLocalTranslation(0, txt.getHeight(), 0);
 		game.getGuiNode().attachChild(txt);
+		
+		String txtA = "Score: 0";
+		scoreTxt = new BitmapText(fnt, false);
+		scoreTxt.setText(txtA);
+		scoreTxt.setLocalTranslation(0, 640, 0);
+		game.getGuiNode().attachChild(scoreTxt);
 
 	}
 
@@ -407,7 +420,9 @@ public class LogicStates extends AbstractAppState {
 		return result;
 	}
 
+	HashMap<Integer, Vector3f> recordMap = new HashMap<Integer, Vector3f>();
 	private void deleteFullLine() {
+		recordMap.clear();
 		int full_line_num = 0;
 		for (int i = 0; i < SIDE_Z; i++) {
 			boolean isfull = true;
@@ -419,13 +434,63 @@ public class LogicStates extends AbstractAppState {
 				}
 			}
 			if (isfull) {
-				newLine(i);// 消除一行
+				for(int j=0; j<SIDE_X; j++) {
+					recordIt(j, posY, i);
+				}
 				full_line_num++;
 			}
+		}
+		
+		for (int j = 0; j < SIDE_X; j++) {
+			boolean isfull = true;
+
+			for (int i = 0; i < SIDE_Z; i++) {
+				if (matrix[posY][i][j] == 0) {
+					isfull = false;
+					continue;
+				}
+			}
+			if (isfull) {
+				// record it
+				for(int i=0; i<SIDE_Z; i++) {
+					recordIt(j, posY, i);
+				}
+				full_line_num++;
+			}
+		}
+		
+		// 消除并让方块下落
+		if (full_line_num > 0) {
+			for(Entry<Integer, Vector3f> entry : recordMap.entrySet()) {
+				Vector3f pos = entry.getValue();
+				int x= (int) pos.x;
+				int y= (int) pos.y;
+				int z= (int) pos.z;
+				
+				// 让该方块上方的所有方块下落
+				for(int i=y; i<SIDE_Y-1; i++) {
+					matrix[i][z][x] = matrix[i+1][z][x];
+				}
+				matrix[SIDE_Y-1][z][x] = 0;
+			}
+			
+			matrixChanged = true;
 		}
 		addScore(full_line_num);
 	}
 
+	/**
+	 * 记录那些点被消除了。
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	private void recordIt(int x, int y, int z) {
+		int hashCode = x*1000 + y*10 + z;
+		if (!recordMap.containsKey(hashCode)) {
+			recordMap.put(hashCode, new Vector3f(x, y, z));
+		}
+	}
 	/**
 	 * 消除一行
 	 * 
@@ -433,7 +498,7 @@ public class LogicStates extends AbstractAppState {
 	 */
 	protected void newLine(int line) {
 		// 清除一行
-		matrix[posY][line] = new int[] { 0, 0, 0, 0, 0, 0};
+		//matrix[posY][line] = new int[] { 0, 0, 0, 0, 0, 0};
 
 //		// 让屏幕上的方块下落
 //		for (int i = line; i > 0; i--) {
@@ -495,6 +560,8 @@ public class LogicStates extends AbstractAppState {
 		if (score / 100 > level && level < 9) {
 			level++;
 		}
+		
+		scoreTxt.setText("Score: " + score);
 	}
 	
 	public void rotateWellRight() {
