@@ -45,10 +45,10 @@ public class InputStates extends AbstractAppState implements ActionListener {
 		
 		// ³õÊ¼»¯°´¼ü
 		inputManager = game.getInputManager();
-		inputManager.addMapping(MOVE_NORTH, new KeyTrigger(KeyInput.KEY_W));
-		inputManager.addMapping(MOVE_SOUTH, new KeyTrigger(KeyInput.KEY_S));
-		inputManager.addMapping(MOVE_EAST, new KeyTrigger(KeyInput.KEY_D));
-		inputManager.addMapping(MOVE_WEST, new KeyTrigger(KeyInput.KEY_A));
+		inputManager.addMapping(MOVE_NORTH, new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP));
+		inputManager.addMapping(MOVE_SOUTH, new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN));
+		inputManager.addMapping(MOVE_EAST, new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT));
+		inputManager.addMapping(MOVE_WEST, new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT));
 		inputManager.addMapping(MOVE_DOWN, new KeyTrigger(KeyInput.KEY_X));
 		inputManager.addMapping(C_ROTATE_R, new KeyTrigger(KeyInput.KEY_E));
 		inputManager.addMapping(C_ROTATE_L, new KeyTrigger(KeyInput.KEY_C));
