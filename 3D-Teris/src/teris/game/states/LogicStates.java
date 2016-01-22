@@ -3,9 +3,9 @@ package teris.game.states;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import teris.game.DIRECTION;
 import teris.game.Main;
 import teris.game.control.MoveControl;
-import teris.game.control.MoveControl.DIRECTION;
 import teris.game.control.RotateControl;
 import teris.game.scene.BoxGeometry;
 
@@ -15,6 +15,7 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -24,7 +25,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 
@@ -60,6 +60,11 @@ public class LogicStates extends AbstractAppState {
 	private int[][] shape = new int[4][4];
 	private BoxGeometry[][] controls = null;
 	private boolean controlChanged = false;
+	
+	// 预览节点的参数
+	private int[][] previewShape = new int[4][4];
+	private BoxGeometry[][] previews = null;
+	private boolean previewChanged = false;
 
 	// 7种方块的形状参数
 	private static int[][] pattern = {
@@ -86,7 +91,7 @@ public class LogicStates extends AbstractAppState {
 	// 游戏相关参数
 	private int level; // 游戏级别 0-9
 	private int score; // 游戏分数
-	private float rate = 0.5f;// 方块下落速率 1秒
+	private float rate;// 方块下落速率
 	
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
@@ -100,8 +105,6 @@ public class LogicStates extends AbstractAppState {
 		game.getGuiNode().attachChild(guiNode);
 		
 		game.getViewPort().setBackgroundColor(new ColorRGBA(0.3f, 0.4f, 0.5f, 1));
-		
-		rootNode.attachChild(getPreviewNode());
 		
 		initGui();
 		initCamera();
@@ -148,19 +151,30 @@ public class LogicStates extends AbstractAppState {
 			}
 		}
 		
+		if (previews == null) {
+			previews = new BoxGeometry[4][4];
+			
+			// 方块坐标的偏移量
+			Vector3f postion = new Vector3f();
+			Vector3f offset = new Vector3f(-2+0.5f, 0.5f, -2+0.5f);
+						
+			for(int x=0; x<4; x++) {
+				for(int y=0; y<4; y++) {
+					// 计算实际坐标
+					postion.set(offset.add(x, 0, y));
+					
+					previews[y][x] = new BoxGeometry(assetManager, 0);
+					previews[y][x].setLocalTranslation(postion);
+				}
+			}
+		}
+		
 		newGame();
 	}
 	
 	private void initGui() {
-		String txtB = "KeyPress:\n[A][W][S][D]: move cubes.\n[E][C]: rotate cubes.\n[Q][Z]: rotate camera.\n[P]: pause.\n[F2]: turn on/off axis.";
-		BitmapText txt;
 		BitmapFont fnt = game.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
-		txt = new BitmapText(fnt, false);
-		txt.setText(txtB);
-		txt.setLocalTranslation(0, txt.getHeight(), 0);
-		game.getGuiNode().attachChild(txt);
-		
-		String txtA = "Score: 0";
+		String txtA = "Score: 0\nLevel: 0";
 		scoreTxt = new BitmapText(fnt, false);
 		scoreTxt.setText(txtA);
 		scoreTxt.setLocalTranslation(0, 640, 0);
@@ -169,33 +183,44 @@ public class LogicStates extends AbstractAppState {
 	}
 
 	private void initCamera() {
-		game.getCamera().setLocation(new Vector3f(10, 25, 10));
-		game.getCamera().lookAt(new Vector3f(3, 13, 3), game.getCamera().getUp());
+		game.getCamera().setLocation(new Vector3f(0, 25, 10));
+		game.getCamera().lookAt(new Vector3f(0, 8, 0), game.getCamera().getUp());
 	}
 	
 	/**
-	 * Initialize the light
+	 * 初始化光照
 	 */
 	private void initLight() {
-		// 创建一个垂直向下的方向光源
+		
+		/**
+		 * 创建一个垂直向下的方向光源，这道光将会产生阴影，这样就能预知方块下落的位置。
+		 */
 		DirectionalLight light = new DirectionalLight();
-		ColorRGBA color = new ColorRGBA(0.7f, 0.7f, 0.7f, 1f);
+		ColorRGBA color = new ColorRGBA(0.5f, 0.5f, 0.5f, 1f);
 		light.setColor(color);
 		light.setDirection(new Vector3f(0, -1f, 0).normalizeLocal());
 		rootNode.addLight(light);
 		
-		// 这道光将会产生阴影，这样就能预知方块下落的位置。
+		// 产生阴影
 		DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(game.getAssetManager(), 1024, 4);
 		dlsr.setLight(light);
 		game.getViewPort().addProcessor(dlsr);
 		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 		
-		// 再添加一个方向光源，让游戏场景稍微亮一些。
+		/**
+		 * 再添加一个方向光源，让朝向摄像机的方位亮一点。
+		 */
 		light = new DirectionalLight();
-		color = new ColorRGBA(0.3f, 0.3f, 0.3f, 1);
+		color = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);
 		light.setColor(color);
-		light.setDirection(new Vector3f(-1, -1, -1).normalize());
+		light.setDirection(new Vector3f(0, -1, -1).normalize());
 		rootNode.addLight(light);
+		
+		/**
+		 * 再添加一个环境光，让游戏场景稍微亮一些。
+		 */
+		AmbientLight ambient = new AmbientLight();
+		rootNode.addLight(ambient);
 	}
 	
 	/**
@@ -204,13 +229,8 @@ public class LogicStates extends AbstractAppState {
 	private void initScene() {
 		rootNode.attachChild(getWellNode());
 		
-		// 添加一个方向光源
-		DirectionalLight light = new DirectionalLight();
-		ColorRGBA color = new ColorRGBA(1, 1, 1, 1);
-		color.mult(0.3f);
-		light.setColor(color);
-		light.setDirection(new Vector3f(-1, -1, -1).normalize());
-		rootNode.addLight(light);
+		rootNode.attachChild(getPreviewNode());
+		
 	}
 	
 	private Node getWellNode() {
@@ -218,7 +238,7 @@ public class LogicStates extends AbstractAppState {
 			wellNode = new Node("well");
 			
 			// 添加旋转控制器
-			wellNode.addControl(new RotateControl(FastMath.QUARTER_PI));
+			wellNode.addControl(new RotateControl());
 			
 			// 将受控节点添加到"井"节点中，这样旋转"井"的时候受控节点也会一起旋转。
 			wellNode.attachChild(getControlNode());
@@ -226,8 +246,8 @@ public class LogicStates extends AbstractAppState {
 			wellNode.setShadowMode(ShadowMode.Receive);
 			
 			// 添加参考坐标系
-			axisNode = showNodeAxies(50f);
-			wellNode.attachChild(axisNode);
+			axisNode = getAxisNode();
+			wellNode.attachChild(getAxisNode());
 		}
 		
 		return wellNode;
@@ -253,53 +273,32 @@ public class LogicStates extends AbstractAppState {
 	private Node getPreviewNode() {
 		if (previewNode == null) {
 			previewNode = new Node("preview");
-			
+			previewNode.scale(0.5f);
+			previewNode.rotate(FastMath.QUARTER_PI/3, 0, 0);
+			previewNode.move(0, 0, 5);
+			previewNode.setShadowMode(ShadowMode.Off);
 		}
 		
 		return previewNode;
 	}
 
-	private Node showNodeAxies(float axisLen) {
-		AssetManager assetManager = game.getAssetManager();
-		
-		Node rootNode = new Node("AxisNode");
-		Geometry grid = new Geometry("Axis_b", new Grid(7, 7, 1f));
-		Material gm = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		gm.setColor("Color", ColorRGBA.White);
-		gm.getAdditionalRenderState().setWireframe(true);
-		grid.setMaterial(gm);
-		grid.center().move(0, 0, 0);
+	private Node getAxisNode() {
+		if (axisNode == null) {
+			axisNode = new Node("AxisNode");
+			Geometry grid = new Geometry("Axis", new Grid(7, 7, 1f));
+			
+			AssetManager assetManager = game.getAssetManager();
+			Material gm = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+			gm.setColor("Color", ColorRGBA.White);
+			gm.getAdditionalRenderState().setWireframe(true);
+			grid.setMaterial(gm);
+			
+			grid.center().move(0, 0, 0);
 
-		rootNode.attachChild(grid);
-		
-		//
-		Vector3f v = new Vector3f(axisLen, 0, 0);
-		Arrow a = new Arrow(v);
-		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Red);
-		Geometry geom = new Geometry(rootNode.getName() + "XAxis", a);
-		geom.setMaterial(mat);
-		rootNode.attachChild(geom);
+			axisNode.attachChild(grid);
+		}
 
-		//
-		v = new Vector3f(0, axisLen, 0);
-		a = new Arrow(v);
-		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Green);
-		geom = new Geometry(rootNode.getName() + "YAxis", a);
-		geom.setMaterial(mat);
-		rootNode.attachChild(geom);
-
-		//
-		v = new Vector3f(0, 0, axisLen);
-		a = new Arrow(v);
-		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Blue);
-		geom = new Geometry(rootNode.getName() + "ZAxis", a);
-		geom.setMaterial(mat);
-		rootNode.attachChild(geom);
-
-		return rootNode;
+		return axisNode;
 	}
 	
 	/**
@@ -330,6 +329,7 @@ public class LogicStates extends AbstractAppState {
 
 				if (isGameEnd()) {
 					setEnabled(false);
+					scoreTxt.setText("Your Final Score: " + score);
 				} else {
 					// 将当前控制节点与下一个方块交换
 					createNewBlock();
@@ -337,6 +337,8 @@ public class LogicStates extends AbstractAppState {
 					// 生成新的方块，并置于预览窗口中。
 					getNextBlock();
 				}
+			} else {
+				moveControl.move(DIRECTION.DOWN);
 			}
 
 			// 刷新界面
@@ -377,18 +379,10 @@ public class LogicStates extends AbstractAppState {
 		resetControlNode();
 
 		// 初始化受控方块的位置
-		posY = SIDE_Y - 1;
-		posX = SIDE_X / 2 - 2;
-		posZ = SIDE_Z / 2 - 2;
-		
-		// 生成当前受控方块
-		blockType = FastMath.rand.nextInt(7);
-		turnState = FastMath.rand.nextInt(4);
-		updateControl();// 刷新受控方块
+		createNewBlock();
 
 		// 生成预览方块
-		nextBlockType = FastMath.rand.nextInt(7);
-		nextTurnState = FastMath.rand.nextInt(4);
+		getNextBlock();
 		
 		// 启动游戏
 		setEnabled(true);
@@ -408,6 +402,8 @@ public class LogicStates extends AbstractAppState {
 	private void getNextBlock() {
 		nextBlockType = FastMath.rand.nextInt(7);
 		nextTurnState = FastMath.rand.nextInt(4);
+		
+		updatePreview();
 	}
 
 	private boolean isGameEnd() {
@@ -550,6 +546,24 @@ public class LogicStates extends AbstractAppState {
 			}
 			
 		}
+		
+		// 预览节点发生了改变
+		if (previewChanged) {
+			previewChanged = false;
+			
+			for(int y=0; y<4; y++) {
+				for(int x=0; x<4; x++) {
+					int index = previewShape[y][x];
+					if (index > 0) {
+						previews[y][x].setColor(index - 1);
+						previewNode.attachChild(previews[y][x]);
+					} else {
+						previewNode.detachChild(previews[y][x]);
+					}
+				}
+			}
+			
+		}
 	}
 
 	/**
@@ -559,13 +573,14 @@ public class LogicStates extends AbstractAppState {
 	 *            被消除的行数
 	 */
 	public void addScore(int lineNum) {
-		score = score + (level + 1) * lineNum;
+		score = score + lineNum * lineNum;
 		// 每1000分升一级，最高9级。
 		if (score / 100 > level && level < 9) {
 			level++;
+			rate -= 0.1f;
 		}
 		
-		scoreTxt.setText("Score: " + score);
+		scoreTxt.setText("Score: " + score + "\nLevel: " + level);
 	}
 	
 	public void rotateWellRight() {
@@ -618,11 +633,31 @@ public class LogicStates extends AbstractAppState {
 		if (assertValid(turnState, posX, posY - 1, posZ)) {
 			posY--;
 			result = true;
-			moveControl.move(DIRECTION.DOWN);
 		}
 		return result;
 	}
 	
+	/**
+	 * 根据井旋转的角度，计算正确的东西南北方向。
+	 * @param dir
+	 */
+	public void move(DIRECTION dir) {
+		int offset = wellNode.getControl(RotateControl.class).getOffset();
+		offset += dir.getValue();
+		
+		while (offset < 0) {
+			offset += 4;
+		}
+		if (offset > 3) offset %= 4;
+		
+		switch (offset) {
+		case 0: moveNorth();break;
+		case 1: moveWest();break;
+		case 2: moveSouth();break;
+		case 3: moveEast();break;
+		}
+		
+	}
 	/**
 	 * 方块向北移动
 	 */
@@ -730,6 +765,25 @@ public class LogicStates extends AbstractAppState {
 		}
 		
 		controlChanged = true;
+	}
+	
+	/**
+	 * 刷新预览节点
+	 */
+	private void updatePreview() {
+		int k = 0x8000;
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				if (((int) pattern[nextBlockType][nextTurnState] & k) != 0) {
+					previewShape[i][j] = nextBlockType + 1;
+				} else {
+					previewShape[i][j] = 0;
+				}
+				k = k >> 1;
+			}
+		}
+		
+		previewChanged = true;
 	}
 	
 	/**

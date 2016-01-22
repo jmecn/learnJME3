@@ -1,5 +1,7 @@
 package teris.game.control;
 
+import teris.game.DIRECTION;
+
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.control.AbstractControl;
@@ -11,21 +13,6 @@ import com.jme3.scene.control.AbstractControl;
  */
 public class MoveControl extends AbstractControl {
 
-	/**
-	 * <pre>
-	 * 位移的方向。
-	 * 正X轴向东，负X轴向西；
-	 * 正Y轴向上，负Y轴向下；
-	 * 正Z轴向南，负Z轴向北。
-	 * </pre>
-	 * 
-	 * @author yanmaoyuan
-	 *
-	 */
-	public enum DIRECTION {
-		NORTH, SOUTH, EAST, WEST, UP, DOWN
-	}
-	
 	private boolean isMoving;
 	private DIRECTION dir;
 	
@@ -45,7 +32,7 @@ public class MoveControl extends AbstractControl {
 	private float distAlreadyMoved;
 	
 	public MoveControl() {
-		time = 0.1f;
+		time = 0.03f;
 		scale = 1 / time;
 		unit = 1f;
 		distAlreadyMoved = 0f;

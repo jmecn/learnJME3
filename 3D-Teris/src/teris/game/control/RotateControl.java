@@ -29,6 +29,11 @@ public class RotateControl extends AbstractControl {
 	private boolean clockwise;
 	
 	/**
+	 * 记录旋转偏移量，左转一次则-1，右转一次则+1。
+	 */
+	private int offset;
+	
+	/**
 	 * 目前已经旋转的角度
 	 */
 	private float angleAlreadyRotated = 0f;
@@ -48,16 +53,6 @@ public class RotateControl extends AbstractControl {
 		this.angleAlreadyRotated = 0f;
 	}
 	
- 	public RotateControl(float angleToRotate) {
-		this.angleToRotate = angleToRotate;
-		
-		this.time = 0.1f;
-		this.scale = 1 / time;
-		this.clockwise = true;
-		this.isRotating = false;
-		this.angleAlreadyRotated = 0f;
-	}
-
 	@Override
 	protected void controlUpdate(float tpf) {
 		// 旋转
@@ -77,10 +72,11 @@ public class RotateControl extends AbstractControl {
 			}
 	
 			// 绕Y轴旋转
-			if (clockwise)
+			if (clockwise) {
 				spatial.rotate(0, -angle, 0);
-			else
+			} else {
 				spatial.rotate(0, angle, 0);
+			}
 		}
 	}
 
@@ -94,11 +90,28 @@ public class RotateControl extends AbstractControl {
 		if (this.isRotating == false) {
 			this.isRotating = true;
 			this.clockwise = clockwise;
+			
+			// 绕Y轴旋转
+			if (clockwise) {
+				offset++;
+			} else {
+				offset--;
+			}
 		}
 	}
 	
 	public boolean isRotating() {
 		return isRotating;
+	}
+	
+	/**
+	 * LogicStates类的move方法将会调用此方法
+	 * @return
+	 */
+	public int getOffset() {
+		int offset = this.offset % 4;
+		if (offset < 0) offset += 4;
+		return offset;
 	}
 
 	@Override

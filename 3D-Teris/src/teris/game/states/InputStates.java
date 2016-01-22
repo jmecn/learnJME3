@@ -1,5 +1,6 @@
 package teris.game.states;
 
+import teris.game.DIRECTION;
 import teris.game.Main;
 
 import com.jme3.app.Application;
@@ -75,16 +76,16 @@ public class InputStates extends AbstractAppState implements ActionListener {
 		if (isPressed) {
 			switch (name) {
 			case MOVE_NORTH:
-				logicState.moveNorth();
+				logicState.move(DIRECTION.NORTH);
 				break;
 			case MOVE_SOUTH:
-				logicState.moveSouth();
+				logicState.move(DIRECTION.SOUTH);
 				break;
 			case MOVE_EAST:
-				logicState.moveEast();
+				logicState.move(DIRECTION.EAST);
 				break;
 			case MOVE_WEST:
-				logicState.moveWest();
+				logicState.move(DIRECTION.WEST);
 				break;
 			case MOVE_DOWN:
 				logicState.quickDown();
