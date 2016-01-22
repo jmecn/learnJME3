@@ -30,6 +30,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 
@@ -103,8 +104,8 @@ public class TwoDLogicStates extends AbstractAppState {
 		
 		// 初始化摄像机
 		Camera cam = game.getCamera();
-		cam.setLocation(new Vector3f(0, 25, 10));
-		cam.lookAt(new Vector3f(0, 8, 0), cam.getUp());
+		cam.setLocation(new Vector3f(5, 10, 50));
+		cam.lookAt(new Vector3f(5, 10, 0), cam.getUp());
 		
 		// 初始化灯光
 		initLight();
@@ -302,9 +303,6 @@ public class TwoDLogicStates extends AbstractAppState {
 		if (wellNode == null) {
 			wellNode = new Node("well");
 			
-			// 添加旋转控制器
-			wellNode.addControl(new RotateControl());
-			
 			// 将受控节点添加到"井"节点中，这样旋转"井"的时候受控节点也会一起旋转。
 			wellNode.attachChild(getControlNode());
 			
@@ -320,15 +318,15 @@ public class TwoDLogicStates extends AbstractAppState {
 				
 				// 方块坐标的偏移量
 				Vector3f postion = new Vector3f();
-				Vector3f offset = new Vector3f(-SIDE_X/2+0.5f, 0.5f, -SIDE_Y/2+0.5f);
+				Vector3f offset = new Vector3f(0.5f, 0.5f, 0.5f);
 				
 				for(int y=0; y<SIDE_Y; y++) {
 					for(int x=0; x<SIDE_X; x++) {
-							// 计算实际坐标
-							postion.set(offset.add(x, y, 0));
-							
-							wells[y][x] = new BoxGeometry(assetManager, 0);
-							wells[y][x].setLocalTranslation(postion);
+						// 计算实际坐标
+						postion.set(offset.add(x, y, 0));
+						
+						wells[y][x] = new BoxGeometry(assetManager, 0);
+						wells[y][x].setLocalTranslation(postion);
 					}
 				}
 			}
@@ -359,12 +357,12 @@ public class TwoDLogicStates extends AbstractAppState {
 				
 				// 方块坐标的偏移量
 				Vector3f postion = new Vector3f();
-				Vector3f offset = new Vector3f(-2+0.5f, 0.5f, -2+0.5f);
+				Vector3f offset = new Vector3f(-2+0.5f, -2+0.5f, 0.5f);
 							
 				for(int x=0; x<4; x++) {
 					for(int y=0; y<4; y++) {
 						// 计算实际坐标
-						postion.set(offset.add(x, 0, y));
+						postion.set(offset.add(x, y, 0));
 						
 						controls[y][x] = new BoxGeometry(assetManager, 0);
 						controls[y][x].setLocalTranslation(postion);
@@ -378,7 +376,7 @@ public class TwoDLogicStates extends AbstractAppState {
 		if (previewNode == null) {
 			previewNode = new Node("preview");
 			previewNode.scale(0.5f);
-			previewNode.rotate(FastMath.QUARTER_PI/3, 0, 0);
+			previewNode.rotate(FastMath.HALF_PI, 0, 0);
 			previewNode.move(0, 0, 5);
 			previewNode.setShadowMode(ShadowMode.Off);
 			
@@ -388,7 +386,7 @@ public class TwoDLogicStates extends AbstractAppState {
 				
 				// 方块坐标的偏移量
 				Vector3f postion = new Vector3f();
-				Vector3f offset = new Vector3f(-2+0.5f, 0.5f, -2+0.5f);
+				Vector3f offset = new Vector3f(-2+0.5f, -2+0.5f, 0.5f);
 							
 				for(int x=0; x<4; x++) {
 					for(int y=0; y<4; y++) {
@@ -408,7 +406,7 @@ public class TwoDLogicStates extends AbstractAppState {
 	private Node getAxisNode() {
 		if (axisNode == null) {
 			axisNode = new Node("AxisNode");
-			Geometry grid = new Geometry("Axis", new Grid(7, 7, 1f));
+			Geometry grid = new Geometry("Axis", new Grid(21, 11, 1f));
 			
 			AssetManager assetManager = game.getAssetManager();
 			Material gm = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -416,8 +414,39 @@ public class TwoDLogicStates extends AbstractAppState {
 			gm.getAdditionalRenderState().setWireframe(true);
 			grid.setMaterial(gm);
 			
-			grid.center().move(0, 0, 0);
+			grid.rotate(FastMath.HALF_PI, 0, 0);
+			grid.center().move(5, 10, 0);
 
+			
+			//
+			Vector3f v = new Vector3f(50f, 0, 0);
+			Arrow a = new Arrow(v);
+			Material mat = new Material(assetManager,
+					"Common/MatDefs/Misc/Unshaded.j3md");
+			mat.setColor("Color", ColorRGBA.Red);
+			Geometry geom = new Geometry(rootNode.getName() + "XAxis", a);
+			geom.setMaterial(mat);
+			axisNode.attachChild(geom);
+
+			//
+			v = new Vector3f(0, 50f, 0);
+			a = new Arrow(v);
+			mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+			mat.setColor("Color", ColorRGBA.Green);
+			geom = new Geometry(rootNode.getName() + "YAxis", a);
+			geom.setMaterial(mat);
+			axisNode.attachChild(geom);
+
+			//
+			v = new Vector3f(0, 0, 50f);
+			a = new Arrow(v);
+			mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+			mat.setColor("Color", ColorRGBA.Blue);
+			geom = new Geometry(rootNode.getName() + "ZAxis", a);
+			geom.setMaterial(mat);
+			axisNode.attachChild(geom);
+			
+			
 			axisNode.attachChild(grid);
 		}
 
@@ -428,7 +457,7 @@ public class TwoDLogicStates extends AbstractAppState {
 	 * 复位受控节点的位置
 	 */
 	private void resetControlNode() {
-		controlNode.setLocalTranslation(new Vector3f(0, SIDE_Y - 1, 0));
+		controlNode.setLocalTranslation(new Vector3f(5, SIDE_Y - 1, 0));
 		controlNode.setLocalRotation(new Quaternion());
 	}
 
@@ -547,18 +576,6 @@ public class TwoDLogicStates extends AbstractAppState {
 
 		int direction = dir.getValue();
 		
-		// 如果开启此功能，就会根据井旋转的角度，计算正确的东西南北方向。
-		{
-			direction += wellNode.getControl(RotateControl.class).getOffset();
-	
-			while (direction < 0) {
-				direction += 4;
-			}
-			if (direction > 3) {
-				direction %= 4;
-			}
-		}
-
 		switch (direction) {
 		case 0:
 			break;

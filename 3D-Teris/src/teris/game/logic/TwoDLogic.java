@@ -88,7 +88,7 @@ public class TwoDLogic {
 	 * 生成当前方块
 	 */
 	public void createNewBlock() {
-		posY = SIDE_Y - 1;
+		posY = SIDE_Y - 3;
 		posX = SIDE_X / 2 - 2;
 
 		blockType = nextBlockType;
@@ -96,12 +96,12 @@ public class TwoDLogic {
 		
 		// 刷新控制节点
 		int k = 0x8000;
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
+		for (int y = 0; y < 4; y++) {
+			for (int z = 0; z < 4; z++) {
 				if (((int) pattern[blockType][turnState] & k) != 0) {
-					control[i][j] = blockType + 1;
+					control[y][z] = blockType + 1;
 				} else {
-					control[i][j] = 0;
+					control[y][z] = 0;
 				}
 				k = k >> 1;
 			}
@@ -119,12 +119,12 @@ public class TwoDLogic {
 		
 		// 刷新预览节点
 		int k = 0x8000;
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
+		for (int y = 0; y < 4; y++) {
+			for (int x = 0; x < 4; x++) {
 				if (((int) pattern[nextBlockType][nextTurnState] & k) != 0) {
-					preview[i][j] = nextBlockType + 1;
+					preview[y][x] = nextBlockType + 1;
 				} else {
-					preview[i][j] = 0;
+					preview[y][x] = 0;
 				}
 				k = k >> 1;
 			}
@@ -155,10 +155,10 @@ public class TwoDLogic {
 		intList.clear();// 清空缓存
 		int full_line_num = 0;
 		
+		System.out.println(posY);
 		// 分别延Y轴扫描，看看是否有节点被消除
 		for (int y = posY; y < SIDE_Y; y++) {
 			boolean isfull = true;
-
 			for (int x = 0; x < SIDE_X; x++) {
 				if (matrix[y][x] == 0) {
 					isfull = false;
@@ -304,6 +304,7 @@ public class TwoDLogic {
 	 * @return
 	 */
 	public boolean assertValid(int turnState, int posX, int posY) {
+		System.out.println("AssetValid: x=" + posX + " , y=" + posY);
 		boolean result = true;
 		int k = 0x8000;
 		for (int i = 0; i < 4; i++) {
