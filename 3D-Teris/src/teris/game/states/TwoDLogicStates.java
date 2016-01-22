@@ -4,11 +4,10 @@ import teris.game.DIRECTION;
 import teris.game.Main;
 import teris.game.control.MoveControl;
 import teris.game.control.RotateControl;
-import teris.game.logic.ThreeDLogic;
+import teris.game.logic.TwoDLogic;
 import teris.game.scene.BoxGeometry;
-import static teris.game.logic.ThreeDLogic.SIDE_X;
-import static teris.game.logic.ThreeDLogic.SIDE_Y;
-import static teris.game.logic.ThreeDLogic.SIDE_Z;
+import static teris.game.logic.TwoDLogic.SIDE_X;
+import static teris.game.logic.TwoDLogic.SIDE_Y;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -35,27 +34,21 @@ import com.jme3.scene.debug.Grid;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 
 /**
- * 3D俄罗斯方块
+ * 2D俄罗斯方块
  * @author yanmaoyuan
  *
  */
-public class ThreeDLogicStates extends AbstractAppState {
+public class TwoDLogicStates extends AbstractAppState {
 
 	// 按键
-	private final static String MOVE_NORTH = "north";// 方块向北移动
-	private final static String MOVE_SOUTH = "south";// 方块向南移动
-	private final static String MOVE_EAST = "east";// 方块向东移动
-	private final static String MOVE_WEST = "west";// 方块向西移动
-	private final static String MOVE_DOWN = "down";// 方块(快速)向下移动
-	private final static String C_ROTATE_R = "rotate_control_right";// 受控节点右旋
-	private final static String C_ROTATE_L = "rotate_control_left";// 受控节点左旋
-	private final static String W_ROTATE_R = "rotate_well_right";// 井右旋
-	private final static String W_ROTATE_L = "rotate_well_left";// 井左旋
-	private final static String DEBUG = "debug";// 调试模式
+	private final static String MOVE_R = "move_right";// 方块向东移动
+	private final static String MOVE_L = "move_left";// 方块向西移动
+	private final static String MOVE_DOWN = "move_down";// 方块(快速)向下移动
+	private final static String ROTATE_R = "rotate_right";// 受控节点右旋
+	private final static String ROTATE_L = "rotate_left";// 受控节点左旋
 	private final static String PAUSE = "pause";// 游戏暂停
 
-	private String[] keys = { MOVE_NORTH, MOVE_SOUTH, MOVE_EAST, MOVE_WEST, MOVE_DOWN,
-			C_ROTATE_R, C_ROTATE_L, W_ROTATE_R, W_ROTATE_L, DEBUG, PAUSE };
+	private String[] keys = { MOVE_R, MOVE_L, MOVE_DOWN, ROTATE_R, ROTATE_L, PAUSE };
 	
 	private Main game;
 	private AssetManager assetManager;
@@ -75,10 +68,10 @@ public class ThreeDLogicStates extends AbstractAppState {
 	private MoveControl moveControl;// 用于控制方块移动的控制器
 	private RotateControl rotateControl;// 用于控制方块旋转的控制器
 	
-	private ThreeDLogic logic;
+	private TwoDLogic logic;
 
 	// 矩阵节点(井)的参数
-	private BoxGeometry[][][] wells = null;
+	private BoxGeometry[][] wells = null;
 
 	// 受控节点的参数
 	private BoxGeometry[][] controls = null;
@@ -91,7 +84,7 @@ public class ThreeDLogicStates extends AbstractAppState {
 		super.initialize(stateManager, app);
 		
 		// 3D俄罗斯方块的核心逻辑类
-		logic = new ThreeDLogic();
+		logic = new TwoDLogic();
 		
 		game = (Main) app;
 		assetManager = game.getAssetManager();
@@ -251,16 +244,11 @@ public class ThreeDLogicStates extends AbstractAppState {
 	private void initKeys() {
 		// 初始化按键
 		inputManager = game.getInputManager();
-		inputManager.addMapping(MOVE_NORTH, new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP));
-		inputManager.addMapping(MOVE_SOUTH, new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN));
-		inputManager.addMapping(MOVE_EAST, new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT));
-		inputManager.addMapping(MOVE_WEST, new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT));
+		inputManager.addMapping(MOVE_R, new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT));
+		inputManager.addMapping(MOVE_L, new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT));
 		inputManager.addMapping(MOVE_DOWN, new KeyTrigger(KeyInput.KEY_X));
-		inputManager.addMapping(C_ROTATE_R, new KeyTrigger(KeyInput.KEY_E));
-		inputManager.addMapping(C_ROTATE_L, new KeyTrigger(KeyInput.KEY_C));
-		inputManager.addMapping(W_ROTATE_R, new KeyTrigger(KeyInput.KEY_Q));
-		inputManager.addMapping(W_ROTATE_L, new KeyTrigger(KeyInput.KEY_Z));
-		inputManager.addMapping(DEBUG, new KeyTrigger(KeyInput.KEY_F2));
+		inputManager.addMapping(ROTATE_R, new KeyTrigger(KeyInput.KEY_E));
+		inputManager.addMapping(ROTATE_L, new KeyTrigger(KeyInput.KEY_C));
 		inputManager.addMapping(PAUSE, new KeyTrigger(KeyInput.KEY_P));
 
 		inputManager.addListener(listener, keys);
@@ -272,35 +260,20 @@ public class ThreeDLogicStates extends AbstractAppState {
 		public void onAction(String name, boolean isPressed, float tpf) {
 			if (isPressed) {
 				switch (name) {
-				case MOVE_NORTH:
-					move(DIRECTION.NORTH);
-					break;
-				case MOVE_SOUTH:
-					move(DIRECTION.SOUTH);
-					break;
-				case MOVE_EAST:
+				case MOVE_R:
 					move(DIRECTION.EAST);
 					break;
-				case MOVE_WEST:
+				case MOVE_L:
 					move(DIRECTION.WEST);
 					break;
 				case MOVE_DOWN:
 					quickDown();
 					break;
-				case C_ROTATE_R:
+				case ROTATE_R:
 					rotateRight();
 					break;
-				case C_ROTATE_L:
+				case ROTATE_L:
 					rotateLeft();
-					break;
-				case W_ROTATE_R:
-					rotateWellRight();
-					break;
-				case W_ROTATE_L:
-					rotateWellLeft();
-					break;
-				case DEBUG:
-					showAxis();
 					break;
 				case PAUSE:
 					/**
@@ -343,21 +316,19 @@ public class ThreeDLogicStates extends AbstractAppState {
 			
 			// 初始化"井"节点中的方块数据结构
 			if (wells == null) {
-				wells = new BoxGeometry[SIDE_Y][SIDE_Z][SIDE_X];
+				wells = new BoxGeometry[SIDE_Y][SIDE_X];
 				
 				// 方块坐标的偏移量
 				Vector3f postion = new Vector3f();
-				Vector3f offset = new Vector3f(-SIDE_X/2+0.5f, 0.5f, -SIDE_Z/2+0.5f);
+				Vector3f offset = new Vector3f(-SIDE_X/2+0.5f, 0.5f, -SIDE_Y/2+0.5f);
 				
 				for(int y=0; y<SIDE_Y; y++) {
 					for(int x=0; x<SIDE_X; x++) {
-						for(int z=0; z<SIDE_Z; z++) {
 							// 计算实际坐标
-							postion.set(offset.add(x, y, z));
+							postion.set(offset.add(x, y, 0));
 							
-							wells[y][z][x] = new BoxGeometry(assetManager, 0);
-							wells[y][z][x].setLocalTranslation(postion);
-						}
+							wells[y][x] = new BoxGeometry(assetManager, 0);
+							wells[y][x].setLocalTranslation(postion);
 					}
 				}
 			}
@@ -461,17 +432,6 @@ public class ThreeDLogicStates extends AbstractAppState {
 		controlNode.setLocalRotation(new Quaternion());
 	}
 
-	/**
-	 * 显示参考坐标系
-	 */
-	private void showAxis() {
-		if (wellNode.hasChild(axisNode)) {
-			wellNode.detachChild(axisNode);
-		} else {
-			wellNode.attachChild(axisNode);
-		}
-	}
-	
 	private void refresh() {
 		// 矩阵发生了改变
 		if (logic.isMatrixChanged()) {
@@ -479,14 +439,12 @@ public class ThreeDLogicStates extends AbstractAppState {
 			
 			for (int y = 0; y < SIDE_Y; y++) {
 				for (int x = 0; x < SIDE_X; x++) {
-					for (int z = 0; z < SIDE_Z; z++) {
-						int index = logic.getMatrix(x, y, z);
-						if (index > 0) {
-							wells[y][z][x].setColor(index - 1);
-							wellNode.attachChild(wells[y][z][x]);
-						} else {
-							wellNode.detachChild(wells[y][z][x]);
-						}
+					int index = logic.getMatrix(x, y);
+					if (index > 0) {
+						wells[y][x].setColor(index - 1);
+						wellNode.attachChild(wells[y][x]);
+					} else {
+						wellNode.detachChild(wells[y][x]);
 					}
 				}
 			}
@@ -550,13 +508,6 @@ public class ThreeDLogicStates extends AbstractAppState {
 		setEnabled(true);
 	}
 
-	private void rotateWellRight() {
-		wellNode.getControl(RotateControl.class).rotate(true);
-	}
-	
-	private void rotateWellLeft() {
-		wellNode.getControl(RotateControl.class).rotate(false);
-	}
 	/**
 	 * 方块顺时针旋转
 	 */
@@ -610,25 +561,17 @@ public class ThreeDLogicStates extends AbstractAppState {
 
 		switch (direction) {
 		case 0:
-			if (logic.moveNorth()) {
-				// 方块向北移动
-				moveControl.move(DIRECTION.NORTH);
-			}
 			break;
 		case 1:
-			if (logic.moveWest()) {
+			if (logic.moveLeft()) {
 				// 方块向西移动
 				moveControl.move(DIRECTION.WEST);
 			}
 			break;
 		case 2:
-			if (logic.moveSouth()) {
-				// 方块向南移动
-				moveControl.move(DIRECTION.SOUTH);
-			}
 			break;
 		case 3:
-			if (logic.moveEast()) {
+			if (logic.moveRight()) {
 				// 方块向东移动
 				moveControl.move(DIRECTION.EAST);
 			}
