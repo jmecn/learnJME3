@@ -1,6 +1,6 @@
 package teris.game.states;
 
-import teris.game.Game;
+import teris.game.Main;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -33,14 +33,14 @@ public class InputStates extends AbstractAppState implements ActionListener {
 	String[] keys = { MOVE_NORTH, MOVE_SOUTH, MOVE_EAST, MOVE_WEST, MOVE_DOWN,
 			C_ROTATE_R, C_ROTATE_L, W_ROTATE_R, W_ROTATE_L, DEBUG, PAUSE };
 
-	private Game game;
+	private Main game;
 	private LogicStates logicState;
 	private InputManager inputManager;
 
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
-		game = (Game) app;
+		game = (Main) app;
 		logicState = game.getStateManager().getState(LogicStates.class);
 		
 		// ³õÊ¼»¯°´¼ü

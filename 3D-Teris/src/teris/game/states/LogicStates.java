@@ -3,7 +3,7 @@ package teris.game.states;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import teris.game.Game;
+import teris.game.Main;
 import teris.game.control.MoveControl;
 import teris.game.control.MoveControl.DIRECTION;
 import teris.game.control.RotateControl;
@@ -30,7 +30,7 @@ import com.jme3.shadow.DirectionalLightShadowRenderer;
 
 public class LogicStates extends AbstractAppState {
 
-	private Game game;
+	private Main game;
 	
 	private Node rootNode = new Node("logicRoot");;
 	
@@ -93,7 +93,7 @@ public class LogicStates extends AbstractAppState {
 		AssetManager assetManager = app.getAssetManager();
 		
 		// 初始化游戏场景
-		game = (Game) app;
+		game = (Main) app;
 		game.getRootNode().attachChild(rootNode);
 		game.getViewPort().setBackgroundColor(new ColorRGBA(0.3f, 0.4f, 0.5f, 1));
 		
