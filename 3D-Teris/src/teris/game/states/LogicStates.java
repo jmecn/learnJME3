@@ -32,7 +32,8 @@ public class LogicStates extends AbstractAppState {
 
 	private Main game;
 	
-	private Node rootNode = new Node("logicRoot");;
+	private Node rootNode = new Node("logicRoot");
+	private Node guiNode = new Node("logicGui");
 	
 	private Node wellNode;// 游戏中的“井”节点
 	private Node controlNode;// 受控节点
@@ -94,7 +95,10 @@ public class LogicStates extends AbstractAppState {
 		
 		// 初始化游戏场景
 		game = (Main) app;
+		
 		game.getRootNode().attachChild(rootNode);
+		game.getGuiNode().attachChild(guiNode);
+		
 		game.getViewPort().setBackgroundColor(new ColorRGBA(0.3f, 0.4f, 0.5f, 1));
 		
 		rootNode.attachChild(getPreviewNode());
@@ -160,7 +164,7 @@ public class LogicStates extends AbstractAppState {
 		scoreTxt = new BitmapText(fnt, false);
 		scoreTxt.setText(txtA);
 		scoreTxt.setLocalTranslation(0, 640, 0);
-		game.getGuiNode().attachChild(scoreTxt);
+		guiNode.attachChild(scoreTxt);
 
 	}
 
