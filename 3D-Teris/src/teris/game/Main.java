@@ -1,7 +1,6 @@
 package teris.game;
 
-import teris.game.states.InputStates;
-import teris.game.states.LogicStates;
+import teris.game.states.ThreeDLogicStates;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.ScreenshotAppState;
@@ -15,8 +14,7 @@ import com.jme3.system.AppSettings;
 public class Main extends SimpleApplication {
 
 	public Main() {
-		super(new LogicStates(),// Âß¼­
-			new InputStates(),// ÊäÈë
+		super(new ThreeDLogicStates(),// Âß¼­
 			new ScreenshotAppState("")// ½ØÍ¼
 		);
 	}
