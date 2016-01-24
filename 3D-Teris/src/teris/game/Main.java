@@ -15,9 +15,9 @@ import com.jme3.system.AppSettings;
 public class Main extends SimpleApplication {
 
 	public Main() {
-		super(//new ThreeDLogicStates(),// Âß¼­
-			new TwoDLogicStates(),// Âß¼­
-			new ScreenshotAppState("")// ½ØÍ¼
+		super(new ThreeDLogicStates(),// 3d game
+			//new TwoDLogicStates(),// 2d game [developing]
+			new ScreenshotAppState("")
 		);
 	}
 	

@@ -88,7 +88,7 @@ public class TwoDLogic {
 	 * 生成当前方块
 	 */
 	public void createNewBlock() {
-		posY = SIDE_Y - 3;
+		posY = SIDE_Y - 1;
 		posX = SIDE_X / 2 - 2;
 
 		blockType = nextBlockType;
@@ -310,10 +310,10 @@ public class TwoDLogic {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
 				if ((int) (pattern[blockType][turnState] & k) != 0) {
-					if (posY + i < 0 || posY + i >= SIDE_Y || posX + j < 0 || posX + j >= SIDE_X) {
+					if (posY - i < 0 || posY - i >= SIDE_Y || posX + j < 0 || posX + j >= SIDE_X) {
 						return false;
 					}
-					if (matrix[posY + i][posX + j] > 0)
+					if (matrix[posY - i][posX + j] > 0)
 						return false;
 				}
 				k = k >> 1;

@@ -270,38 +270,27 @@ public class ThreeDLogicStates extends AbstractAppState {
 		@Override
 		public void onAction(String name, boolean isPressed, float tpf) {
 			if (isPressed) {
-				switch (name) {
-				case MOVE_NORTH:
+				if (MOVE_NORTH.equals(name)) {
 					move(DIRECTION.NORTH);
-					break;
-				case MOVE_SOUTH:
+				} else if (MOVE_SOUTH.equals(name)) {
 					move(DIRECTION.SOUTH);
-					break;
-				case MOVE_EAST:
+				} else if (MOVE_EAST.equals(name)) {
 					move(DIRECTION.EAST);
-					break;
-				case MOVE_WEST:
+				} else if (MOVE_WEST.equals(name)) {
 					move(DIRECTION.WEST);
-					break;
-				case MOVE_DOWN:
+				} else if (MOVE_DOWN.equals(name)) {
 					quickDown();
-					break;
-				case C_ROTATE_R:
+				} else if (C_ROTATE_R.equals(name)) {
 					rotateRight();
-					break;
-				case C_ROTATE_L:
+				} else if (C_ROTATE_L.equals(name)) {
 					rotateLeft();
-					break;
-				case W_ROTATE_R:
+				} else if (W_ROTATE_R.equals(name)) {
 					rotateWellRight();
-					break;
-				case W_ROTATE_L:
+				} else if (W_ROTATE_L.equals(name)) {
 					rotateWellLeft();
-					break;
-				case DEBUG:
+				} else if (DEBUG.equals(name)) {
 					showAxis();
-					break;
-				case PAUSE:
+				} else if (PAUSE.equals(name)) {
 					/**
 					 * ÇÐ»»ÓÎÏ·µÄÔÝÍ£/ÔËÐÐ×´Ì¬
 					 */
@@ -310,12 +299,8 @@ public class ThreeDLogicStates extends AbstractAppState {
 					} else {
 						setEnabled(true);
 					}
-					break;
-				default:
-					break;
 				}
 			}
-			
 		}
 		
 	};

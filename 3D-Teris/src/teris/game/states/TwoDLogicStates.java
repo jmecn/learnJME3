@@ -1,13 +1,13 @@
 package teris.game.states;
 
+import static teris.game.logic.TwoDLogic.SIDE_X;
+import static teris.game.logic.TwoDLogic.SIDE_Y;
 import teris.game.DIRECTION;
 import teris.game.Main;
 import teris.game.control.MoveControl;
 import teris.game.control.RotateControl;
 import teris.game.logic.TwoDLogic;
 import teris.game.scene.BoxGeometry;
-import static teris.game.logic.TwoDLogic.SIDE_X;
-import static teris.game.logic.TwoDLogic.SIDE_Y;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -23,7 +23,6 @@ import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
@@ -32,7 +31,6 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
-import com.jme3.shadow.DirectionalLightShadowRenderer;
 
 /**
  * 2D俄罗斯方块
@@ -93,6 +91,7 @@ public class TwoDLogicStates extends AbstractAppState {
 		
 		// 初始化场景图
 		game.getRootNode().attachChild(rootNode);
+		
 		rootNode.attachChild(getWellNode());
 		rootNode.attachChild(getPreviewNode());
 		
@@ -104,8 +103,8 @@ public class TwoDLogicStates extends AbstractAppState {
 		
 		// 初始化摄像机
 		Camera cam = game.getCamera();
-		cam.setLocation(new Vector3f(5, 10, 50));
-		cam.lookAt(new Vector3f(5, 10, 0), cam.getUp());
+		cam.setLocation(new Vector3f(5, 30, -10));
+		cam.lookAt(new Vector3f(5, 10, -10), new Vector3f(0, 0, -1));
 		
 		// 初始化灯光
 		initLight();
@@ -159,7 +158,7 @@ public class TwoDLogicStates extends AbstractAppState {
 				}
 			} else {
 				// 方块正常下降
-				moveControl.move(DIRECTION.DOWN);
+				moveControl.move(DIRECTION.SOUTH);
 			}
 
 			// 刷新界面
@@ -209,29 +208,11 @@ public class TwoDLogicStates extends AbstractAppState {
 			 * 创建一个垂直向下的方向光源，这道光将会产生阴影，这样就能预知方块下落的位置。
 			 */
 			DirectionalLight light = new DirectionalLight();
-			ColorRGBA color = new ColorRGBA(0.5f, 0.5f, 0.5f, 1f);
+			ColorRGBA color = new ColorRGBA(1f, 1f, 1f, 1f);
 			light.setColor(color);
 			light.setDirection(new Vector3f(0, -1f, 0).normalizeLocal());
 			rootNode.addLight(light);
 			
-			// 产生阴影
-			DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(game.getAssetManager(), 1024, 4);
-			dlsr.setLight(light);
-			game.getViewPort().addProcessor(dlsr);
-			rootNode.setShadowMode(ShadowMode.CastAndReceive);
-			
-			/**
-			 * 再添加一个方向光源，让朝向摄像机的方位亮一点。
-			 */
-			light = new DirectionalLight();
-			color = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);
-			light.setColor(color);
-			light.setDirection(new Vector3f(0, -1, -1).normalize());
-			rootNode.addLight(light);
-			
-			/**
-			 * 再添加一个环境光，让游戏场景稍微亮一些。
-			 */
 			AmbientLight ambient = new AmbientLight();
 			rootNode.addLight(ambient);
 			
@@ -260,23 +241,17 @@ public class TwoDLogicStates extends AbstractAppState {
 		@Override
 		public void onAction(String name, boolean isPressed, float tpf) {
 			if (isPressed) {
-				switch (name) {
-				case MOVE_R:
+				if (MOVE_R.equals(name)) {
 					move(DIRECTION.EAST);
-					break;
-				case MOVE_L:
+				} else if (MOVE_L.equals(name)) {
 					move(DIRECTION.WEST);
-					break;
-				case MOVE_DOWN:
+				} else if (MOVE_DOWN.equals(name)) {
 					quickDown();
-					break;
-				case ROTATE_R:
+				} else if (ROTATE_R.equals(name)) {
 					rotateRight();
-					break;
-				case ROTATE_L:
+				} else if (ROTATE_L.equals(name)) {
 					rotateLeft();
-					break;
-				case PAUSE:
+				} else if (PAUSE.equals(name)) {
 					/**
 					 * 切换游戏的暂停/运行状态
 					 */
@@ -285,12 +260,8 @@ public class TwoDLogicStates extends AbstractAppState {
 					} else {
 						setEnabled(true);
 					}
-					break;
-				default:
-					break;
 				}
 			}
-			
 		}
 		
 	};
@@ -318,12 +289,12 @@ public class TwoDLogicStates extends AbstractAppState {
 				
 				// 方块坐标的偏移量
 				Vector3f postion = new Vector3f();
-				Vector3f offset = new Vector3f(0.5f, 0.5f, 0.5f);
+				Vector3f offset = new Vector3f(0.5f, 0.5f, -0.5f);
 				
 				for(int y=0; y<SIDE_Y; y++) {
 					for(int x=0; x<SIDE_X; x++) {
 						// 计算实际坐标
-						postion.set(offset.add(x, y, 0));
+						postion.set(offset.add(x, 0, -y));
 						
 						wells[y][x] = new BoxGeometry(assetManager, 0);
 						wells[y][x].setLocalTranslation(postion);
@@ -357,12 +328,12 @@ public class TwoDLogicStates extends AbstractAppState {
 				
 				// 方块坐标的偏移量
 				Vector3f postion = new Vector3f();
-				Vector3f offset = new Vector3f(-2+0.5f, -2+0.5f, 0.5f);
+				Vector3f offset = new Vector3f(-2+0.5f, 0.5f, -2-0.5f);
 							
 				for(int x=0; x<4; x++) {
 					for(int y=0; y<4; y++) {
 						// 计算实际坐标
-						postion.set(offset.add(x, y, 0));
+						postion.set(offset.add(x, 0, -y));
 						
 						controls[y][x] = new BoxGeometry(assetManager, 0);
 						controls[y][x].setLocalTranslation(postion);
@@ -376,8 +347,8 @@ public class TwoDLogicStates extends AbstractAppState {
 		if (previewNode == null) {
 			previewNode = new Node("preview");
 			previewNode.scale(0.5f);
-			previewNode.rotate(FastMath.HALF_PI, 0, 0);
-			previewNode.move(0, 0, 5);
+			previewNode.rotate(0, 0, 0);
+			previewNode.move(11, 0, -20);
 			previewNode.setShadowMode(ShadowMode.Off);
 			
 			// 初始化预览节点中的方块数据结构
@@ -386,12 +357,12 @@ public class TwoDLogicStates extends AbstractAppState {
 				
 				// 方块坐标的偏移量
 				Vector3f postion = new Vector3f();
-				Vector3f offset = new Vector3f(-2+0.5f, -2+0.5f, 0.5f);
+				Vector3f offset = new Vector3f(-2+0.5f, 0.5f, -2-0.5f);
 							
 				for(int x=0; x<4; x++) {
 					for(int y=0; y<4; y++) {
 						// 计算实际坐标
-						postion.set(offset.add(x, 0, y));
+						postion.set(offset.add(x, 0, -y));
 						
 						previews[y][x] = new BoxGeometry(assetManager, 0);
 						previews[y][x].setLocalTranslation(postion);
@@ -414,8 +385,8 @@ public class TwoDLogicStates extends AbstractAppState {
 			gm.getAdditionalRenderState().setWireframe(true);
 			grid.setMaterial(gm);
 			
-			grid.rotate(FastMath.HALF_PI, 0, 0);
-			grid.center().move(5, 10, 0);
+			grid.rotate(0, 0, 0);
+			grid.center().move(5, 0, -10);
 
 			
 			//
@@ -457,7 +428,7 @@ public class TwoDLogicStates extends AbstractAppState {
 	 * 复位受控节点的位置
 	 */
 	private void resetControlNode() {
-		controlNode.setLocalTranslation(new Vector3f(5, SIDE_Y - 1, 0));
+		controlNode.setLocalTranslation(new Vector3f(5, 0, -SIDE_Y + 1));
 		controlNode.setLocalRotation(new Quaternion());
 	}
 
