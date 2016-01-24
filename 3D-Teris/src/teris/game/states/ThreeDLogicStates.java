@@ -119,7 +119,7 @@ public class ThreeDLogicStates extends AbstractAppState {
 		// 初始化输入控制
 		initKeys();
 		
-		setEnabled(false);
+		newGame();
 	}
 	
 	/**
