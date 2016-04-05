@@ -3,7 +3,8 @@ package yan.mazegame.states;
 import java.util.ArrayList;
 import java.util.List;
 
-import yan.mazegame.Game;
+import yan.mazegame.TestMazeCreator;
+import yan.mazegame.TestPlayerControl;
 
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
@@ -37,7 +38,7 @@ import com.jme3.texture.Texture.WrapMode;
 
 public class TestPlayerState extends AbstractAppState implements ActionListener, AnimEventListener{
 
-	private Game game;
+	private TestPlayerControl game;
 	private Node rootNode;
 	private Node guiNode;
 	
@@ -63,7 +64,7 @@ public class TestPlayerState extends AbstractAppState implements ActionListener,
 		super.initialize(stateManager, app);
 		
 		if (game == null) {
-			game = (Game) app;
+			game = (TestPlayerControl) app;
 			rootNode = game.getRootNode();
 			guiNode = game.getGuiNode();
 		}

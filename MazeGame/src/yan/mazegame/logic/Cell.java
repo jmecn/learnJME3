@@ -1,4 +1,4 @@
-package yan.maze;
+package yan.mazegame.logic;
 
 /**
  * 迷宫中的房间。

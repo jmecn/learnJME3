@@ -1,6 +1,6 @@
 package yan.mazegame.states;
 
-import yan.mazegame.Game;
+import yan.mazegame.TestMazeCreator;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -26,7 +26,7 @@ import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
 
 public class AxisState extends AbstractAppState {
-	private Game game;
+	private TestMazeCreator game;
 	private Node rootNode;
 	private Node guiNode;
 
@@ -40,7 +40,7 @@ public class AxisState extends AbstractAppState {
 		super.initialize(stateManager, app);
 		
 		if (game == null) {
-			game = (Game) app;
+			game = (TestMazeCreator) app;
 			rootNode = game.getRootNode();
 			guiNode = game.getGuiNode();
 		}

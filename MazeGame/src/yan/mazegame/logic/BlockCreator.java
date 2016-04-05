@@ -1,17 +1,33 @@
-package yan.maze;
+package yan.mazegame.logic;
 
+import java.awt.Point;
+import java.util.List;
+
+import yan.mazegame.logic.pathfinding.Node;
+import yan.mazegame.logic.pathfinding.PathFinding;
+
+/**
+ * <pre>
+ * 方块生成器
+ * 由于Minecraft是由方块组成的，想建造迷宫的话，必须使用方块来建造墙壁和道路！
+ * 
+ * 这个类将{@link MazeCreator MazeCreator}类中生成的迷宫转换成了方块形式。
+ * </pre>
+ * @author yan
+ *
+ */
 public class BlockCreator {
 
 	// 道路宽度
 	// 考虑迷宫的道路使用方块隔开，因此实际宽度要+1。
 	private int ROAD_SIZE;
-	
+
 	private int[][] blocks = null;// 迷宫地图
-	
+
 	private int blockCol;// 方块列数
 	private int blockRow;// 方块行数
 	private int blockCount;// 方块总量
-	
+
 	/**
 	 * 默认构造函数
 	 */
@@ -39,14 +55,16 @@ public class BlockCreator {
 
 	/**
 	 * 生成方块迷宫
+	 * 
 	 * @param mc
 	 */
 	public void create(MazeCreator mc) {
 		create(mc.getMaze(), mc.getColCount(), mc.getRowCount());
 	}
-	
+
 	/**
 	 * 生成方块迷宫
+	 * 
 	 * @param maze
 	 * @param cols
 	 * @param rows
@@ -56,7 +74,7 @@ public class BlockCreator {
 		this.blockRow = rows * ROAD_SIZE + 1;
 		this.blockCol = cols * ROAD_SIZE + 1;
 		blocks = new int[blockRow][blockCol];
-		
+
 		// 根据迷宫数据，将整个区域建造墙壁
 		for (int col = 0; col < cols; col++) {
 			for (int row = 0; row < rows; row++) {
@@ -83,7 +101,7 @@ public class BlockCreator {
 		blockCount = 0;
 		for (int y = 0; y < blockRow; y++) {
 			for (int x = 0; x < blockCol; x++) {
-				if (blocks[y][x] != 0) {
+				if (blocks[y][x] == 1) {
 					blockCount++;
 				}
 			}
@@ -91,7 +109,29 @@ public class BlockCreator {
 	}
 
 	/**
+	 * A*寻路
+	 */
+	public void pathfinding() {
+		int[] hit = { 1 }; // the area of which movement is
+		Point begin = new Point(0, 1);// the beginning points of
+		Point dest = new Point(blockCol - 1, blockRow - 2);// the destination points
+		PathFinding astar = new PathFinding(blocks, hit);
+		
+		List path = astar.searchPath(begin, dest);
+		
+		if (path != null) {
+			// visit the position，describe the path
+			for (int i = 0; i < path.size(); i++) {
+				Node node = (Node) path.get(i);
+				Point pos = node._Pos;
+				blocks[pos.y][pos.x] = 2;
+			}
+		}
+	}
+
+	/**
 	 * 建造一堵墙
+	 * 
 	 * @param x1
 	 * @param y1
 	 * @param x2
@@ -104,7 +144,6 @@ public class BlockCreator {
 			}
 		}
 	}
-	
 
 	public int[][] getMap() {
 		return blocks;

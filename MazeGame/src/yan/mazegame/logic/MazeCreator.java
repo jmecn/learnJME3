@@ -1,4 +1,4 @@
-package yan.maze;
+package yan.mazegame.logic;
 
 import java.util.Random;
 
@@ -43,7 +43,7 @@ public class MazeCreator {
 		if (rand) {
 			this.rand = new Random();
 		} else {
-			this.rand = new Random(seed);
+			this.rand = new Random(1000);
 		}
 		
 		this.rows = rows;

@@ -1,8 +1,8 @@
 package yan.mazegame.states;
 
-import yan.maze.BlockCreator;
-import yan.maze.MazeCreator;
-import yan.mazegame.Game;
+import yan.mazegame.TestMazeCreator;
+import yan.mazegame.logic.BlockCreator;
+import yan.mazegame.logic.MazeCreator;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -31,7 +31,7 @@ import com.jme3.util.TangentBinormalGenerator;
 
 public class TestMazeState extends AbstractAppState {
 
-	private Game game;
+	private TestMazeCreator game;
 	private Node rootNode;
 	private Node guiNode;
 
@@ -60,7 +60,7 @@ public class TestMazeState extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 		if (game == null) {
-			game = (Game) app;
+			game = (TestMazeCreator) app;
 			rootNode = game.getRootNode();
 			guiNode = game.getGuiNode();
 		}

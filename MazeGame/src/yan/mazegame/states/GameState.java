@@ -1,8 +1,8 @@
 package yan.mazegame.states;
 
-import yan.maze.BlockCreator;
-import yan.maze.MazeCreator;
 import yan.mazegame.Game;
+import yan.mazegame.logic.BlockCreator;
+import yan.mazegame.logic.MazeCreator;
 
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
@@ -87,17 +87,21 @@ public class GameState extends AbstractAppState implements ActionListener, AnimE
 		
 		if (game == null) {
 			game = (Game) app;
-			rootNode = game.getRootNode();
-			guiNode = game.getGuiNode();
+			rootNode = new Node("GameRootNode");
+			guiNode = new Node("GameGuiNode");
+			
+			this.stateManager = stateManager;
+			this.inputManager = app.getInputManager();
+			this.assetManager = app.getAssetManager();
+			this.cam = app.getCamera();
 		}
-		this.stateManager = stateManager;
-		inputManager = app.getInputManager();
-		assetManager = app.getAssetManager();
-		cam = app.getCamera();
+		game.getRootNode().attachChild(rootNode);
+		game.getGuiNode().attachChild(guiNode);
+		
 		
 		/** Set up Physics */
-		bulletAppState = new BulletAppState();
-		stateManager.attach(bulletAppState);
+		this.bulletAppState = new BulletAppState();
+		this.stateManager.attach(bulletAppState);
 		//bulletAppState.getPhysicsSpace().enableDebug(assetManager);
 
 		setUpKeys();
@@ -163,6 +167,13 @@ public class GameState extends AbstractAppState implements ActionListener, AnimE
 		bulletAppState.getPhysicsSpace().add(player);
 	}
 	
+	@Override
+	public void cleanup() {
+		game.getRootNode().detachChild(rootNode);
+		game.getGuiNode().detachChild(guiNode);
+		super.cleanup();
+	}
+
 	private void initViewPort2() {
 		cam2 = cam.clone();
         cam2.setName("cam2");

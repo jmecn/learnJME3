@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+import yan.mazegame.logic.BlockCreator;
+
 /**
  * 画板
  * @author yan
@@ -20,6 +22,15 @@ public class Canvas extends JPanel {
 	public Canvas() {
 		SIZE = 12;// 默认12像素
 	}
+	
+	/**
+	 * 根据用户设置的像素值初始化画板。
+	 * @param px
+	 */
+	public Canvas(int px) {
+		setPixel(px);
+	}
+	
 	/**
 	 * 设置像素宽度
 	 * 至少7 px
@@ -67,14 +78,27 @@ public class Canvas extends JPanel {
 		// 清屏
 		image.flush();
 
-		// 循环绘制界面
 		Graphics g = image.getGraphics();
+		
+		// 填充底色
+		g.setColor(Color.white);
+		g.fillRect(0, 0, width, height);
+		
+		// 循环绘制界面
 		for (int y = 0; y < row; y++) {
 			g.setColor(Color.BLACK);
 			for (int x = 0; x < col; x++) {
 				// 绘制界面方块
-				if (map[y][x] != 0)
-					drawUnit(g, x, y);
+				switch (map[y][x]) {
+				case 1: {
+					drawBlock(g, x, y);
+					break;
+				}
+				case 2: {
+					drawPath(g, x, y);
+					break;
+				}
+				}
 			}
 		}
 	}
@@ -88,13 +112,16 @@ public class Canvas extends JPanel {
 	 *            横坐标
 	 * @param posY
 	 *            纵坐标
-	 * @param state
 	 */
-	private void drawUnit(Graphics g, int posX, int posY) {
+	private void drawBlock(Graphics g, int posX, int posY) {
 		// 设置方块坐标
 		int x = 5 + posX * SIZE;
 		int y = 5 + posY * SIZE;
 
+		// 绘制方块底色
+		g.setColor(new Color(0xEE, 0xEE, 0xFF));
+		g.fillRect(x + 1, y + 1 , SIZE - 2, SIZE - 2);
+		
 		// 设置线段颜色
 		g.setColor(Color.BLACK);
 		// 绘制线段
@@ -107,6 +134,26 @@ public class Canvas extends JPanel {
 		g.drawLine(x + SIZE - 3, y + 2, x + SIZE - 3, y + SIZE - 3);
 	}
 
+	/**
+	 * 绘制路径点
+	 * 
+	 * @param g
+	 *            画笔
+	 * @param posX
+	 *            横坐标
+	 * @param posY
+	 *            纵坐标
+	 */
+	private void drawPath(Graphics g, int posX, int posY) {
+		// 设置方块坐标
+		int x = 5 + posX * SIZE;
+		int y = 5 + posY * SIZE;
+
+		// 绘制方块底色
+		g.setColor(Color.RED);
+		g.fillRect(x + 2, y + 2 , SIZE - 5, SIZE - 5);
+	}
+	
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -117,6 +164,7 @@ public class Canvas extends JPanel {
 	public void update(Graphics g) {
 		paint(g);
 	}
+	
 	public BufferedImage getImage() {
 		return image;
 	}
