@@ -7,7 +7,6 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResults;
-import com.jme3.font.BitmapText;
 import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -28,9 +27,7 @@ import com.jme3.scene.debug.Grid;
 public class AxisState extends AbstractAppState {
 	private TestMazeCreator game;
 	private Node rootNode;
-	private Node guiNode;
 
-	private AppStateManager stateManager;
 	private InputManager inputManager;
 	private AssetManager assetManager;
 	private Camera cam;
@@ -42,9 +39,7 @@ public class AxisState extends AbstractAppState {
 		if (game == null) {
 			game = (TestMazeCreator) app;
 			rootNode = game.getRootNode();
-			guiNode = game.getGuiNode();
 		}
-		this.stateManager = stateManager;
 		inputManager = app.getInputManager();
 		assetManager = app.getAssetManager();
 		cam = app.getCamera();

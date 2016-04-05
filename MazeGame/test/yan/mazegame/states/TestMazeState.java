@@ -8,21 +8,16 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.MaterialKey;
-import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.post.FilterPostProcessor;
-import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
@@ -33,10 +28,7 @@ public class TestMazeState extends AbstractAppState {
 
 	private TestMazeCreator game;
 	private Node rootNode;
-	private Node guiNode;
 
-	private AppStateManager stateManager;
-	private InputManager inputManager;
 	private AssetManager assetManager;
 	private Camera cam;
 
@@ -62,10 +54,7 @@ public class TestMazeState extends AbstractAppState {
 		if (game == null) {
 			game = (TestMazeCreator) app;
 			rootNode = game.getRootNode();
-			guiNode = game.getGuiNode();
 		}
-		this.stateManager = stateManager;
-		inputManager = app.getInputManager();
 		assetManager = app.getAssetManager();
 		cam = app.getCamera();
 

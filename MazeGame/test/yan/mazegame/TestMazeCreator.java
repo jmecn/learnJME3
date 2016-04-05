@@ -7,7 +7,6 @@ import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
-import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.system.AppSettings;
 
 /**

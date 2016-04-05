@@ -40,6 +40,12 @@ import com.jme3.texture.Texture.WrapMode;
 import com.jme3.util.SkyFactory;
 import com.jme3.util.TangentBinormalGenerator;
 
+/**
+ * ÓÎÏ·Ö÷³¡¾°
+ * @author yanmaoyuan
+ *
+ */
+@SuppressWarnings("deprecation")
 public class GameState extends AbstractAppState implements ActionListener, AnimEventListener{
 
 	private Game game;

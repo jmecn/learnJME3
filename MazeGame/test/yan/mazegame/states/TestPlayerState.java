@@ -3,7 +3,6 @@ package yan.mazegame.states;
 import java.util.ArrayList;
 import java.util.List;
 
-import yan.mazegame.TestMazeCreator;
 import yan.mazegame.TestPlayerControl;
 
 import com.jme3.animation.AnimChannel;
@@ -36,20 +35,18 @@ import com.jme3.terrain.heightmap.ImageBasedHeightMap;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 
+@SuppressWarnings("deprecation")
 public class TestPlayerState extends AbstractAppState implements ActionListener, AnimEventListener{
 
 	private TestPlayerControl game;
 	private Node rootNode;
-	private Node guiNode;
 	
-	private AppStateManager stateManager;
 	private InputManager inputManager;
 	private AssetManager assetManager;
 	private Camera cam;
 	
 
 	private BulletAppState bulletAppState;
-	private RigidBodyControl landscape;
 	private CharacterControl player;
 	private Vector3f walkDirection = new Vector3f();
 	private Vector3f lookDirection = new Vector3f();
@@ -66,9 +63,7 @@ public class TestPlayerState extends AbstractAppState implements ActionListener,
 		if (game == null) {
 			game = (TestPlayerControl) app;
 			rootNode = game.getRootNode();
-			guiNode = game.getGuiNode();
 		}
-		this.stateManager = stateManager;
 		inputManager = app.getInputManager();
 		assetManager = app.getAssetManager();
 		cam = app.getCamera();
