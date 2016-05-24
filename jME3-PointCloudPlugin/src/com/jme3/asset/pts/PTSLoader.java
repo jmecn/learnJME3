@@ -70,13 +70,11 @@ public class PTSLoader implements AssetLoader {
 				colors[i * 4 + 2] = Integer.parseInt(split[6].trim()) / 255f;
 				colors[i * 4 + 3] = 1;
 			} else {
-				// 无数据则采用白色
 				colors[i * 4] = 1;
 				colors[i * 4 + 1] = 1;
 				colors[i * 4 + 2] = 1;
 				colors[i * 4 + 3] = 1;
 			}
-			
 			// 顶点大小
 			sizes[i] = pointSize;
 			
