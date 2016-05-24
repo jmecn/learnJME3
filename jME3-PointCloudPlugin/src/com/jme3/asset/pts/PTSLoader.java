@@ -14,11 +14,15 @@ import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Mesh.Mode;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
+/**
+ * PTS 点云文件导入
+ * @author yanmaoyuan
+ *
+ */
 public class PTSLoader implements AssetLoader {
 
 	@Override
@@ -66,16 +70,13 @@ public class PTSLoader implements AssetLoader {
 				colors[i * 4 + 2] = Integer.parseInt(split[6].trim()) / 255f;
 				colors[i * 4 + 3] = 1;
 			} else {
+				// 无数据则采用白色
 				colors[i * 4] = 1;
 				colors[i * 4 + 1] = 1;
 				colors[i * 4 + 2] = 1;
 				colors[i * 4 + 3] = 1;
 			}
-			// TODO debug 用，把所有点都弄成白色
-			colors[i * 4] = 1;
-			colors[i * 4 + 1] = 1;
-			colors[i * 4 + 2] = 1;
-			colors[i * 4 + 3] = 1;
+			
 			// 顶点大小
 			sizes[i] = pointSize;
 			
