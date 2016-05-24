@@ -108,15 +108,12 @@ public class PTSLoader implements AssetLoader {
 		m.updateBound();
 
 		// 创建一个几何体
-		Geometry g = new Geometry("Point Cloud " + name, m);
+		Geometry g = new Geometry(name, m);
 		g.setShadowMode(ShadowMode.Off);
 		g.setQueueBucket(Bucket.Opaque);
 		g.setMaterial(mat);
 		g.updateModelBound();
 
-		Node node = new Node(name);
-		node.attachChild(g);
-		node.updateModelBound();
 		return g;
 	}
 
