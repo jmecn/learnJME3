@@ -186,8 +186,14 @@ public class GameState extends AbstractAppState implements ActionListener, AnimE
         cam2.setViewPort(0.7f, 1f, 0f, 0.3f);
         cam2.setLocation(new Vector3f(0, 1, 0));
         cam2.lookAt(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0));
+        
+        // 正交相机
+        cam2.setParallelProjection(true);
+        final float aspect = (float) cam2.getWidth() / cam2.getHeight();
+        float frustumSize = 8f;
+        cam2.setFrustum(-100, 1000, -aspect * frustumSize, aspect * frustumSize, frustumSize, -frustumSize);
 
-        final ViewPort view3 = game.getRenderManager().createMainView("Top center", cam2);
+        final ViewPort view3 = game.getRenderManager().createMainView("Bottom right", cam2);
         view3.setClearFlags(true, true, true);
         view3.attachScene(rootNode);
 	}
@@ -248,10 +254,7 @@ public class GameState extends AbstractAppState implements ActionListener, AnimE
 		Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
 		Texture diff = assetManager.loadTexture("Textures/Terrain/BrickWall/BrickWall.jpg");
 		diff.setWrap(Texture.WrapMode.Repeat);
-		Texture norm = assetManager.loadTexture("Textures/Terrain/BrickWall/BrickWall_normal.jpg");
-		norm.setWrap(Texture.WrapMode.Repeat);
 		mat.setTexture("DiffuseMap", diff);
-		mat.setTexture("NormalMap", norm);
 		mat.setFloat("Shininess", 2.0f);
 		
 		Box mesh = new Box(0.5f, 0.5f, 0.5f);
@@ -274,14 +277,10 @@ public class GameState extends AbstractAppState implements ActionListener, AnimE
 		maze.attachChild(wall.clone().move(0, 1, 0));
 		maze.attachChild(wall.clone().move(0, 2, 0));
 
-	   // 创建地板
-		Material mat2 = assetManager.loadMaterial("Textures/Terrain/BrickWall/BrickWall.j3m");
-		mat2.getTextureParam("DiffuseMap").getTextureValue().setWrap(WrapMode.Repeat);
-		mat2.getTextureParam("NormalMap").getTextureValue().setWrap(WrapMode.Repeat);
-		mat2.getTextureParam("ParallaxMap").getTextureValue().setWrap(WrapMode.Repeat);
+		// 创建地板
+		Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat2.setColor("Color", ColorRGBA.Brown);
 		Box floor = new Box(col/2+1, 0.1f, row/2+1);
-		TangentBinormalGenerator.generate(floor);
-		floor.scaleTextureCoordinates(new Vector2f(col/2, row/2));
 		Geometry floorGeom = new Geometry("Floor", floor);
 		floorGeom.setMaterial(mat2);
 		floorGeom.setShadowMode(ShadowMode.Receive);
@@ -398,7 +397,7 @@ public class GameState extends AbstractAppState implements ActionListener, AnimE
 		sinbad.setLocalTranslation(location);
 		
 		// 头顶的摄像头
-		cam2.setLocation(new Vector3f(location).setY(30));
+		cam2.setLocation(new Vector3f(location).setY(300));
 		
 		if (player.onGround()) {
 			String animName = channel.getAnimationName();
