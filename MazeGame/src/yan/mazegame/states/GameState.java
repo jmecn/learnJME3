@@ -204,9 +204,6 @@ public class GameState extends AbstractAppState implements ActionListener, AnimE
 
 	private void initLight() {
 		if (!lightInitialzed) {
-			/**
-			 * 创建一个垂直向下的方向光源，这道光将会产生阴影，这样就能预知方块下落的位置。
-			 */
 			DirectionalLight light = new DirectionalLight();
 			ColorRGBA color = new ColorRGBA(1, 1, 1, 1f);
 			light.setColor(color);
