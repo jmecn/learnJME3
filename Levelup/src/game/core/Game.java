@@ -1,0 +1,152 @@
+package game.core;
+
+import game.service.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.simsilica.es.EntityData;
+
+/**
+ * 游戏主类
+ * @author yanmaoyuan
+ *
+ */
+public class Game {
+	
+	private Logger log = LoggerFactory.getLogger(Game.class);
+	
+	private boolean started;
+	private ScheduledExecutorService executor;
+	private ServiceRunnable serviceRunner;
+	private Timer timer;
+	private List<Service> services = new ArrayList<Service>();
+
+	public Game() {
+		// 添加游戏服务
+		services.add(new EntityDataService());
+		services.add(new DecayService());
+		services.add(new FpsService());
+		
+		// 初始化定时器
+		timer = new Timer();
+		// 初始化游戏主线程
+		serviceRunner = new ServiceRunnable();
+	}
+
+    public EntityData getEntityData() {
+        return getService(EntityDataService.class).getEntityData(); 
+    }
+    
+    /**
+     * 添加服务
+     * @param s
+     * @return
+     */
+    public <T extends Service> T addService( T s ) {
+        if( started ) {
+            throw new IllegalStateException( "游戏已启动." );
+        }
+        services.add(s);
+        return s;
+    }
+    
+    /**
+     * 查询服务
+     * @param type
+     * @return
+     */
+	@SuppressWarnings("unchecked")
+	public <T extends Service> T getService(Class<T> type) {
+		int len = services.size();
+		for (int i = 0; i < len; i++) {
+			Service s = services.get(i);
+			if (type.isInstance(s)) {
+				return (T) s;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 开始游戏
+	 */
+	public void start() {
+		if (started) {
+			return;
+		}
+		
+		// 顺序初始化所有服务
+		for (Service s : services) {
+			s.initialize(this);
+		}
+		
+		executor = Executors.newScheduledThreadPool(1);
+		// 固定刷新率每秒16帧，时间间隔为62.5毫秒。
+		executor.scheduleAtFixedRate(serviceRunner, 0, 62, TimeUnit.MILLISECONDS);
+		started = true;
+		
+		log.info("开始游戏");
+	}
+
+	/**
+	 * 结束游戏
+	 */
+	public void stop() {
+		if (!started) {
+			return;
+		}
+		executor.shutdown();
+
+		// 逆序清理所有的服务
+		for (int i = services.size() - 1; i >= 0; i--) {
+			Service s = services.get(i);
+			s.terminate(this);
+		}
+		started = false;
+		
+		log.info("游戏结束");
+	}
+
+	/**
+	 * 运行所有服务
+	 * @param gameTime
+	 */
+	protected void runServices(long gameTime) {
+		int len = services.size();
+		for (int i = 0; i < len; i++) {
+			Service s = services.get(i);
+			s.update(gameTime);
+		}
+	}
+
+    public long getGameTime() {
+        return timer.getTime(); 
+    }
+    
+    public Timer getTimer() {
+    	return timer;
+    }
+    
+	private class ServiceRunnable implements Runnable {
+		public void run() {
+			try {
+				timer.update();
+				runServices(getGameTime());
+			} catch (RuntimeException e) {
+				log.error("服务运行发生异常", e);
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		Game game = new Game();
+		game.start();
+	}
+}
