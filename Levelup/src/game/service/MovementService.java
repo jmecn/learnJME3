@@ -10,6 +10,11 @@ import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntitySet;
 
+/**
+ * 实体运动计算子系统
+ * @author yanmaoyuan
+ *
+ */
 public class MovementService implements Service {
 
 	EntitySet entities;
@@ -32,7 +37,7 @@ public class MovementService implements Service {
                            (float)(linear.y * tpf),
                            (float)(linear.z * tpf) );
 
-            if (loc.x > 800 || loc.z > 600 || loc.x < 0 || loc.z < 0) {
+            if (loc.x > ViewService.WIDTH || loc.z > ViewService.HEIGHT || loc.x < 0 || loc.z < 0) {
             	e.set(new Decay(0));
             }
             e.set(new Position(loc, null));

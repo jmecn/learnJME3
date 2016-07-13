@@ -43,11 +43,11 @@ public class Game {
 	public Game() {
 		// 添加游戏服务
 		services.add(new EntityDataService());
-		services.add(new ViewService());
 		services.add(new ControlService());
 		services.add(new AiService());
 		services.add(new MovementService());
 		services.add(new DecayService());
+		services.add(new ViewService());
 		
 		// 初始化定时器
 		timer = new Timer();

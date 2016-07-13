@@ -31,8 +31,8 @@ public class ViewService extends Canvas implements Service {
 	
 	private Logger log = LoggerFactory.getLogger(ViewService.class);
 
-	public final static int WIDTH = 800;
-	public final static int HEIGHT = 600;
+	public final static int WIDTH = 1080;
+	public final static int HEIGHT = 720;
 
 	private Image mBuffer;// 缓冲区
 	private Graphics gBuffer;
@@ -48,6 +48,8 @@ public class ViewService extends Canvas implements Service {
 	public void initialize(Game game) {
 		ed = game.getEntityData();
 		entities = ed.getEntities(Model.class, Position.class);
+		
+		log.info("Canvas准备完毕");
 	}
 
 	@Override
@@ -59,6 +61,10 @@ public class ViewService extends Canvas implements Service {
 			// 清屏
 			gBuffer.setColor(Color.white);
 			gBuffer.fillRect(0, 0, WIDTH, HEIGHT);
+			
+			paintText();
+			
+			repaint();
 		}
 		
 		// 更新data
@@ -78,11 +84,13 @@ public class ViewService extends Canvas implements Service {
 				} else if (Model.BAD.equals(model.getName())) {
 					gBuffer.fillRect((int) loc.x, (int) loc.z, 10, 10);
 				} else if (Model.TARGET.equals(model.getName())) {
-					gBuffer.draw3DRect((int) loc.x, (int) loc.z, 10, 10, true);
+					gBuffer.draw3DRect((int) loc.x, (int) loc.z, 10, 10, false);
 				}
 			}
 
 			// 重绘
+			paintText();
+			
 			repaint();
 		}
 	}
@@ -94,12 +102,24 @@ public class ViewService extends Canvas implements Service {
 	}
 
 	/**
+	 * 绘制文字
+	 */
+	private void paintText() {
+		gBuffer.setColor(Color.black);
+		gBuffer.drawString("操作说明:", 0, 13);
+		gBuffer.drawString("Z键:创建绿点", 0, 26);
+		gBuffer.drawString("X键:创建红点", 0, 39);
+		gBuffer.drawString("鼠标左键:在指定位置创建绿点", 0, 52);
+		gBuffer.drawString("鼠标右键:在指定位置创建红点", 0, 65);
+		gBuffer.drawString("鼠标中键:在指定点创建一个目标，当前屏幕上所有点都将追逐它", 0, 78);
+		gBuffer.drawString("ESC:退出程序", 0, 91);
+	}
+	/**
 	 * 重载Canvas中的paint方法，将缓冲区的图像绘制到屏幕上。
 	 */
 	@Override
 	public void paint(Graphics g) {
 		g.drawImage(mBuffer, 0, 0, this);
-
 	}
 
 	/**
