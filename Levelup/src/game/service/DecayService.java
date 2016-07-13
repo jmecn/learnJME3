@@ -12,42 +12,41 @@ import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
 
 /**
- *  Removes any entities whose Decay time has come.
- *  
- *  @author    Paul Speed
+ * Removes any entities whose Decay time has come.
+ * 
+ * @author Paul Speed
  */
 public class DecayService implements Service {
- 
-    static Logger log = LoggerFactory.getLogger(DecayService.class); 
- 
-    private EntityData ed;    
-    private EntitySet decaying;
-       
-    public DecayService() {
-    }
 
-    public void initialize( Game game ) {
-        this.ed = game.getEntityData();
-        decaying = ed.getEntities(Decay.class);
-    }
+	static Logger log = LoggerFactory.getLogger(DecayService.class);
 
-    public void update( long gameTime ) {
-        decaying.applyChanges();
-        if( !decaying.isEmpty() ) {
-            for( Entity e : decaying ) {
-                Decay decay = e.get(Decay.class);
-                if( gameTime > decay.getTime() ) {
-                    if( log.isDebugEnabled() ) {
-                        log.debug("Removing entity:" + e);                                   
-                    }
-                    ed.removeEntity(e.getId());
-                }
-            }
-        }
-    }
+	private EntityData ed;
+	private EntitySet decaying;
 
-    public void terminate( Game game ) {
-        decaying.release();
-    }
-    
+	public DecayService() {
+	}
+
+	public void initialize(Game game) {
+		this.ed = game.getEntityData();
+		decaying = ed.getEntities(Decay.class);
+	}
+
+	public void update(long gameTime) {
+		decaying.applyChanges();
+		if (!decaying.isEmpty()) {
+			for (Entity e : decaying) {
+				Decay decay = e.get(Decay.class);
+				if( decay.getPercent() >= 1.0 ) {
+					log.info("Removing entity:" + e);
+	                ed.removeEntity(e.getId());
+	            }
+			}
+		}
+	}
+
+	public void terminate(Game game) {
+		decaying.release();
+		decaying = null;
+	}
+
 }

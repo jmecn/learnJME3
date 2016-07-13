@@ -1,12 +1,23 @@
 package game.core;
 
-import game.service.*;
+import game.service.AiService;
+import game.service.ControlService;
+import game.service.DecayService;
+import game.service.EntityDataService;
+import game.service.MovementService;
+import game.service.ViewService;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.JFrame;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +37,17 @@ public class Game {
 	private ScheduledExecutorService executor;
 	private ServiceRunnable serviceRunner;
 	private Timer timer;
+	private JFrame frame;
 	private List<Service> services = new ArrayList<Service>();
-
+	
 	public Game() {
 		// 添加游戏服务
 		services.add(new EntityDataService());
+		services.add(new ViewService());
+		services.add(new ControlService());
+		services.add(new AiService());
+		services.add(new MovementService());
 		services.add(new DecayService());
-		services.add(new FpsService());
 		
 		// 初始化定时器
 		timer = new Timer();
@@ -87,14 +102,51 @@ public class Game {
 			s.initialize(this);
 		}
 		
-		executor = Executors.newScheduledThreadPool(1);
+		// 创建窗口
+		createFrame();
+		
 		// 固定刷新率每秒16帧，时间间隔为62.5毫秒。
+		executor = Executors.newScheduledThreadPool(1);
 		executor.scheduleAtFixedRate(serviceRunner, 0, 62, TimeUnit.MILLISECONDS);
 		started = true;
 		
 		log.info("开始游戏");
 	}
 
+	/**
+	 * 创建游戏窗口
+	 */
+	private void createFrame() {
+		// 创建窗口
+		JFrame frame = new JFrame();
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				stop();
+			}
+		});
+		frame.addKeyListener(getService(ControlService.class));
+		
+		// 配置窗口参数
+		frame.setTitle("My Game");
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setResizable(false);
+		
+		// 添加ViewService
+		frame.add(getService(ViewService.class));
+		frame.pack();
+		
+		// 窗口居中
+		Dimension frameSize = frame.getSize();
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int locX = (screenSize.width - frameSize.width)/2;
+		int locY = (screenSize.height - frameSize.height)/2;
+		frame.setLocation(locX, locY);
+		
+		// 显示窗口
+		frame.setVisible(true);
+	}
+	
 	/**
 	 * 结束游戏
 	 */
@@ -112,6 +164,8 @@ public class Game {
 		started = false;
 		
 		log.info("游戏结束");
+		
+		System.exit(0);
 	}
 
 	/**
@@ -134,11 +188,15 @@ public class Game {
     	return timer;
     }
     
+    public JFrame getFrame() {
+    	return frame;
+    }
+    
 	private class ServiceRunnable implements Runnable {
 		public void run() {
 			try {
 				timer.update();
-				runServices(getGameTime());
+				runServices(timer.getTimePerFrame());
 			} catch (RuntimeException e) {
 				log.error("服务运行发生异常", e);
 			}

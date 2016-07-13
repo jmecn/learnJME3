@@ -1,29 +1,30 @@
 package game.components;
+
 import com.simsilica.es.EntityComponent;
 
-
 /**
- *  An entity with a decay component will be deleted
- *  at some point in the future.
+ *  Represents a time-to-live for an entity.
  *
  *  @author    Paul Speed
  */
 public class Decay implements EntityComponent {
-    private long at;
- 
-    public Decay() {
+    private long start;
+    private long delta;
+
+    public Decay( long deltaMillis ) {
+        this.start = System.nanoTime();
+        this.delta = deltaMillis * 1000000;
     }
-    
-    public Decay( long at ) {
-        this.at = at;
+
+    public double getPercent() {
+        long time = System.nanoTime();
+        return (double)(time - start)/delta;
     }
-    
-    public long getTime() {
-        return at;
-    }
-    
+
     @Override
     public String toString() {
-        return "Decay[" + at + "]";
+        return "Decay[" + (delta/1000000.0) + " ms]";
     }
 }
+
+

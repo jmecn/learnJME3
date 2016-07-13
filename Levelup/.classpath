@@ -5,7 +5,7 @@
 	<classpathentry kind="lib" path="libs/log4j-1.2.12.jar"/>
 	<classpathentry kind="lib" path="libs/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="lib" path="libs/slf4j-log4j12-1.7.5.jar"/>
-	<classpathentry kind="lib" path="libs/Zay-ES.jar"/>
+	<classpathentry kind="lib" path="libs/Zay-ES.jar" sourcepath="/zay-es"/>
 	<classpathentry kind="lib" path="libs/jME3-core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
