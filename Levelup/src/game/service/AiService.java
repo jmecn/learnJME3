@@ -18,26 +18,27 @@ public class AiService implements Service {
 
 	private Logger log = LoggerFactory.getLogger(AiService.class);
 	
-	private EntitySet badEntities;// 坏人
+	private EntitySet entities;// 坏人
 
 	@Override
 	public void initialize(Game game) {
-		badEntities = game.getEntityData().getEntities(Position.class, Target.class);
+		entities = game.getEntityData().getEntities(Position.class, Target.class);
 	}
 
 	@Override
 	public void update(long time) {
-		if (badEntities.applyChanges()) {
-			for (Entity bad : badEntities) {
-				Vector3f target = bad.get(Target.class).getLocation();
-				Vector3f loc = bad.get(Position.class).getLocation();
+		if (entities.applyChanges()) {
+			for (Entity e : entities) {
+				Vector3f target = e.get(Target.class).getLocation();
+				Vector3f loc = e.get(Position.class).getLocation();
 				if (target.distanceSquared(loc) < 100) {
-					bad.set(new Decay(1000));
+					e.set(new Decay(0));
+					log.info("抓到目标啦!" + e);
 				} else {
 					Vector3f v = target.subtract(loc);
 					v.normalizeLocal().multLocal(50);
-					// 设置坏人的移动速度
-					bad.set(new Velocity(v));
+					// 设置移动速度
+					e.set(new Velocity(v));
 				}
 			}
 		}
@@ -45,8 +46,8 @@ public class AiService implements Service {
 
 	@Override
 	public void terminate(Game game) {
-		badEntities.release();
-		badEntities = null;
+		entities.release();
+		entities = null;
 
 	}
 

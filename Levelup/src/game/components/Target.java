@@ -14,4 +14,8 @@ public class Target implements EntityComponent {
 	public Vector3f getLocation() {
 		return location;
 	}
+	
+	public String toString() {
+		return "Target[" + location + "]";
+	}
 }

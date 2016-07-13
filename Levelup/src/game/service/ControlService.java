@@ -65,10 +65,7 @@ public class ControlService implements KeyListener, MouseListener, Service {
 
 	// 按键监听
 	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void keyPressed(KeyEvent e) {}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
@@ -81,10 +78,7 @@ public class ControlService implements KeyListener, MouseListener, Service {
 	}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void keyTyped(KeyEvent e) {}
 
 	// 鼠标点击事件监听
 	@Override
@@ -106,37 +100,25 @@ public class ControlService implements KeyListener, MouseListener, Service {
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void mouseEntered(MouseEvent e) {}
 
 	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void mouseExited(MouseEvent e) {}
 
 	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void mousePressed(MouseEvent e) {}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void mouseReleased(MouseEvent e) {}
 
 	private void createPlayer(int x, int z) {
 		EntityId player = ed.createEntity();
 		ed.setComponents(player,
 				new Model(Model.PLAYER, Color.GREEN),
 				new Position(new Vector3f(x, 0, z), null),
-				new Velocity(new Vector3f(-1, 0, 0)));
+				new Velocity(new Vector3f(-60, 0, 0)));
 		
-		log.info("Create player at:" + x + ", " + z);
+		log.info("创建玩家实体:" + x + ", " + z);
 	}
 
 	private void createBad(int x, int z) {
@@ -144,15 +126,19 @@ public class ControlService implements KeyListener, MouseListener, Service {
 		ed.setComponents(player,
 				new Model(Model.BAD, Color.RED),
 				new Position(new Vector3f(x, 0, z), null),
-				new Velocity(new Vector3f(1, 0, 0)));
+				new Velocity(new Vector3f(60, 0, 0)));
 		
-		log.info("Create bad guy at:" + x + ", " + z);
+		log.info("创建坏人实体:" + x + ", " + z);
 	}
 	
 	private void createTarget(int x, int z) {
 		entities.applyChanges();
 		for(Entity e : entities) {
-			ed.setComponent(e.getId(), new Target(new Vector3f(x, 0, z)));
+			String name = e.get(Model.class).getName();
+			if (!Model.TARGET.equals(name)) {
+				ed.setComponent(e.getId(),
+						new Target(new Vector3f(x, 0, z)));
+			}
 		}
 		
 		EntityId target = ed.createEntity();
@@ -161,7 +147,7 @@ public class ControlService implements KeyListener, MouseListener, Service {
 				new Position(new Vector3f(x, 0, z), null),
 				new Decay(10000));
 		
-		log.info("Create target at:" + x + ", " + z);
+		log.info("创建一个目标实体:" + x + ", " + z);
 	}
 	
 }
