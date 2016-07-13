@@ -39,6 +39,7 @@ public class Game {
 	private Timer timer;
 	private JFrame frame;
 	private List<Service> services = new ArrayList<Service>();
+	private EntityFactory factory;
 	
 	public Game() {
 		// 添加游戏服务
@@ -101,6 +102,8 @@ public class Game {
 		for (Service s : services) {
 			s.initialize(this);
 		}
+		
+		factory = new EntityFactory(getEntityData());
 		
 		// 创建窗口
 		createFrame();
@@ -190,6 +193,10 @@ public class Game {
     
     public JFrame getFrame() {
     	return frame;
+    }
+    
+    public EntityFactory getFactory() {
+    	return factory;
     }
     
 	private class ServiceRunnable implements Runnable {

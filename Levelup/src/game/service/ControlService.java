@@ -62,10 +62,10 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	@Override
 	public void update(long time) {
 		if (zPressed) {
-			createPlayer(360, 360);
+			game.getFactory().createPlayer(360, 360);
 		}
 		if (xPressed) {
-			createBad(720, 360);
+			game.getFactory().createBad(720, 360);
 		}
 	}
 
@@ -122,16 +122,17 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	public void mousePressed(MouseEvent e) {
 		switch (e.getButton()) {
 		case MouseEvent.BUTTON1: {// 左键
-			createPlayer(e.getX(), e.getY());
+			game.getFactory().createPlayer(e.getX(), e.getY());
 			lPressed = true;
 			break;
 		}
 		case MouseEvent.BUTTON2: {// 中键
-			createTarget(e.getX(), e.getY());
+			setTarget(e.getX(), e.getY());
+			game.getFactory().createTarget(e.getX(), e.getY());
 			break;
 		}
 		case MouseEvent.BUTTON3: {// 右键
-			createBad(e.getX(), e.getY());
+			game.getFactory().createBad(e.getX(), e.getY());
 			rPressed = true;
 			break;
 		}
@@ -158,37 +159,17 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if (lPressed) {
-			createPlayer(e.getX(), e.getY());
+			game.getFactory().createPlayer(e.getX(), e.getY());
 		}
 		if (rPressed) {
-			createBad(e.getX(), e.getY());
+			game.getFactory().createBad(e.getX(), e.getY());
 		}
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {}
 
-	private void createPlayer(int x, int z) {
-		EntityId player = ed.createEntity();
-		ed.setComponents(player,
-				new Model(Model.PLAYER, Color.GREEN),
-				new Position(new Vector3f(x, 0, z), null),
-				new Velocity(randomDirection().mult(60)));
-		
-		log.info("创建玩家实体:" + x + ", " + z);
-	}
-
-	private void createBad(int x, int z) {
-		EntityId player = ed.createEntity();
-		ed.setComponents(player,
-				new Model(Model.BAD, Color.RED),
-				new Position(new Vector3f(x, 0, z), null),
-				new Velocity(randomDirection().mult(60)));
-		
-		log.info("创建坏人实体:" + x + ", " + z);
-	}
-	
-	private void createTarget(int x, int z) {
+	public void setTarget(int x, int z) {
 		entities.applyChanges();
 		for(Entity e : entities) {
 			String name = e.get(Model.class).getName();
@@ -197,27 +178,5 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 						new Target(new Vector3f(x, 0, z)));
 			}
 		}
-		
-		EntityId target = ed.createEntity();
-		ed.setComponents(target,
-				new Model(Model.TARGET, Color.BLUE),
-				new Position(new Vector3f(x, 0, z), null),
-				new Decay(12000));// 目标点在屏幕上出现12秒，然后消失。
-		
-		log.info("创建一个目标实体:" + x + ", " + z);
 	}
-	
-	/**
-	 * 获得一个随机方向的初速度
-	 * @return
-	 */
-	private Vector3f randomDirection() {
-		float theta = FastMath.rand.nextFloat() * FastMath.TWO_PI;
-		float x = FastMath.sin(theta);
-		float z = FastMath.cos(theta);
-		Vector3f dir = new Vector3f(x, 0, z);
-		dir.normalizeLocal();
-		return dir;
-	}
-
 }

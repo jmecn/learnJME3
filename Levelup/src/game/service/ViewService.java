@@ -72,8 +72,10 @@ public class ViewService extends Canvas implements Service {
 			// «Â∆¡
 			gBuffer.setColor(Color.white);
 			gBuffer.fillRect(0, 0, WIDTH, HEIGHT);
+			int size = entities.size();
 			
-			for (Entity e : entities) {
+			Entity[] ary = entities.toArray(new Entity[]{});
+			for (Entity e : ary) {
 				Position p = e.get(Position.class);
 				Vector3f loc = p.getLocation();
 				Model model = e.get(Model.class);
