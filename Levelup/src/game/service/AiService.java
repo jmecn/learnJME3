@@ -67,6 +67,8 @@ public class AiService implements Service {
 				Vector3f v = target.get(Position.class).getLocation().subtract(loc);
 				v.normalizeLocal().multLocal(20);
 				e.set(new Velocity(v));
+				
+				log.info("∑¢œ÷ÕÊº“" + target);
 			}
 		}
 	}

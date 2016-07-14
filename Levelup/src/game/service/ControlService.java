@@ -2,7 +2,6 @@ package game.service;
 
 import game.components.Model;
 import game.components.Position;
-import game.components.Target;
 import game.components.Velocity;
 import game.core.Game;
 import game.core.Service;
@@ -60,7 +59,6 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	@Override
 	public void update(long time) {
 		if (zPressed) {
-			game.getFactory().createBad(720, 360);
 		}
 		if (xPressed) {
 		}
@@ -85,6 +83,8 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 		case KeyEvent.VK_Z:
 			zPressed = true;break;
 		}
+		
+		log.info("°´¼ü:" + e.getKeyChar());
 	}
 
 	@Override
@@ -128,7 +128,6 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 		}
 		case MouseEvent.BUTTON3: {// ÓÒ¼ü
 			setTarget(e.getX(), e.getY());
-			game.getFactory().createTarget(e.getX(), e.getY());
 			rPressed = true;
 			break;
 		}
@@ -163,7 +162,6 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 		}
 		if (rPressed) {
 			setTarget(e.getX(), e.getY());
-			game.getFactory().createTarget(e.getX(), e.getY());
 		}
 	}
 

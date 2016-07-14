@@ -27,9 +27,9 @@ public class SpawnService implements Service {
 	
 	Game game;
 	EntityData ed;
-	EntitySet entities;
+	EntitySet spawnPoints;
 	EntitySet players;
-	EntitySet bads;
+	EntitySet mobs;
 
 	// 最大刷怪数量
 	public final static int MAX_MOBS = 50;
@@ -38,7 +38,7 @@ public class SpawnService implements Service {
 	public void initialize(Game game) {
 		this.game = game;
 		ed = game.getEntityData();
-		entities = ed.getEntities(
+		spawnPoints = ed.getEntities(
 				Position.class, 
 				SpawnPoint.class,
 				AoI.class);
@@ -46,7 +46,7 @@ public class SpawnService implements Service {
 				Position.class,
 				Model.class);
 		
-		bads = ed.getEntities(Filters.fieldEquals(Model.class, "name", Model.BAD),
+		mobs = ed.getEntities(Filters.fieldEquals(Model.class, "name", Model.BAD),
 				Model.class);
 	}
 
@@ -61,59 +61,60 @@ public class SpawnService implements Service {
 			time -= 1000000000;
 		}
 		
-		entities.applyChanges();
-		players.applyChanges();
-		bads.applyChanges();
+		spawnPoints.applyChanges();// 更新刷怪点
+		players.applyChanges();// 更新玩家
+		mobs.applyChanges();// 更新怪物
 
-		int mob_count = bads.size();
+		// 判断地图中的怪物数量是否到达上限
+		int mob_count = mobs.size();
 		if (mob_count >= MAX_MOBS) return;
 		
-		if (entities.size() > 0) {
-			Entity[] sAry = entities.toArray(new Entity[] {});
-			Entity[] pAry = players.toArray(new Entity[] {});
-			
-			
-			// 判断玩家附近是否有刷怪点
-			int plen = pAry.length;
-			int len = sAry.length;
-			List<Entity> activeSpawn = new ArrayList<Entity>();
-			for(int j=0; j<plen; j++) {
-				Vector3f pLoc = pAry[j].get(Position.class).getLocation();
-				for (int i = 0; i < len; i++) {
-					Vector3f sLoc = sAry[i].get(Position.class).getLocation();
-					float distance = sAry[i].get(AoI.class).getRadiusSquare();
-					if (sLoc.distanceSquared(pLoc) <= distance) {
-						activeSpawn.add(sAry[i]);
-					}
+		if (spawnPoints.size() == 0) return;
+		
+		Entity[] sAry = spawnPoints.toArray(new Entity[] {});
+		Entity[] pAry = players.toArray(new Entity[] {});
+		
+		// 判断玩家附近是否有刷怪点
+		int plen = pAry.length;
+		int len = sAry.length;
+		List<Entity> activeSpawn = new ArrayList<Entity>();
+		for(int j=0; j<plen; j++) {
+			Vector3f pLoc = pAry[j].get(Position.class).getLocation();
+			for (int i = 0; i < len; i++) {
+				Vector3f sLoc = sAry[i].get(Position.class).getLocation();
+				float distance = sAry[i].get(AoI.class).getRadiusSquare();
+				if (sLoc.distanceSquared(pLoc) <= distance) {
+					activeSpawn.add(sAry[i]);
 				}
 			}
-			
-			
-			len = activeSpawn.size();
-			// 附近没有玩家
-			if (len == 0) {
-				return;
-			}
-			
-			// 随机挑一个刷怪点
-			int index = FastMath.rand.nextInt(len);
-				
-			Entity spawn = activeSpawn.get(index);
-			SpawnPoint point = spawn.get(SpawnPoint.class);
-			Vector3f loc = spawn.get(Position.class).getLocation();
-
-			// 怪物数量不足
-			if (!point.isFull() && point.getPercent() > 1.0) {
-				
-				EntityId id = game.getFactory().createBad(loc.x, loc.z);
-				
-				// 重置刷怪点
-				int current = point.getCurrentCount() + 1;
-				int max = point.getMaximumCount();
-				ed.setComponent(spawn.getId(), new SpawnPoint(max, current));
-			}
-				
 		}
+		
+		
+		len = activeSpawn.size();
+		// 附近没有玩家
+		if (len == 0) {
+			return;
+		}
+		
+		// 随机挑一个刷怪点
+		int index = FastMath.rand.nextInt(len);
+			
+		Entity spawn = activeSpawn.get(index);
+		SpawnPoint point = spawn.get(SpawnPoint.class);
+		Vector3f loc = spawn.get(Position.class).getLocation();
+
+		// 怪物数量不足
+		if (!point.isFull() && point.getPercent() > 1.0) {
+			
+			EntityId id = game.getFactory().createBad(loc.x, loc.z);
+			log.info(spawn + " 刷新了 " + id);
+			
+			// 重置刷怪点
+			int current = point.getCurrentCount() + 1;
+			int max = point.getMaximumCount();
+			ed.setComponent(spawn.getId(), new SpawnPoint(max, current));
+		}
+				
 	}
 	
 	protected void respawn() {
