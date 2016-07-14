@@ -65,7 +65,7 @@ public class AiService implements Service {
 			} else {
 				// 设置移动速度
 				Vector3f v = target.get(Position.class).getLocation().subtract(loc);
-				v.normalizeLocal().multLocal(40);
+				v.normalizeLocal().multLocal(20);
 				e.set(new Velocity(v));
 			}
 		}

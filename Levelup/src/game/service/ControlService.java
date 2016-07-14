@@ -147,6 +147,10 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 		}
 		case MouseEvent.BUTTON3: {// ср╪Э
 			rPressed = false;
+			entities.applyChanges();
+			for(Entity player : entities) {
+				ed.removeComponent(player.getId(), Velocity.class);
+			}
 			break;
 		}
 		}
@@ -165,7 +169,6 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		setTarget(e.getX(), e.getY());
 	}
 
 	public void setTarget(int x, int z) {
@@ -174,13 +177,9 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 			Vector3f target = new Vector3f(x, 0, z);
 			Vector3f loc = e.get(Position.class).getLocation();
 			
-			if (loc.distanceSquared(target) >= 64) {
-				Vector3f v = target.subtract(loc);
-				v.normalizeLocal().multLocal(100);
-				ed.setComponents(e.getId(), new Velocity(v));
-			} else {
-				ed.removeComponent(e.getId(), Velocity.class);
-			}
+			Vector3f v = target.subtract(loc);
+			v.normalizeLocal().multLocal(100);
+			ed.setComponents(e.getId(), new Velocity(v));
 		}
 	}
 }

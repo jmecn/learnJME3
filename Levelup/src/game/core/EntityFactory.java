@@ -36,7 +36,7 @@ public class EntityFactory {
 	public EntityId createPlayer(float x, float z) {
 		EntityId player = ed.createEntity();
 		ed.setComponents(player,
-				new Model(Model.PLAYER, ColorRGBA.Green, new Circle(30)),
+				new Model(Model.PLAYER, ColorRGBA.Green, new Circle(10)),
 				new Position(new Vector3f(540, 0, 360), null));
 		
 		log.info("创建玩家实体:" + x + ", " + z);
@@ -48,15 +48,14 @@ public class EntityFactory {
 		ed.setComponents(id,
 				new Model(Model.BAD, ColorRGBA.randomColor(), new Box(14, 14)),
 				new Position(new Vector3f(x, 0, z), null),
-				new Velocity(randomDirection().mult(30)),
-				new AoI(200));
+				new Velocity(randomDirection().mult(15)),
+				new AoI(150));
 		
 		log.info("创建坏人实体:" + x + ", " + z);
 		return id;
 	}
 	
 	public void createTarget(float x, float z) {
-		
 		EntityId target = ed.createEntity();
 		ed.setComponents(target,
 				new Model(Model.TARGET, ColorRGBA.Blue, new Box(5, 5)),
@@ -72,7 +71,7 @@ public class EntityFactory {
 				new Model(Model.RESPAWN_POINT, ColorRGBA.DarkGray, new Cross()),
 				new Position(new Vector3f(x, 0, z), null),
 				new SpawnPoint(10), 
-				new AoI(400));
+				new AoI(200));
 		
 		log.info("创建一个刷怪点:" + x + ", " + z);
 		
