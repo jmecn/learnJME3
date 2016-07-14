@@ -1,11 +1,6 @@
 package game.core;
 
-import game.service.AiService;
-import game.service.ControlService;
-import game.service.DecayService;
-import game.service.EntityDataService;
-import game.service.MovementService;
-import game.service.ViewService;
+import game.service.*;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -45,8 +40,11 @@ public class Game {
 		// 添加游戏服务
 		services.add(new EntityDataService());
 		services.add(new ControlService());
+		services.add(new SinglePlayerService());
+		services.add(new SpawnService());
 		services.add(new AiService());
 		services.add(new MovementService());
+		services.add(new BoundaryService(5));
 		services.add(new DecayService());
 		services.add(new ViewService());
 		

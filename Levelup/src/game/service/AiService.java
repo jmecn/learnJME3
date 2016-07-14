@@ -1,8 +1,8 @@
 package game.service;
 
-import game.components.Decay;
+import game.components.AoI;
+import game.components.Model;
 import game.components.Position;
-import game.components.Target;
 import game.components.Velocity;
 import game.core.Game;
 import game.core.Service;
@@ -14,36 +14,59 @@ import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
+import com.simsilica.es.Filters;
 
 public class AiService implements Service {
 
 	private Logger log = LoggerFactory.getLogger(AiService.class);
 	
 	private EntitySet entities;// 坏人
+	private EntitySet players;// 玩家
 	private EntityData ed;
 
 	@Override
 	public void initialize(Game game) {
 		ed = game.getEntityData();
-		entities = ed.getEntities(Position.class, Target.class);
+		
+		entities = ed.getEntities(Filters.fieldEquals(Model.class, "name",
+				Model.BAD), Model.class, Position.class, AoI.class);
+		
+		players = ed.getEntities(Filters.fieldEquals(Model.class, "name",
+				Model.PLAYER), Model.class, Position.class);
 	}
 
 	@Override
 	public void update(long time) {
-		if (entities.applyChanges()) {
-			for (Entity e : entities) {
-				Vector3f target = e.get(Target.class).getLocation();
-				Vector3f loc = e.get(Position.class).getLocation();
-				if (target.distanceSquared(loc) < 100) {
-					e.set(new Decay(10));
-					ed.removeComponent(e.getId(), Velocity.class);
-					log.info("抓到目标啦!" + e);
-				} else {
-					Vector3f v = target.subtract(loc);
-					v.normalizeLocal().multLocal(50);
-					// 设置移动速度
-					e.set(new Velocity(v));
+		entities.applyChanges();
+		players.applyChanges();
+		
+		for (Entity e : entities) {
+			Vector3f loc = e.get(Position.class).getLocation();
+			float aoiDist = e.get(AoI.class).getRadiusSquare();
+
+			// 寻找离自己距离最近的玩家
+			float minDist = Float.MAX_VALUE;
+			Entity target = null;
+			for(Entity p : players) {
+				Vector3f pLoc = p.get(Position.class).getLocation();
+				float dist = loc.distanceSquared(pLoc);
+				if (dist > aoiDist) continue;
+
+				// 记录距离最近的玩家
+				if (dist < minDist) {
+					minDist = dist;
+					target = p;
 				}
+			}
+			
+			// 没有找到距离比较近的玩家，保持原状。
+			if (target == null) {
+				continue;
+			} else {
+				// 设置移动速度
+				Vector3f v = target.get(Position.class).getLocation().subtract(loc);
+				v.normalizeLocal().multLocal(40);
+				e.set(new Velocity(v));
 			}
 		}
 	}

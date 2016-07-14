@@ -14,6 +14,7 @@ import java.awt.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
@@ -65,6 +66,7 @@ public class ViewService extends Canvas implements Service {
 			paintText();
 			
 			repaint();
+			
 		}
 		
 		// ¸üÐÂdata
@@ -80,14 +82,11 @@ public class ViewService extends Canvas implements Service {
 				Vector3f loc = p.getLocation();
 				Model model = e.get(Model.class);
 
-				gBuffer.setColor(model.getColor());
-				if (Model.PLAYER.equals(model.getName())) {
-					gBuffer.fillOval((int) loc.x, (int) loc.z, 10, 10);
-				} else if (Model.BAD.equals(model.getName())) {
-					gBuffer.fillRect((int) loc.x, (int) loc.z, 10, 10);
-				} else if (Model.TARGET.equals(model.getName())) {
-					gBuffer.draw3DRect((int) loc.x, (int) loc.z, 10, 10, false);
-				}
+				ColorRGBA mc = model.getColor();
+				Color c = new Color(mc.r, mc.g, mc.b, mc.a);
+				gBuffer.setColor(c);
+				
+				model.getShape().draw(gBuffer, loc);
 			}
 
 			// ÖØ»æ

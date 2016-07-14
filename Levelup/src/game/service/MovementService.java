@@ -1,6 +1,5 @@
 package game.service;
 
-import game.components.Decay;
 import game.components.Position;
 import game.components.Velocity;
 import game.core.Game;
@@ -8,6 +7,7 @@ import game.core.Service;
 
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
+import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
 
 /**
@@ -17,10 +17,12 @@ import com.simsilica.es.EntitySet;
  */
 public class MovementService implements Service {
 
+	EntityData ed;
 	EntitySet entities;
 	@Override
 	public void initialize(Game game) {
-		entities = game.getEntityData().getEntities(Position.class, Velocity.class);
+		ed = game.getEntityData();
+		entities = ed.getEntities(Position.class, Velocity.class);
 	}
 
 	@Override
@@ -33,14 +35,11 @@ public class MovementService implements Service {
 
             Vector3f loc = pos.getLocation();
             Vector3f linear = vel.getLinear();
-            loc = loc.add( (float)(linear.x * tpf),
+            Vector3f newloc = loc.add( (float)(linear.x * tpf),
                            (float)(linear.y * tpf),
                            (float)(linear.z * tpf) );
 
-            if (loc.x > ViewService.WIDTH || loc.z > ViewService.HEIGHT || loc.x < 0 || loc.z < 0) {
-            	e.set(new Decay(0));
-            }
-            e.set(new Position(loc, null));
+            e.set(new Position(newloc, null));
         }
 	}
 

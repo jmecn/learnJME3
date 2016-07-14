@@ -20,6 +20,10 @@ public class AoI implements EntityComponent {
 		return radius;
 	}
 	
+	public float getRadiusSquare() {
+		return radius * radius;
+	}
+	
 	public String toString() {
 		return "AoI["+ radius+ "]";
 	}

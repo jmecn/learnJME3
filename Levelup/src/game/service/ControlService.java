@@ -1,6 +1,5 @@
 package game.service;
 
-import game.components.Decay;
 import game.components.Model;
 import game.components.Position;
 import game.components.Target;
@@ -8,7 +7,6 @@ import game.components.Velocity;
 import game.core.Game;
 import game.core.Service;
 
-import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -18,12 +16,11 @@ import java.awt.event.MouseMotionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
-import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
+import com.simsilica.es.Filters;
 
 /**
  * 用户控制服务
@@ -49,8 +46,9 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	public void initialize(Game game) {
 		this.game = game;
 		ed = game.getEntityData();
-		entities = ed.getEntities(Model.class, Position.class);
-
+		entities = ed.getEntities(Filters.fieldEquals(Model.class, "name", Model.PLAYER),
+				Model.class, Position.class);
+		
 		ViewService view = game.getService(ViewService.class);
 		if (view != null) {
 			view.addKeyListener(this);
@@ -62,10 +60,9 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	@Override
 	public void update(long time) {
 		if (zPressed) {
-			game.getFactory().createPlayer(360, 360);
+			game.getFactory().createBad(720, 360);
 		}
 		if (xPressed) {
-			game.getFactory().createBad(720, 360);
 		}
 	}
 
@@ -122,17 +119,16 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	public void mousePressed(MouseEvent e) {
 		switch (e.getButton()) {
 		case MouseEvent.BUTTON1: {// 左键
-			game.getFactory().createPlayer(e.getX(), e.getY());
+			game.getFactory().createSpawnPoint(e.getX(), e.getY());
 			lPressed = true;
 			break;
 		}
 		case MouseEvent.BUTTON2: {// 中键
-			setTarget(e.getX(), e.getY());
-			game.getFactory().createTarget(e.getX(), e.getY());
 			break;
 		}
 		case MouseEvent.BUTTON3: {// 右键
-			game.getFactory().createBad(e.getX(), e.getY());
+			setTarget(e.getX(), e.getY());
+			game.getFactory().createTarget(e.getX(), e.getY());
 			rPressed = true;
 			break;
 		}
@@ -159,23 +155,31 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if (lPressed) {
-			game.getFactory().createPlayer(e.getX(), e.getY());
+			game.getFactory().createSpawnPoint(e.getX(), e.getY());
 		}
 		if (rPressed) {
-			game.getFactory().createBad(e.getX(), e.getY());
+			setTarget(e.getX(), e.getY());
+			game.getFactory().createTarget(e.getX(), e.getY());
 		}
 	}
 
 	@Override
-	public void mouseMoved(MouseEvent e) {}
+	public void mouseMoved(MouseEvent e) {
+		setTarget(e.getX(), e.getY());
+	}
 
 	public void setTarget(int x, int z) {
 		entities.applyChanges();
 		for(Entity e : entities) {
-			String name = e.get(Model.class).getName();
-			if (!Model.TARGET.equals(name)) {
-				ed.setComponent(e.getId(),
-						new Target(new Vector3f(x, 0, z)));
+			Vector3f target = new Vector3f(x, 0, z);
+			Vector3f loc = e.get(Position.class).getLocation();
+			
+			if (loc.distanceSquared(target) >= 64) {
+				Vector3f v = target.subtract(loc);
+				v.normalizeLocal().multLocal(100);
+				ed.setComponents(e.getId(), new Velocity(v));
+			} else {
+				ed.removeComponent(e.getId(), Velocity.class);
 			}
 		}
 	}
