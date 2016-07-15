@@ -1,6 +1,7 @@
 package game.core;
 
 import game.components.AoI;
+import game.components.CollisionShape;
 import game.components.Decay;
 import game.components.Model;
 import game.components.Position;
@@ -36,8 +37,9 @@ public class EntityFactory {
 	public EntityId createPlayer(float x, float z) {
 		EntityId player = ed.createEntity();
 		ed.setComponents(player,
-				new Model(Model.PLAYER, ColorRGBA.Green, new Circle(10)),
-				new Position(new Vector3f(540, 0, 360), null));
+				new Model(Model.PLAYER, ColorRGBA.Green),
+				new Position(new Vector3f(540, 0, 360), null),
+				new CollisionShape(10));
 		
 		log.info("创建玩家实体:" + x + ", " + z);
 		return player;
@@ -46,10 +48,11 @@ public class EntityFactory {
 	public EntityId createBad(float x, float z) {
 		EntityId id = ed.createEntity();
 		ed.setComponents(id,
-				new Model(Model.BAD, ColorRGBA.randomColor(), new Box(14, 14)),
+				new Model(Model.BAD, ColorRGBA.randomColor()),
 				new Position(new Vector3f(x, 0, z), null),
 				new Velocity(randomDirection().mult(15)),
-				new AoI(150));
+				new AoI(100),
+				new CollisionShape(1+FastMath.rand.nextFloat()*20));
 		
 		log.info("创建坏人实体:" + x + ", " + z);
 		return id;
@@ -58,7 +61,7 @@ public class EntityFactory {
 	public void createTarget(float x, float z) {
 		EntityId target = ed.createEntity();
 		ed.setComponents(target,
-				new Model(Model.TARGET, ColorRGBA.Blue, new Box(5, 5)),
+				new Model(Model.TARGET, ColorRGBA.Blue),
 				new Position(new Vector3f(x, 0, z), null),
 				new Decay(100));// 目标点在屏幕上出现100毫秒，然后消失。
 		
@@ -68,10 +71,10 @@ public class EntityFactory {
 	public EntityId createSpawnPoint(float x, float z) {
 		EntityId respawn = ed.createEntity();
 		ed.setComponents(respawn, 
-				new Model(Model.RESPAWN_POINT, ColorRGBA.DarkGray, new Cross()),
+				new Model(Model.RESPAWN_POINT, ColorRGBA.DarkGray),
 				new Position(new Vector3f(x, 0, z), null),
 				new SpawnPoint(10), 
-				new AoI(200));
+				new AoI(250));
 		
 		log.info("创建一个刷怪点:" + x + ", " + z);
 		

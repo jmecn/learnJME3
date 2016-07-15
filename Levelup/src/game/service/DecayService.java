@@ -23,12 +23,10 @@ public class DecayService implements Service {
 	private EntityData ed;
 	private EntitySet decaying;
 
-	public DecayService() {
-	}
-
 	public void initialize(Game game) {
 		this.ed = game.getEntityData();
 		decaying = ed.getEntities(Decay.class);
+		
 	}
 
 	public void update(long gameTime) {

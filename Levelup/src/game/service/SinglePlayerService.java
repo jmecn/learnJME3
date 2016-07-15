@@ -62,6 +62,12 @@ public class SinglePlayerService implements Service {
 			state = GameState.Playing;
 			break;
 		case Playing:
+			if (players.applyChanges()) {
+				if (players.getRemovedEntities().size() > 0) {
+					// 玩家被吃了。。
+					state = GameState.Death;
+				}
+			}
 			break;
 		case Death :
 			break;
@@ -85,7 +91,7 @@ public class SinglePlayerService implements Service {
 		game.getFactory().createPlayer(540, 360);
 		
 		// 创建刷怪点
-		for(int i=0; i<10; i++) {
+		for(int i=0; i<13; i++) {
 			int x = rand.nextInt(ViewService.WIDTH);
 			int y = rand.nextInt(ViewService.HEIGHT);
 			

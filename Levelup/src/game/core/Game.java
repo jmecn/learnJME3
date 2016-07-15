@@ -41,10 +41,11 @@ public class Game {
 		services.add(new EntityDataService());
 		services.add(new ControlService());
 		services.add(new SinglePlayerService());
-		services.add(new SpawnService());
 		services.add(new AiService());
 		services.add(new MovementService());
-		services.add(new BoundaryService(5));
+		services.add(new CollisionService());
+		services.add(new BoundaryService(20));
+		services.add(new SpawnService());
 		services.add(new DecayService());
 		services.add(new ViewService());
 		

@@ -26,6 +26,14 @@ public class SpawnPoint implements EntityComponent {
 	private long start;
 	private long delta;
 
+	public SpawnPoint(final int maximum, final int current, long start, long delta) {
+		this.maximum = maximum;
+		this.current = current;
+		
+		this.start = start;
+		this.delta = delta;
+	}
+	
 	public SpawnPoint(final int maximum, final int current, long deltaMillis) {
 		this.maximum = maximum;
 		this.current = current;
@@ -61,6 +69,14 @@ public class SpawnPoint implements EntityComponent {
 	
 	public int getCurrentCount() {
 		return current;
+	}
+	
+	public long getStartTime() {
+		return start;
+	}
+	
+	public long getDeltaTime() {
+		return delta;
 	}
 	
 	public boolean isFull() {

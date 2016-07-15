@@ -1,15 +1,11 @@
 package game.components;
 
-import game.core.graphics.Box;
-import game.core.graphics.Shape;
-
 import com.jme3.math.ColorRGBA;
 import com.simsilica.es.EntityComponent;
 
 public class Model implements EntityComponent {
 	private final String name;
 	private final ColorRGBA color;
-	private final Shape shape;
 	
 	public final static String PLAYER = "player";// Íæ¼Ò
 	public final static String BAD = "bad";// »µÈË
@@ -19,13 +15,6 @@ public class Model implements EntityComponent {
 	public Model(String name, ColorRGBA color) {
 		this.name = name;
 		this.color = color;
-		this.shape = new Box();
-	}
-	
-	public Model(String name, ColorRGBA color, Shape shape) {
-		this.name = name;
-		this.color = color;
-		this.shape = shape;
 	}
 	
 	public String getName() {
@@ -36,8 +25,8 @@ public class Model implements EntityComponent {
 		return color;
 	}
 	
-	public Shape getShape() {
-		return shape;
+	@Override
+	public String toString() {
+		return "Model[Name=" + name + ", Color=" + color + "]";
 	}
-	
 }

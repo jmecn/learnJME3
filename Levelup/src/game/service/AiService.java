@@ -1,6 +1,9 @@
 package game.service;
 
 import game.components.AoI;
+import game.components.CollisionShape;
+import game.components.CoolDown;
+import game.components.Damage;
 import game.components.Model;
 import game.components.Position;
 import game.components.Velocity;
@@ -10,6 +13,7 @@ import game.core.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
@@ -29,10 +33,10 @@ public class AiService implements Service {
 		ed = game.getEntityData();
 		
 		entities = ed.getEntities(Filters.fieldEquals(Model.class, "name",
-				Model.BAD), Model.class, Position.class, AoI.class);
+				Model.BAD), Model.class, Position.class, AoI.class, CollisionShape.class);
 		
 		players = ed.getEntities(Filters.fieldEquals(Model.class, "name",
-				Model.PLAYER), Model.class, Position.class);
+				Model.PLAYER), Model.class, Position.class, CollisionShape.class);
 	}
 
 	@Override
@@ -60,15 +64,29 @@ public class AiService implements Service {
 			}
 			
 			// 没有找到距离比较近的玩家，保持原状。
-			if (target == null) {
-				continue;
-			} else {
-				// 设置移动速度
-				Vector3f v = target.get(Position.class).getLocation().subtract(loc);
-				v.normalizeLocal().multLocal(20);
-				e.set(new Velocity(v));
+			if (target != null) {
 				
-				log.info("发现玩家" + target);
+				// 判断是否在攻击距离内
+				if (minDist >= 100) {
+					// 设置移动速度
+					Vector3f v = target.get(Position.class).getLocation().subtract(loc);
+					v.normalizeLocal().multLocal(20);
+					e.set(new Velocity(v));
+				} else {
+					// 不再追击玩家，开始攻击
+					ed.removeComponent(e.getId(), Velocity.class);
+					
+					// 计算攻击冷却
+					CoolDown cd = ed.getComponent(e.getId(), CoolDown.class);
+					if (cd == null || cd.getPercent() >= 1.0) {
+						
+						// TODO 这里应该要计算攻击的伤害值
+						int delta = 1 + FastMath.rand.nextInt(5);
+						
+						target.set(new Damage(delta, e.getId()));
+						e.set(new CoolDown(1000));
+					}
+				}
 			}
 		}
 	}
@@ -78,6 +96,8 @@ public class AiService implements Service {
 		entities.release();
 		entities = null;
 
+		players.release();
+		players = null;
 	}
 
 }
