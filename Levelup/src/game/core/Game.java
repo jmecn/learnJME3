@@ -29,6 +29,8 @@ public class Game {
 	private Logger log = LoggerFactory.getLogger(Game.class);
 	
 	private boolean started;
+	private boolean enabled;
+	
 	private ScheduledExecutorService executor;
 	private ServiceRunnable serviceRunner;
 	private Timer timer;
@@ -112,6 +114,7 @@ public class Game {
 		executor.scheduleAtFixedRate(serviceRunner, 0, 62, TimeUnit.MILLISECONDS);
 		started = true;
 		
+		enabled = true;
 		log.info("开始游戏");
 	}
 
@@ -126,6 +129,17 @@ public class Game {
 			public void windowClosing(WindowEvent e) {
 				stop();
 			}
+
+			@Override
+			public void windowActivated(WindowEvent arg0) {
+				enabled = true;
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent arg0) {
+				enabled = false;
+			}
+			
 		});
 		frame.addKeyListener(getService(ControlService.class));
 		
@@ -164,7 +178,7 @@ public class Game {
 			s.terminate(this);
 		}
 		started = false;
-		
+		enabled = false;
 		log.info("游戏结束");
 		
 		System.exit(0);
@@ -200,8 +214,11 @@ public class Game {
     
 	private class ServiceRunnable implements Runnable {
 		public void run() {
+			
 			try {
 				timer.update();
+				if (!enabled)
+					return;
 				runServices(timer.getTimePerFrame());
 			} catch (RuntimeException e) {
 				log.error("服务运行发生异常", e);
