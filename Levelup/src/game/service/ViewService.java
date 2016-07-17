@@ -41,11 +41,19 @@ public class ViewService extends Canvas implements Service {
 
 	private EntityData ed;
 	
+	private Entity player;
+	private boolean dirty;
+	
 	// 模型
 	private EntitySet models;
 	
 	public ViewService() {
 		this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+	}
+	
+	public void setPlayer(Entity player) {
+		this.player = player;
+		dirty = true;
 	}
 
 	@Override
@@ -101,10 +109,14 @@ public class ViewService extends Canvas implements Service {
 		gBuffer.drawString("实体数量:" + count, 10, 23);
 		// 重绘
 		paintText();
-		//paintPlayerStatus();
+		
+		if (dirty) {
+			paintPlayerStatus();
+		}
 		repaint();
 	}
 
+	
 	@Override
 	public void terminate(Game game) {
 		models.release();
@@ -123,6 +135,7 @@ public class ViewService extends Canvas implements Service {
 	}
 	
 	private void paintPlayerStatus() {
+		dirty = false;
 		// 分别画血条、蓝条、绿条、经验条的边框
 		float hpPct = 1.0f;
 		float mpPct = 1.0f;

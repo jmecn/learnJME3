@@ -7,9 +7,6 @@ import game.components.Model;
 import game.components.Position;
 import game.components.SpawnPoint;
 import game.components.Velocity;
-import game.core.graphics.Box;
-import game.core.graphics.Circle;
-import game.core.graphics.Cross;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

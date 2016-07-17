@@ -43,8 +43,7 @@ public class SinglePlayerService implements Service {
 		this.game = game;
 		ed = game.getEntityData();
 		
-		players = ed.getEntities(Filters.fieldEquals(Model.class, "name",
-				Model.PLAYER), Model.class);
+		players = ed.getEntities(Filters.fieldEquals(Model.class, "name", Model.PLAYER), Model.class);
 		
 	}
 

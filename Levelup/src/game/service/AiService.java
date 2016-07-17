@@ -45,16 +45,26 @@ public class AiService implements Service {
 		players.applyChanges();
 		
 		for (Entity e : entities) {
+			
+			// 视野范围
+			float aoiRadius = e.get(AoI.class).getRadius();
+			
 			Vector3f loc = e.get(Position.class).getLocation();
-			float aoiDist = e.get(AoI.class).getRadiusSquare();
+			float r1 = e.get(CollisionShape.class).getRadius();
+			float meleeRange = 10;// 怪物的近战攻击距离
 
 			// 寻找离自己距离最近的玩家
 			float minDist = Float.MAX_VALUE;
 			Entity target = null;
 			for(Entity p : players) {
 				Vector3f pLoc = p.get(Position.class).getLocation();
+				float r2 = p.get(CollisionShape.class).getRadius();
+				
+				float threshold = aoiRadius + r1 + r2;
+				threshold *= threshold;
+				
 				float dist = loc.distanceSquared(pLoc);
-				if (dist > aoiDist) continue;
+				if (dist > threshold) continue;
 
 				// 记录距离最近的玩家
 				if (dist < minDist) {
@@ -63,11 +73,17 @@ public class AiService implements Service {
 				}
 			}
 			
-			// 没有找到距离比较近的玩家，保持原状。
+			// 找到目标，准备靠近玩家攻击！
 			if (target != null) {
+				Vector3f pLoc = target.get(Position.class).getLocation();
+				float r2 = target.get(CollisionShape.class).getRadius();
 				
+				float threshold = meleeRange + r1 + r2;
+				threshold *= threshold;
+				
+				float dist = loc.distanceSquared(pLoc);
 				// 判断是否在攻击距离内
-				if (minDist >= 100) {
+				if (dist >= threshold) {
 					// 设置移动速度
 					Vector3f v = target.get(Position.class).getLocation().subtract(loc);
 					v.normalizeLocal().multLocal(20);

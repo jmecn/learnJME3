@@ -137,19 +137,13 @@ public class SpawnService implements Service {
 
 		/**
 		 * 下面这个刷怪策略，适用于ARPG游戏，当玩家靠近刷怪点的时候才会刷怪。
-
+		 */
 		List<Entity> activeSpawn = getActiveSpawnPoint();
 		spawnCount = activeSpawn.size();
 		if (spawnCount > 0) {
 			// 随机挑一个刷怪点
 			int index = FastMath.rand.nextInt(spawnCount);
 			Entity e = activeSpawn.get(index);
-			spawn(e);
-		}
-		 *
-		 */
-		
-		for(Entity e : spawnPoints) {
 			spawn(e);
 		}
 	}

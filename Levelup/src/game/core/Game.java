@@ -45,7 +45,7 @@ public class Game {
 		services.add(new SinglePlayerService());
 		services.add(new AiService());
 		services.add(new MovementService());
-		services.add(new CollisionService());
+		//services.add(new CollisionService());
 		services.add(new BoundaryService(20));
 		services.add(new SpawnService());
 		services.add(new DecayService());
