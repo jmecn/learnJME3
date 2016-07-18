@@ -1,8 +1,14 @@
 package game.service;
 
 import game.components.CollisionShape;
+import game.components.Exp;
+import game.components.Health;
+import game.components.Level;
+import game.components.Mana;
 import game.components.Model;
 import game.components.Position;
+import game.components.Stamina;
+import game.components.Velocity;
 import game.core.Game;
 import game.core.Service;
 
@@ -19,6 +25,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
+import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
 
 /**
@@ -41,25 +48,27 @@ public class ViewService extends Canvas implements Service {
 
 	private EntityData ed;
 	
-	private Entity player;
-	private boolean dirty;
+	private EntityId player;
 	
 	// 模型
 	private EntitySet models;
+	private EntitySet velocities;
+	private EntitySet hpBars;
 	
 	public ViewService() {
 		this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 	}
 	
-	public void setPlayer(Entity player) {
+	public void setPlayer(EntityId player) {
 		this.player = player;
-		dirty = true;
 	}
 
 	@Override
 	public void initialize(Game game) {
 		ed = game.getEntityData();
 		models = ed.getEntities(Position.class, Model.class, CollisionShape.class);
+		hpBars = ed.getEntities(Position.class, Health.class, CollisionShape.class);
+		velocities = ed.getEntities(Position.class, Velocity.class);
 		
 		log.info("Canvas准备完毕");
 	}
@@ -77,6 +86,20 @@ public class ViewService extends Canvas implements Service {
 		gBuffer.fillRect(0, 0, WIDTH, HEIGHT);
 		
 		// 更新data
+		
+		// 绘制方向
+		velocities.applyChanges();
+		for (Entity e : velocities) {
+			Position p = e.get(Position.class);
+			Vector3f loc = p.getLocation();
+			Velocity v = e.get(Velocity.class);
+			Vector3f end = loc.add(v.getLinear());
+			
+			gBuffer.setColor(Color.black);
+			gBuffer.drawLine((int)loc.x, (int)loc.z, (int)end.x, (int)end.z);
+		}
+		
+		// 绘制模型
 		models.applyChanges();
 		Entity[] ary = models.toArray(new Entity[]{});
 		for (Entity e : ary) {
@@ -104,15 +127,32 @@ public class ViewService extends Canvas implements Service {
 					(int)radius * 2);
 		}
 		
+		// 绘制生命条
+		hpBars.applyChanges();
+		for (Entity e : hpBars) {
+			Position p = e.get(Position.class);
+			Vector3f loc = p.getLocation();
+			Health hp = e.get(Health.class);
+			float radius = e.get(CollisionShape.class).getRadius();
+
+			
+			int length = (int)(radius * 2 * hp.getPercent());
+			int maxLength = (int)(radius * 2);
+			int x = (int)(loc.x - radius);
+			int y = (int)(loc.z - radius - 5);
+			
+			gBuffer.setColor(Color.red);
+			gBuffer.fillRect(x, y, maxLength, 2);
+			gBuffer.setColor(Color.green);
+			gBuffer.fillRect(x, y, length, 2);
+		}
+		
 		int count = models.size();
 		gBuffer.setColor(Color.black);
-		gBuffer.drawString("实体数量:" + count, 10, 23);
+		gBuffer.drawString("实体数量:" + count, 10, 223);
 		// 重绘
 		paintText();
-		
-		if (dirty) {
-			paintPlayerStatus();
-		}
+		paintPlayerStatus();
 		repaint();
 	}
 
@@ -121,6 +161,12 @@ public class ViewService extends Canvas implements Service {
 	public void terminate(Game game) {
 		models.release();
 		models = null;
+		
+		velocities.release();
+		velocities = null;
+		
+		hpBars.release();
+		hpBars = null;
 	}
 
 	/**
@@ -135,12 +181,19 @@ public class ViewService extends Canvas implements Service {
 	}
 	
 	private void paintPlayerStatus() {
-		dirty = false;
 		// 分别画血条、蓝条、绿条、经验条的边框
-		float hpPct = 1.0f;
-		float mpPct = 1.0f;
-		float spPct = 1.0f;
-		float expPct = 0.35f;
+		float hpPct = 0f;
+		float mpPct = 0f;
+		float spPct = 0f;
+		float expPct = 0f;
+		int lvl = 1;
+		if (player != null) {
+			lvl = ed.getComponent(player, Level.class).getLv();
+			hpPct = ed.getComponent(player, Health.class).getPercent();
+			mpPct = ed.getComponent(player, Mana.class).getPercent();
+			spPct = ed.getComponent(player, Stamina.class).getPercent();
+			expPct = ed.getComponent(player, Exp.class).getPercent();
+		}
 		
 		// HP
 		gBuffer.setColor(Color.black);
@@ -169,6 +222,12 @@ public class ViewService extends Canvas implements Service {
 		gBuffer.setColor(Color.green);
 		gBuffer.fillRect(42, 46, (int)(spPct * 147), 12);
 		
+		// 等级
+		gBuffer.setColor(Color.black);
+		
+		String lvlStr = String.format("等级:%d  %.2f%%", lvl, expPct*100);
+		gBuffer.drawString(lvlStr, 10, 702);
+		
 		// EXP 经验值
 		gBuffer.setColor(Color.black);
 		gBuffer.drawRoundRect(10, 707, 1060, 8, 3, 3);
@@ -176,6 +235,13 @@ public class ViewService extends Canvas implements Service {
 		gBuffer.fillRect(11, 708, 1059, 7);
 		gBuffer.setColor(Color.cyan);
 		gBuffer.fillRect(12, 709, (int)(expPct * 1057), 5);
+		
+		// 画19个短竖线，把经验条分成格子
+		gBuffer.setColor(Color.black);
+		float len = 1057.0f/20;
+		for(int i=1; i<20; i++) {
+			gBuffer.drawLine((int)(10+i*len), 707, (int)(10+i*len), 714);
+		}
 
 	}
 	/**

@@ -9,6 +9,7 @@ public class Model implements EntityComponent {
 	
 	public final static String PLAYER = "player";// 玩家
 	public final static String BAD = "bad";// 坏人
+	public static final String BULLET = "Bullet";// 子弹
 	public final static String TARGET = "target";// 追逐目标
 	public final static String RESPAWN_POINT = "respawn_point";// 刷怪点
 	

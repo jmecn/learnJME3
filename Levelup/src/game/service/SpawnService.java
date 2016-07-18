@@ -32,7 +32,7 @@ import com.simsilica.es.Filters;
  */
 public class SpawnService implements Service {
 
-	private Logger log = LoggerFactory.getLogger(SpawnService.class);
+	static Logger log = LoggerFactory.getLogger(SpawnService.class);
 
 	private Game game;
 	private EntityData ed;
@@ -66,7 +66,7 @@ public class SpawnService implements Service {
 				Model.class);
 		
 		childMobs = ed.getEntities(BornPoint.class);
-		movingMobs = ed.getEntities(BornPoint.class, Position.class, Velocity.class);
+		movingMobs = ed.getEntities(BornPoint.class, Position.class);
 	}
 
 	private int time = 0;
@@ -109,7 +109,6 @@ public class SpawnService implements Service {
 				long delta = point.getDeltaTime();
 				
 				ed.setComponent(id, new SpawnPoint(max, count, start, delta));
-				log.info("死亡，更新刷新点：" + id);
 			}
 		}
 	}
@@ -237,13 +236,12 @@ public class SpawnService implements Service {
 			Vector3f loc2 = e.get(Position.class).getLocation();
 			
 			if (loc1.distanceSquared(loc2) >= radius * radius) {
-				Velocity v = e.get(Velocity.class);
-				if (v != null) {
-					Vector3f linear = loc1.subtract(loc2);
-					linear.normalizeLocal().multLocal(15);
+				Vector3f linear = loc1.subtract(loc2);
+				linear.normalizeLocal().multLocal(15);
 
-					ed.setComponent(e.getId(), new Velocity(linear));
-				}
+				ed.setComponent(e.getId(), new Velocity(linear));
+			} else {
+				//ed.removeComponent(e.getId(), Velocity.class);
 			}
 		}
 	}

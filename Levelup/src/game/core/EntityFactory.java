@@ -3,10 +3,16 @@ package game.core;
 import game.components.AoI;
 import game.components.CollisionShape;
 import game.components.Decay;
+import game.components.Exp;
+import game.components.Health;
+import game.components.Level;
+import game.components.Mana;
 import game.components.Model;
 import game.components.Position;
 import game.components.SpawnPoint;
+import game.components.Stamina;
 import game.components.Velocity;
+import game.service.LevelService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,27 +37,52 @@ public class EntityFactory {
 		this.ed = ed;
 	}
 	
-	public EntityId createPlayer(float x, float z) {
+	public EntityId createPlayer() {
 		EntityId player = ed.createEntity();
+		resetPlayer(player);
+		
+		log.info("创建玩家");
+		
+		return player;
+	}
+	
+	public void resetPlayer(EntityId player) {
 		ed.setComponents(player,
 				new Model(Model.PLAYER, ColorRGBA.Green),
 				new Position(new Vector3f(540, 0, 360), null),
-				new CollisionShape(10));
+				new CollisionShape(10),
+				// RPG数值
+				new Level(1),
+				new Health(100, 100),
+				new Mana(50, 50),
+				new Stamina(50, 50),
+				new Exp(0, LevelService.expTable[0]));
+	}
+	
+	public EntityId createBullet(Vector3f location, Vector3f velocity) {
+		EntityId id = ed.createEntity();
+		ed.setComponents(id,
+				new Model(Model.BULLET, ColorRGBA.Black),
+				new Position(location, null),
+				new Velocity(velocity),
+				new CollisionShape(2),
+				new Decay(5000));
 		
-		log.info("创建玩家实体:" + x + ", " + z);
-		return player;
+		return id;
 	}
 
 	public EntityId createBad(float x, float z) {
 		EntityId id = ed.createEntity();
+		float rand = FastMath.rand.nextFloat()*10;
+		
 		ed.setComponents(id,
 				new Model(Model.BAD, ColorRGBA.randomColor()),
 				new Position(new Vector3f(x, 0, z), null),
-				new Velocity(randomDirection().mult(15)),
 				new AoI(100),
-				new CollisionShape(1+FastMath.rand.nextFloat()*20));
+				new CollisionShape(10+FastMath.rand.nextFloat()*10),
+				new Health(10+rand, 10+rand),
+				new Exp(10+rand, 10+rand));
 		
-		log.info("创建坏人实体:" + x + ", " + z);
 		return id;
 	}
 	
@@ -61,8 +92,6 @@ public class EntityFactory {
 				new Model(Model.TARGET, ColorRGBA.Blue),
 				new Position(new Vector3f(x, 0, z), null),
 				new Decay(100));// 目标点在屏幕上出现100毫秒，然后消失。
-		
-		log.info("创建一个目标实体:" + x + ", " + z);
 	}
 	
 	public EntityId createSpawnPoint(float x, float z) {
@@ -72,8 +101,6 @@ public class EntityFactory {
 				new Position(new Vector3f(x, 0, z), null),
 				new SpawnPoint(10), 
 				new AoI(250));
-		
-		log.info("创建一个刷怪点:" + x + ", " + z);
 		
 		return respawn;
 	}

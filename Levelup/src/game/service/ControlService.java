@@ -2,6 +2,7 @@ package game.service;
 
 import game.components.Model;
 import game.components.Position;
+import game.components.Potion;
 import game.components.Velocity;
 import game.core.Game;
 import game.core.Service;
@@ -40,6 +41,9 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 
 	private boolean lPressed = false;// 鼠标左键
 	private boolean rPressed = false;// 鼠标右键
+	// 鼠标左键点击的坐标
+	private int lX = 0;
+	private int lY = 0;
 	
 	@Override
 	public void initialize(Game game) {
@@ -56,11 +60,31 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 		}
 	}
 
+	// 攻击冷却时间
+	long cdTime = 0;
 	@Override
 	public void update(long time) {
+		cdTime += time;
 		if (zPressed) {
 		}
 		if (xPressed) {
+		}
+		
+		if (lPressed) {
+			// 1秒攻击间隔
+			// TODO 此处应该根据攻速来判断时间
+			if (cdTime >= 1000000000) {
+				cdTime = 0;
+				for(Entity e : entities) {
+					Position p = e.get(Position.class);
+					Vector3f loc = p.getLocation();
+					Vector3f target = new Vector3f(lX, 0, lY);
+					Vector3f v = target.subtract(loc).normalize();
+					v.multLocal(60);
+					
+					game.getFactory().createBullet(loc, v);
+				}
+			}
 		}
 	}
 
@@ -79,9 +103,11 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	public void keyPressed(KeyEvent e) {
 		switch(e.getKeyCode()) {
 		case KeyEvent.VK_X:
-			xPressed = true;break;
+			xPressed = true;
+			break;
 		case KeyEvent.VK_Z:
-			zPressed = true;break;
+			zPressed = true;
+			break;
 		}
 		
 		log.info("按键:" + e.getKeyChar());
@@ -98,6 +124,10 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 			break;
 		case KeyEvent.VK_Z:
 			zPressed = false;
+			break;
+		case KeyEvent.VK_1:
+			// 吃红药
+			eatPotion();
 			break;
 		}
 	}
@@ -119,7 +149,8 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	public void mousePressed(MouseEvent e) {
 		switch (e.getButton()) {
 		case MouseEvent.BUTTON1: {// 左键
-			game.getFactory().createSpawnPoint(e.getX(), e.getY());
+			lX = e.getX();
+			lY = e.getY();
 			lPressed = true;
 			break;
 		}
@@ -158,7 +189,8 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if (lPressed) {
-			game.getFactory().createSpawnPoint(e.getX(), e.getY());
+			lX = e.getX();
+			lY = e.getY();
 		}
 		if (rPressed) {
 			setTarget(e.getX(), e.getY());
@@ -169,6 +201,12 @@ public class ControlService implements KeyListener, MouseMotionListener, MouseLi
 	public void mouseMoved(MouseEvent e) {
 	}
 
+	public void eatPotion() {
+		entities.applyChanges();
+		for(Entity e:entities) {
+			e.set(new Potion(25));
+		}
+	}
 	public void setTarget(int x, int z) {
 		entities.applyChanges();
 		for(Entity e : entities) {

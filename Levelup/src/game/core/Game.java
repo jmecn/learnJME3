@@ -41,15 +41,19 @@ public class Game {
 	public Game() {
 		// 添加游戏服务
 		services.add(new EntityDataService());
+		services.add(new ViewService());
 		services.add(new ControlService());
 		services.add(new SinglePlayerService());
-		services.add(new AiService());
+		services.add(new DamageService());
+		services.add(new HealService());
 		services.add(new MovementService());
-		//services.add(new CollisionService());
+		services.add(new CollisionService());
 		services.add(new BoundaryService(20));
+		services.add(new LootService());
+		services.add(new LevelService());
 		services.add(new SpawnService());
+		services.add(new AiService());
 		services.add(new DecayService());
-		services.add(new ViewService());
 		
 		// 初始化定时器
 		timer = new Timer();
@@ -89,6 +93,17 @@ public class Game {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * 移除服务
+	 * @param service
+	 */
+	public void removeService(Service service) {
+		if (services.contains(service)) {
+			service.terminate(this);
+			services.remove(service);
+		}
 	}
 
 	/**

@@ -35,7 +35,6 @@ public class DecayService implements Service {
 			for (Entity e : decaying) {
 				Decay decay = e.get(Decay.class);
 				if( decay.getPercent() >= 1.0 ) {
-					log.info("าฦณýสตฬๅ:" + e);
 	                ed.removeEntity(e.getId());
 	            }
 			}
