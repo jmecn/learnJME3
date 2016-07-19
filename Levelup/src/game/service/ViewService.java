@@ -27,6 +27,7 @@ import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
+import com.simsilica.es.Name;
 
 /**
  * 显示服务。 继承Canvas类，用于绘制UI。
@@ -53,6 +54,7 @@ public class ViewService extends Canvas implements Service {
 	// 模型
 	private EntitySet models;
 	private EntitySet velocities;
+	private EntitySet names;
 	private EntitySet hpBars;
 	
 	public ViewService() {
@@ -69,6 +71,7 @@ public class ViewService extends Canvas implements Service {
 		models = ed.getEntities(Position.class, Model.class, CollisionShape.class);
 		hpBars = ed.getEntities(Position.class, Health.class, CollisionShape.class);
 		velocities = ed.getEntities(Position.class, Velocity.class);
+		names = ed.getEntities(Position.class, Name.class, CollisionShape.class);
 		
 		log.info("Canvas准备完毕");
 	}
@@ -95,8 +98,8 @@ public class ViewService extends Canvas implements Service {
 			Velocity v = e.get(Velocity.class);
 			Vector3f end = loc.add(v.getLinear());
 			
-			gBuffer.setColor(Color.black);
-			gBuffer.drawLine((int)loc.x, (int)loc.z, (int)end.x, (int)end.z);
+			//gBuffer.setColor(Color.black);
+			//gBuffer.drawLine((int)loc.x, (int)loc.z, (int)end.x, (int)end.z);
 		}
 		
 		// 绘制模型
@@ -147,6 +150,19 @@ public class ViewService extends Canvas implements Service {
 			gBuffer.fillRect(x, y, length, 2);
 		}
 		
+		
+		names.applyChanges();
+		for(Entity e : names) {
+			Vector3f loc = e.get(Position.class).getLocation();
+			String name = e.get(Name.class).getName();
+			float radius = e.get(CollisionShape.class).getRadius();
+			
+			int x = (int)(loc.x - radius);
+			int y = (int)(loc.z + radius + 16);
+			gBuffer.setColor(Color.black);
+			gBuffer.drawString(name, x, y);
+		}
+		
 		int count = models.size();
 		gBuffer.setColor(Color.black);
 		gBuffer.drawString("实体数量:" + count, 10, 223);
@@ -167,6 +183,9 @@ public class ViewService extends Canvas implements Service {
 		
 		hpBars.release();
 		hpBars = null;
+		
+		names.release();
+		names = null;
 	}
 
 	/**
@@ -174,10 +193,10 @@ public class ViewService extends Canvas implements Service {
 	 */
 	private void paintText() {
 		gBuffer.setColor(Color.black);
-		gBuffer.drawString("操作说明:", 0, 613);
-		gBuffer.drawString("鼠标左键:在指定位置创建刷怪点", 0, 626);
-		gBuffer.drawString("鼠标右键:控制玩家移动", 0, 639);
-		gBuffer.drawString("ESC:退出程序", 0, 652);
+		gBuffer.drawString("操作说明:", 10, 613);
+		gBuffer.drawString("鼠标左键:攻击", 10, 626);
+		gBuffer.drawString("鼠标右键:控制玩家移动", 10, 639);
+		gBuffer.drawString("ESC:退出程序", 10, 652);
 	}
 	
 	private void paintPlayerStatus() {

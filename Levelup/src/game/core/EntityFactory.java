@@ -22,6 +22,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
+import com.simsilica.es.Name;
 
 /**
  * 实体工厂，用来创建各种类型的实体
@@ -49,6 +50,7 @@ public class EntityFactory {
 	public void resetPlayer(EntityId player) {
 		ed.setComponents(player,
 				new Model(Model.PLAYER, ColorRGBA.Green),
+				new Name("Player"),
 				new Position(new Vector3f(540, 0, 360), null),
 				new CollisionShape(10),
 				// RPG数值
@@ -70,14 +72,19 @@ public class EntityFactory {
 		
 		return id;
 	}
+	
+	static String names[] = {"小独角兽", "蘑菇精", "兔妖"};
 
 	public EntityId createBad(float x, float z) {
 		EntityId id = ed.createEntity();
 		float rand = FastMath.rand.nextFloat()*10;
 		
+		int n = FastMath.rand.nextInt(3);
+		
 		ed.setComponents(id,
 				new Model(Model.BAD, ColorRGBA.randomColor()),
 				new Position(new Vector3f(x, 0, z), null),
+				new Name(names[n] + id.getId()),
 				new AoI(100),
 				new CollisionShape(10+FastMath.rand.nextFloat()*10),
 				new Health(10+rand, 10+rand),
@@ -109,7 +116,7 @@ public class EntityFactory {
 	 * 获得一个随机方向的初速度
 	 * @return
 	 */
-	private Vector3f randomDirection() {
+	protected Vector3f randomDirection() {
 		float theta = FastMath.rand.nextFloat() * FastMath.TWO_PI;
 		float x = FastMath.sin(theta);
 		float z = FastMath.cos(theta);
