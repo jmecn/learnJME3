@@ -1,6 +1,7 @@
 package game.service;
 
 import game.components.AoI;
+import game.components.BornPoint;
 import game.components.CollisionShape;
 import game.components.CoolDown;
 import game.components.Damage;
@@ -101,6 +102,30 @@ public class AiService implements Service {
 						
 						target.set(new Damage(delta, e.getId()));
 						e.set(new CoolDown(1000));
+					}
+				}
+			} else {
+				// 没有找到玩家，回家
+				BornPoint mother = ed.getComponent(e.getId(), BornPoint.class);
+				if (mother != null) {
+					Vector3f mLoc = mother.getLocation();
+					
+					float threshold = r1 + aoiRadius;
+					threshold *= threshold;
+					
+					float distSquared = mLoc.distanceSquared(loc);
+					
+					// 太远了，要回头
+					if (distSquared >= threshold) {
+						Vector3f linear = mLoc.subtract(loc);
+						linear.normalizeLocal().multLocal(15);
+	
+						ed.setComponent(e.getId(), new Velocity(linear));
+					} else {
+						// 已经回到出生点了，移除速度组件
+						if (distSquared <= r1 * r1) {
+							ed.removeComponent(e.getId(), Velocity.class);
+						}
 					}
 				}
 			}

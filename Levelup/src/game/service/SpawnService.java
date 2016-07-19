@@ -209,7 +209,9 @@ public class SpawnService implements Service {
 			float x = FastMath.sin(t) * r;
 			float y = FastMath.cos(t) * r;
 			
-			EntityId id = game.getFactory().createBad(loc.x+x, loc.z+y);
+			loc.addLocal(x, 0, y);
+			
+			EntityId id = game.getFactory().createBad(loc.x, loc.z);
 			
 			// 记录这个怪物的刷新点，当怪物消失后要通知这个刷怪点。
 			ed.setComponent(id, new BornPoint(loc, area));
@@ -229,20 +231,7 @@ public class SpawnService implements Service {
 	 */
 	private void goHome(Set<Entity> entities) {
 		for(Entity e : movingMobs) {
-			BornPoint mother = e.get(BornPoint.class);
-			float radius = mother.getMaxRadius();
-			
-			Vector3f loc1 = mother.getLocation();
-			Vector3f loc2 = e.get(Position.class).getLocation();
-			
-			if (loc1.distanceSquared(loc2) >= radius * radius) {
-				Vector3f linear = loc1.subtract(loc2);
-				linear.normalizeLocal().multLocal(15);
 
-				ed.setComponent(e.getId(), new Velocity(linear));
-			} else {
-				//ed.removeComponent(e.getId(), Velocity.class);
-			}
 		}
 	}
 
