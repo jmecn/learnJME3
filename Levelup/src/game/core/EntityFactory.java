@@ -50,7 +50,7 @@ public class EntityFactory {
 	public void resetPlayer(EntityId player) {
 		ed.setComponents(player,
 				new Model(Model.PLAYER, ColorRGBA.Green),
-				new Name("Player"),
+				new Name("Íæ¼Ò"),
 				new Position(new Vector3f(540, 0, 360), null),
 				new CollisionShape(10),
 				// RPGÊýÖµ

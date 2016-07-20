@@ -49,10 +49,10 @@ public class Game {
 		services.add(new MovementService());
 		services.add(new CollisionService());
 		services.add(new BoundaryService(20));
+		services.add(new AiService());
+		services.add(new SpawnService());
 		services.add(new LootService());
 		services.add(new LevelService());
-		services.add(new SpawnService());
-		services.add(new AiService());
 		services.add(new DecayService());
 		
 		// 初始化定时器

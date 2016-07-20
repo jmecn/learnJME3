@@ -13,6 +13,7 @@ import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
+import com.simsilica.es.Name;
 
 public class DamageService implements Service {
 
@@ -24,19 +25,23 @@ public class DamageService implements Service {
 	@Override
 	public void initialize(Game game) {
 		ed = game.getEntityData();
-		entities = ed.getEntities(Health.class, Damage.class);
+		entities = ed.getEntities(Health.class, Damage.class, Name.class);
 	}
 
 	@Override
 	public void update(long time) {
 		if (entities.applyChanges()) {
 			for (Entity e : entities) {
+				String name = e.get(Name.class).getName();
+				
 				Damage damage = e.get(Damage.class);
 				EntityId dealer = damage.getDealer();
 				float delta = damage.getDelta();
 				Health hp = e.get(Health.class);
 				
-				log.info(dealer.getId() + "攻击了" + e.getId().getId() + ", 造成了" + (int)delta + "点伤害.");
+				String dealerName = ed.getComponent(dealer, Name.class).getName();
+				
+				log.info(dealerName + "攻击了" + name + ", 造成了" + (int)delta + "点伤害.");
 				
 				// 死亡
 				if (delta > hp.getCurrentHp()) {
