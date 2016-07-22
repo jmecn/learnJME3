@@ -17,14 +17,18 @@ import com.simsilica.es.EntitySet;
  */
 public class MovementService implements Service {
 
-	EntityData ed;
-	EntitySet entities;
+	private EntityData ed;
+	private EntitySet entities;
 	@Override
 	public void initialize(Game game) {
 		ed = game.getEntityData();
+		// 只关心实体的位置和运动速度
 		entities = ed.getEntities(Position.class, Velocity.class);
 	}
 
+	/**
+	 * 新位置 = 旧位置 + 速度 * 时间;
+	 */
 	@Override
 	public void update(long time) {
 		float tpf = time / 1000000000f;

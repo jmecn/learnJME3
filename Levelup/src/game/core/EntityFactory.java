@@ -47,6 +47,9 @@ public class EntityFactory {
 		return player;
 	}
 	
+	/**
+	 * 初始化玩家数据
+	 */
 	public void resetPlayer(EntityId player) {
 		ed.setComponents(player,
 				new Model(Model.PLAYER, ColorRGBA.Green),
@@ -61,6 +64,12 @@ public class EntityFactory {
 				new Exp(0, LevelService.expTable[0]));
 	}
 	
+	/**
+	 * 创建子弹实体
+	 * @param location 子弹的初始位置
+	 * @param velocity 运动速度
+	 * @return
+	 */
 	public EntityId createBullet(Vector3f location, Vector3f velocity) {
 		EntityId id = ed.createEntity();
 		ed.setComponents(id,
@@ -73,8 +82,17 @@ public class EntityFactory {
 		return id;
 	}
 	
+	/**
+	 * 怪物的名字
+	 */
 	static String names[] = {"小独角兽", "蘑菇精", "兔妖"};
 
+	/**
+	 * 创建怪物实体
+	 * @param x
+	 * @param z
+	 * @return
+	 */
 	public EntityId createBad(float x, float z) {
 		EntityId id = ed.createEntity();
 		float rand = FastMath.rand.nextFloat()*10;
