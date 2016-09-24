@@ -8,6 +8,11 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 
+/**
+ * ≤‚ ‘TTF◊÷ÃÂ
+ * @author yanmaoyuan
+ *
+ */
 public class MyGame extends SimpleApplication {
 
 	@Override
