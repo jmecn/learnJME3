@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="assets"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-libraries"/>
+	<classpathentry kind="lib" path="jME-TrueTypeFont-v1.22.jar" sourcepath="D:/QQTalks/115050813/FileRecv/jME-TrueTypeFont-v1.22/jME-TrueTypeFont-1.22/src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
