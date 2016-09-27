@@ -1,6 +1,9 @@
 package jmecn.app;
 
+import com.jme3.app.DebugKeysAppState;
+import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.StatsAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
@@ -21,7 +24,9 @@ public class MyGame extends SimpleApplication {
 	Spatial terrain;
 
 	CharacterControl player;
-	
+	public MyGame() {
+		super(new DebugKeysAppState(), new FlyCamAppState(), new StatsAppState());
+	}
 	@Override
 	public void simpleInitApp() {
 		// 加载地形
@@ -51,12 +56,12 @@ public class MyGame extends SimpleApplication {
 		sun.setDirection(new Vector3f(3, -5, 3));
 		rootNode.addLight(sun);
 
-		// 摄像机移动速度
-		flyCam.setMoveSpeed(10);
-
 		// 十字准心
 		initCrossHairs();
 
+		// 摄像机初始位置
+		cam.setLocation(new Vector3f(20, 2, 0));
+		
 		initBullet();
 
 	}
@@ -81,6 +86,7 @@ public class MyGame extends SimpleApplication {
 		// 激活Bullet物理引擎
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
+		bulletAppState.setDebugEnabled(true);
 		
 		// 物理空间
 		PhysicsSpace space = bulletAppState.getPhysicsSpace();
@@ -91,13 +97,14 @@ public class MyGame extends SimpleApplication {
 
 		// 玩家
 		CapsuleCollisionShape collisionShape = new CapsuleCollisionShape(0.5f, 2f);
-		player = new CharacterControl(collisionShape, 0.5f);
-		player.setPhysicsLocation(new Vector3f(0, 2, 0));
+		player = new CharacterControl(collisionShape, 50f);
+		player.setPhysicsLocation(new Vector3f(20, 2, 0));
 		space.add(player);
+		
+		bulletAppState.setEnabled(true);
 	}
 	
 	public void simpeUpdate(float tpf) {
-		cam.setLocation(player.getPhysicsLocation());
 	}
 
 	public static void main(String[] args) {
