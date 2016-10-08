@@ -1,7 +1,7 @@
 package jmecn.app;
 
-import jmecn.state.AxisAppState;
 import jmecn.state.InGameAppState;
+import jmecn.state.MainAppState;
 
 import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.FlyCamAppState;
@@ -12,11 +12,13 @@ import com.jme3.system.AppSettings;
 public class MyGame extends SimpleApplication {
 
 	public MyGame() {
-		super(new DebugKeysAppState(), new FlyCamAppState(),  new StatsAppState(), new AxisAppState(), new InGameAppState());
+		// new AxisAppState()
+		super(new DebugKeysAppState(), new FlyCamAppState(),  new StatsAppState());
 	}
 	
 	@Override
 	public void simpleInitApp() {
+		stateManager.attach(new MainAppState());
 	}
 
 	
@@ -25,9 +27,8 @@ public class MyGame extends SimpleApplication {
 
 	public static void main(String[] args) {
 		AppSettings settings = new AppSettings(true);
+		settings.setSamples(0);
 		settings.setResolution(1024, 768);
-		settings.setFullscreen(true);
-		settings.setSamples(40);
 		settings.setTitle("www.jmecn.net");
 		
 		MyGame game = new MyGame();

@@ -3,7 +3,13 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="assets"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-libraries"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-blender"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-core"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-desktop"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-jbullet"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-jogg"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-lwjgl"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-terrain"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-testdata"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

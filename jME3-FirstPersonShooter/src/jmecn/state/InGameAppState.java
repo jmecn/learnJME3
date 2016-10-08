@@ -1,9 +1,12 @@
 package jmecn.state;
 
+import jmecn.effects.DecayControl;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.audio.AudioData.DataType;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
@@ -11,8 +14,6 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
-import com.jme3.font.BitmapFont;
-import com.jme3.font.BitmapText;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -25,17 +26,18 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
-import com.jme3.renderer.Caps;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Sphere;
-import com.jme3.scene.shape.Sphere.TextureMode;
-import com.jme3.shadow.BasicShadowRenderer;
+import com.jme3.ui.Picture;
 
+/**
+ * 游戏内的场景
+ * @author yanmaoyuan
+ *
+ */
 public class InGameAppState extends AbstractAppState {
 
 	private final static String LEFT = "left";
@@ -65,7 +67,8 @@ public class InGameAppState extends AbstractAppState {
 	private Node terrainModel;
 	private Geometry mark;
 
-	private Material stone_mat;
+	// 手雷
+	private RigidBodyControl ball_phy;
 
 	// 运动逻辑
 	private boolean left = false, right = false, forward = false,
@@ -109,10 +112,6 @@ public class InGameAppState extends AbstractAppState {
 			}
 		});
 
-		stone_mat = new Material(simpleApp.getAssetManager(),
-				"Common/MatDefs/Misc/Unshaded.j3md");
-		stone_mat.setColor("Color", ColorRGBA.Red);
-
 		initAudio();
 		initSunLight();
 		initCrossHairs();
@@ -124,21 +123,21 @@ public class InGameAppState extends AbstractAppState {
 	/* gun shot sound is to be triggered by a mouse click. */
 	private void initAudio() {
 		audio_gun = new AudioNode(simpleApp.getAssetManager(),
-				"Sound/Effects/Gun.wav", false);
+				"Sound/Effects/Gun.wav", DataType.Buffer);
 		audio_gun.setPositional(true);
 		audio_gun.setLooping(false);
 		audio_gun.setVolume(2);
 		rootNode.attachChild(audio_gun);
 
 		audio_bang = new AudioNode(simpleApp.getAssetManager(),
-				"Sound/Effects/Bang.wav", false);
+				"Sound/Effects/Bang.wav", DataType.Buffer);
 		audio_bang.setPositional(true);
 		audio_bang.setLooping(false);
 		audio_bang.setVolume(3);
 		rootNode.attachChild(audio_bang);
 
 		audio_beep = new AudioNode(simpleApp.getAssetManager(),
-				"Sound/Effects/Beep.ogg", false);
+				"Sound/Effects/Beep.ogg", DataType.Buffer);
 		audio_beep.setPositional(true);
 		audio_beep.setLooping(false);
 		audio_beep.setVolume(3);
@@ -166,17 +165,11 @@ public class InGameAppState extends AbstractAppState {
 	 * 准星
 	 */
 	protected void initCrossHairs() {
-		BitmapFont guiFont = simpleApp.getAssetManager().loadFont(
-				"Interface/Fonts/Default.fnt");
-		BitmapText ch = new BitmapText(guiFont, false);
-		ch.setSize(guiFont.getCharSet().getRenderedSize());
-		ch.setText("+"); // crosshairs
-
-		ch.setLocalTranslation(
-				// center
-				1024 / 2 - guiFont.getCharSet().getRenderedSize() / 2,
-				786 / 2 + ch.getLineHeight() / 2, 0);
-		guiNode.attachChild(ch);
+		Picture pic = new Picture("cross");
+		pic.setImage(simpleApp.getAssetManager(), "Texture/cross.png", true);
+		pic.setWidth(1024);
+		pic.setHeight(768);
+		guiNode.attachChild(pic);
 	}
 
 	protected void initBullet() {
@@ -190,7 +183,7 @@ public class InGameAppState extends AbstractAppState {
 		// 玩家
 		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(10f,
 				40f, 1);
-		player = new CharacterControl(capsuleShape, 0.1f);
+		player = new CharacterControl(capsuleShape, 50f);
 		player.setJumpSpeed(60);
 		player.setFallSpeed(60);
 		player.setGravity(98f);
@@ -252,7 +245,7 @@ public class InGameAppState extends AbstractAppState {
 	private float gunTime = 0f;
 	public final static float GUN_COOLDOWN_TIME = 0.1f;// 枪管冷却时间
 	private float bombTime = 0f;
-	public final static float BOMB_COOLDOWN_TIME = 10f;// 炸弹冷却时间
+	public final static float BOMB_COOLDOWN_TIME = 1f;// 炸弹冷却时间
 
 	@Override
 	public void update(float tpf) {
@@ -272,6 +265,7 @@ public class InGameAppState extends AbstractAppState {
 		if (backward) {
 			walkDirection.addLocal(camDir.negate());
 		}
+		walkDirection.y = 0;
 		walkDirection.normalizeLocal().multLocal(moveSpeed);
 		player.setWalkDirection(walkDirection);
 		cam.setLocation(player.getPhysicsLocation());
@@ -299,7 +293,6 @@ public class InGameAppState extends AbstractAppState {
 	 */
 	private void shoot() {
 		audio_bang.playInstance();
-		// audio_beep.playInstance();
 
 		// 射线检测
 		CollisionResults results = new CollisionResults();
@@ -308,9 +301,21 @@ public class InGameAppState extends AbstractAppState {
 		if (results.size() > 0) {
 			CollisionResult closest = results.getClosestCollision();
 
+			// 弹痕标记
 			Geometry newMark = mark.clone();
 			newMark.setLocalTranslation(closest.getContactPoint());
 			rootNode.attachChild(newMark);
+			
+			// 利用目标的名字来判断是否是炸弹
+			Geometry target = closest.getGeometry();
+			String name = target.getName();
+			if (name.equals("BombGeom1")) {
+				
+				// 瞬间爆炸
+				Node parent = target.getParent().getParent().getParent();
+				DecayControl control = parent.getControl(DecayControl.class);
+				control.explosionNow();
+			}
 		}
 	}
 
@@ -318,33 +323,26 @@ public class InGameAppState extends AbstractAppState {
 	 * 扔雷
 	 */
 	private void bomb() {
-		audio_gun.playInstance(); // play each instance once!
-		
 		Vector3f loc = cam.getLocation();
 		loc.addLocal(cam.getDirection().mult(3));
 
-		/** Create a cannon ball geometry and attach to scene graph. */
-		Geometry ball_geo = new Geometry("cannon ball", sphere);
-		ball_geo.setMaterial(stone_mat);
-		rootNode.attachChild(ball_geo);
-		/** Position the cannon ball */
-		ball_geo.setLocalTranslation(loc);
-		/** Make the ball physcial with a mass > 0.0f */
-		ball_phy = new RigidBodyControl(1f);
-		/** Add physical ball to physics space. */
-		ball_geo.addControl(ball_phy);
+		// 导入炸弹模型
+		Node bomb = (Node)simpleApp.getAssetManager().loadModel("Models/Bomb/bomb.blend");
+		
+		// 让手雷在5秒后消失，然后爆炸BOOM!!
+		DecayControl decayContorl = new DecayControl(audio_gun, simpleApp);
+		bomb.addControl(decayContorl);
+		
+		shootable.attachChild(bomb);
+		bomb.setLocalTranslation(loc);
+		ball_phy = new RigidBodyControl(0.5f);
+		bomb.addControl(ball_phy);
 		bulletAppState.getPhysicsSpace().add(ball_phy);
-		/** Accelerate the physcial ball to shoot it. */
-		ball_phy.setLinearVelocity(cam.getDirection().mult(25));
+		ball_phy.setLinearVelocity(cam.getDirection().mult(50));
+		ball_phy.setGravity(new Vector3f(0, -98f, 0));
+		
 	}
 
-	private RigidBodyControl ball_phy;
-	private static final Sphere sphere;
-	static {
-		/** Initialize the cannon ball geometry */
-		sphere = new Sphere(6, 6, 3f, true, false);
-		sphere.setTextureMode(TextureMode.Projected);
-	}
 
 	@Override
 	public void cleanup() {
