@@ -24,7 +24,6 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
-import com.jme3.post.HDRRenderer;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.Caps;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
@@ -34,6 +33,7 @@ import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.scene.shape.Sphere.TextureMode;
 import com.jme3.shadow.BasicShadowRenderer;
 
 public class InGameAppState extends AbstractAppState {
@@ -65,6 +65,8 @@ public class InGameAppState extends AbstractAppState {
 	private Node terrainModel;
 	private Geometry mark;
 
+	private Material stone_mat;
+
 	// 运动逻辑
 	private boolean left = false, right = false, forward = false,
 			backward = false, trigger = false, bomb = false;
@@ -74,8 +76,6 @@ public class InGameAppState extends AbstractAppState {
 	private float moveSpeed = 2f;
 
 	// 特效
-	private BasicShadowRenderer bsr;
-	private Vector3f lightDir = new Vector3f(-3, -5, -3).normalizeLocal();
 
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
@@ -85,13 +85,15 @@ public class InGameAppState extends AbstractAppState {
 		this.cam = simpleApp.getCamera();
 
 		// 初始化场景
-		simpleApp.getViewPort().setBackgroundColor(new ColorRGBA(0.75f, 0.875f, 1f, 1f));
+		simpleApp.getViewPort().setBackgroundColor(
+				new ColorRGBA(0.75f, 0.875f, 1f, 1f));
 		simpleApp.getRootNode().attachChild(rootNode);
 		simpleApp.getGuiNode().attachChild(guiNode);
 		rootNode.attachChild(shootable);
 
 		// 加载地形
-		terrainModel = (Node) app.getAssetManager().loadModel("Models/Terrain/iceworld.blend");
+		terrainModel = (Node) app.getAssetManager().loadModel(
+				"Models/Terrain/iceworld.blend");
 		terrainModel.scale(10);
 		shootable.attachChild(terrainModel);
 
@@ -107,9 +109,9 @@ public class InGameAppState extends AbstractAppState {
 			}
 		});
 
-		rootNode.setCullHint(CullHint.Never);
-		rootNode.setShadowMode(ShadowMode.CastAndReceive);
-		setupBasicShadow();
+		stone_mat = new Material(simpleApp.getAssetManager(),
+				"Common/MatDefs/Misc/Unshaded.j3md");
+		stone_mat.setColor("Color", ColorRGBA.Red);
 
 		initAudio();
 		initSunLight();
@@ -144,29 +146,25 @@ public class InGameAppState extends AbstractAppState {
 
 	}
 
-	public void setupBasicShadow() {
-		if (simpleApp.getRenderer().getCaps().contains(Caps.GLSL100)) {
-			bsr = new BasicShadowRenderer(simpleApp.getAssetManager(), 1024);
-			bsr.setDirection(lightDir);
-			simpleApp.getViewPort().addProcessor(bsr);
-		}
-	}
-
 	/**
 	 * 初始化阳光
 	 */
 	protected void initSunLight() {
+
 		DirectionalLight dl = new DirectionalLight();
-		dl.setDirection(lightDir);
-		dl.setColor(new ColorRGBA(.9f, .9f, .9f, 1));
+		dl.setDirection(new Vector3f(-3, -5, -3).normalize());
+		dl.setColor(new ColorRGBA(.6f, .6f, .6f, 0.8f));
 		rootNode.addLight(dl);
 
 		dl = new DirectionalLight();
-		dl.setDirection(new Vector3f(1, 0, -1).normalizeLocal());
-		dl.setColor(new ColorRGBA(.4f, .4f, .4f, 1));
+		dl.setDirection(new Vector3f(3, -5, 3).normalize());
+		dl.setColor(new ColorRGBA(.4f, .4f, .4f, 0.2f));
 		rootNode.addLight(dl);
 	}
 
+	/**
+	 * 准星
+	 */
 	protected void initCrossHairs() {
 		BitmapFont guiFont = simpleApp.getAssetManager().loadFont(
 				"Interface/Fonts/Default.fnt");
@@ -176,7 +174,7 @@ public class InGameAppState extends AbstractAppState {
 
 		ch.setLocalTranslation(
 				// center
-				1024 / 2 - guiFont.getCharSet().getRenderedSize() / 3 * 2,
+				1024 / 2 - guiFont.getCharSet().getRenderedSize() / 2,
 				786 / 2 + ch.getLineHeight() / 2, 0);
 		guiNode.attachChild(ch);
 	}
@@ -190,7 +188,8 @@ public class InGameAppState extends AbstractAppState {
 		terrainModel.addControl(rigidBodyControl);
 
 		// 玩家
-		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(10f, 40f, 1);
+		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(10f,
+				40f, 1);
 		player = new CharacterControl(capsuleShape, 0.1f);
 		player.setJumpSpeed(60);
 		player.setFallSpeed(60);
@@ -203,7 +202,7 @@ public class InGameAppState extends AbstractAppState {
 
 	/** A red ball that marks the last spot that was "hit" by the "shot". */
 	protected void initMark() {
-		Sphere sphere = new Sphere(6, 6, 2f);
+		Sphere sphere = new Sphere(6, 6, 0.2f);
 		mark = new Geometry("BOOM!", sphere);
 		Material mark_mat = new Material(simpleApp.getAssetManager(),
 				"Common/MatDefs/Misc/Unshaded.j3md");
@@ -320,7 +319,31 @@ public class InGameAppState extends AbstractAppState {
 	 */
 	private void bomb() {
 		audio_gun.playInstance(); // play each instance once!
+		
+		Vector3f loc = cam.getLocation();
+		loc.addLocal(cam.getDirection().mult(3));
 
+		/** Create a cannon ball geometry and attach to scene graph. */
+		Geometry ball_geo = new Geometry("cannon ball", sphere);
+		ball_geo.setMaterial(stone_mat);
+		rootNode.attachChild(ball_geo);
+		/** Position the cannon ball */
+		ball_geo.setLocalTranslation(loc);
+		/** Make the ball physcial with a mass > 0.0f */
+		ball_phy = new RigidBodyControl(1f);
+		/** Add physical ball to physics space. */
+		ball_geo.addControl(ball_phy);
+		bulletAppState.getPhysicsSpace().add(ball_phy);
+		/** Accelerate the physcial ball to shoot it. */
+		ball_phy.setLinearVelocity(cam.getDirection().mult(25));
+	}
+
+	private RigidBodyControl ball_phy;
+	private static final Sphere sphere;
+	static {
+		/** Initialize the cannon ball geometry */
+		sphere = new Sphere(6, 6, 3f, true, false);
+		sphere.setTextureMode(TextureMode.Projected);
 	}
 
 	@Override
