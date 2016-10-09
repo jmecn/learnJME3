@@ -1,7 +1,7 @@
 package jmecn.app;
 
-import jmecn.state.InGameAppState;
 import jmecn.state.MainAppState;
+import strongdk.jme.appstate.console.ConsoleAppState;
 
 import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.FlyCamAppState;
@@ -13,11 +13,12 @@ public class MyGame extends SimpleApplication {
 
 	public MyGame() {
 		// new AxisAppState()
-		super(new DebugKeysAppState(), new FlyCamAppState(),  new StatsAppState());
+		super(new DebugKeysAppState(), new FlyCamAppState(), new StatsAppState());
 	}
 	
 	@Override
 	public void simpleInitApp() {
+		stateManager.attach(new ConsoleAppState());
 		stateManager.attach(new MainAppState());
 	}
 

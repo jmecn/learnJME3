@@ -89,8 +89,8 @@ public class Explosion extends Node {
 		flash.setGravity(0, 0, 0);
 		flash.setLowLife(.2f);
 		flash.setHighLife(.2f);
-		flash.setInitialVelocity(new Vector3f(0, 5f, 0));
-		flash.setVelocityVariation(1);
+		flash.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 5f, 0));
+		flash.getParticleInfluencer().setVelocityVariation(1);
 		flash.setImagesX(2);
 		flash.setImagesY(2);
 		Material mat = new Material(assetManager,
@@ -116,8 +116,8 @@ public class Explosion extends Node {
 		roundspark.setGravity(0, -.5f, 0);
 		roundspark.setLowLife(1.8f);
 		roundspark.setHighLife(2f);
-		roundspark.setInitialVelocity(new Vector3f(0, 3, 0));
-		roundspark.setVelocityVariation(.5f);
+		roundspark.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 3, 0));
+		roundspark.getParticleInfluencer().setVelocityVariation(.5f);
 		roundspark.setImagesX(1);
 		roundspark.setImagesY(1);
 		Material mat = new Material(assetManager,
@@ -169,8 +169,8 @@ public class Explosion extends Node {
 		smoketrail.setGravity(0, 1, 0);
 		smoketrail.setLowLife(.4f);
 		smoketrail.setHighLife(.5f);
-		smoketrail.setInitialVelocity(new Vector3f(0, 12, 0));
-		smoketrail.setVelocityVariation(1);
+		smoketrail.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 12, 0));
+		smoketrail.getParticleInfluencer().setVelocityVariation(1);
 		smoketrail.setImagesX(1);
 		smoketrail.setImagesY(3);
 		Material mat = new Material(assetManager,
@@ -197,8 +197,8 @@ public class Explosion extends Node {
 		debris.setGravity(0, 12f, 0);
 		debris.setLowLife(1.4f);
 		debris.setHighLife(1.5f);
-		debris.setInitialVelocity(new Vector3f(0, 15, 0));
-		debris.setVelocityVariation(.60f);
+		debris.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 15, 0));
+		debris.getParticleInfluencer().setVelocityVariation(.60f);
 		debris.setImagesX(3);
 		debris.setImagesY(3);
 		Material mat = new Material(assetManager,
@@ -225,8 +225,8 @@ public class Explosion extends Node {
 		shockwave.setGravity(0, 0, 0);
 		shockwave.setLowLife(0.5f);
 		shockwave.setHighLife(0.5f);
-		shockwave.setInitialVelocity(new Vector3f(0, 0, 0));
-		shockwave.setVelocityVariation(0f);
+		shockwave.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 0, 0));
+		shockwave.getParticleInfluencer().setVelocityVariation(0f);
 		shockwave.setImagesX(1);
 		shockwave.setImagesY(1);
 		Material mat = new Material(assetManager,

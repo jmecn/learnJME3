@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="assets"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-blender"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-core"/>
@@ -11,5 +12,15 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-lwjgl"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-terrain"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-testdata"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/guava"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/lemur"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/slf4j"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/groovy"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-effects"/>
+	<classpathentry kind="lib" path="libs/ConsoleAppState/libs/ConsoleAppState.jar" sourcepath="libs/ConsoleAppState/sources/strongdk-console-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/jME3-FirstPersonShooter/libs/ConsoleAppState/docs/ConsoleAppState-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
