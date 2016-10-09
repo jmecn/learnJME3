@@ -47,6 +47,7 @@ public class InGameAppState extends AbstractAppState {
 	private final static String JUMP = "jump";
 	private final static String TRIGGER = "trigger";// 左键扣动扳机
 	private final static String BOMB = "bomb";// 右键扔手雷
+	private final static String ESC = "esc";// 退出游戏
 
 	private SimpleApplication simpleApp;
 	private Camera cam;
@@ -77,26 +78,29 @@ public class InGameAppState extends AbstractAppState {
 	private Vector3f camLeft = new Vector3f();
 	private Vector3f walkDirection = new Vector3f();
 	private float moveSpeed = 2f;
-
-	// 特效
+	
+	// DEBUG
+	private AxisAppState axisAppState = new AxisAppState();//参考坐标系
 
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
+		// TODO for debug 添加一个参考坐标系，方便计算坐标。
+		stateManager.attach(axisAppState);
+		
 		this.simpleApp = (SimpleApplication) app;
 		this.cam = simpleApp.getCamera();
+		cam.lookAtDirection(new Vector3f(-1, 0, 0), Vector3f.UNIT_Y);
 
 		// 初始化场景
-		simpleApp.getViewPort().setBackgroundColor(
-				new ColorRGBA(0.75f, 0.875f, 1f, 1f));
+		simpleApp.getViewPort().setBackgroundColor(new ColorRGBA(0.75f, 0.875f, 1f, 1f));
 		simpleApp.getRootNode().attachChild(rootNode);
 		simpleApp.getGuiNode().attachChild(guiNode);
 		rootNode.attachChild(shootable);
 
 		// 加载地形
-		terrainModel = (Node) app.getAssetManager().loadModel(
-				"Models/Terrain/iceworld.blend");
+		terrainModel = (Node) app.getAssetManager().loadModel("Models/Terrain/iceworld.blend");
 		terrainModel.scale(10);
 		shootable.attachChild(terrainModel);
 
@@ -181,13 +185,12 @@ public class InGameAppState extends AbstractAppState {
 		terrainModel.addControl(rigidBodyControl);
 
 		// 玩家
-		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(10f,
-				40f, 1);
+		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(10f, 40f, 1);
 		player = new CharacterControl(capsuleShape, 50f);
 		player.setJumpSpeed(60);
 		player.setFallSpeed(60);
 		player.setGravity(98f);
-		player.setPhysicsLocation(new Vector3f(0, 20, 0));
+		player.setPhysicsLocation(new Vector3f(200, 20, 80));
 
 		bulletAppState.getPhysicsSpace().add(terrainModel);
 		bulletAppState.getPhysicsSpace().add(player);
@@ -211,17 +214,18 @@ public class InGameAppState extends AbstractAppState {
 		inputManager.addMapping(FORWARD, new KeyTrigger(KeyInput.KEY_W));
 		inputManager.addMapping(BACKWARD, new KeyTrigger(KeyInput.KEY_S));
 		inputManager.addMapping(JUMP, new KeyTrigger(KeyInput.KEY_SPACE));
-		inputManager.addMapping(TRIGGER, new MouseButtonTrigger(
-				MouseInput.BUTTON_LEFT));
-		inputManager.addMapping(BOMB, new MouseButtonTrigger(
-				MouseInput.BUTTON_RIGHT));
+		inputManager.addMapping(TRIGGER, new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+		inputManager.addMapping(BOMB, new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+		inputManager.addMapping(ESC, new KeyTrigger(KeyInput.KEY_ESCAPE));
 
-		MyListener listener = new MyListener();
-		inputManager.addListener(listener, LEFT, RIGHT, FORWARD, BACKWARD,
-				JUMP, TRIGGER, BOMB);
+		inputManager.addListener(myListener, LEFT, RIGHT, FORWARD, BACKWARD,
+				JUMP, TRIGGER, BOMB, ESC);
 	}
 
-	class MyListener implements ActionListener {
+	/**
+	 * 按键事件监听器
+	 */
+	private ActionListener myListener = new ActionListener() {
 		@Override
 		public void onAction(String name, boolean isPressed, float tpf) {
 			if (name.equals(LEFT)) {
@@ -238,9 +242,12 @@ public class InGameAppState extends AbstractAppState {
 				trigger = isPressed;
 			} else if (name.equals(BOMB)) {
 				bomb = isPressed;
+			} else if (name.equals(ESC) && isPressed) {
+				// 退出游戏
+				quitGame();
 			}
 		}
-	}
+	};
 
 	private float gunTime = 0f;
 	public final static float GUN_COOLDOWN_TIME = 0.1f;// 枪管冷却时间
@@ -343,10 +350,38 @@ public class InGameAppState extends AbstractAppState {
 		
 	}
 
+	/**
+	 * 退出游戏
+	 */
+	private void quitGame() {
+		simpleApp.getStateManager().detach(InGameAppState.this);
+		simpleApp.getStateManager().attach(new MainAppState());
+	}
 
 	@Override
 	public void cleanup() {
 		super.cleanup();
+	}
+
+	@Override
+	public void stateDetached(AppStateManager stateManager) {
+		// 退出游戏时要做清理工作
+		simpleApp.getRootNode().detachChild(rootNode);
+		simpleApp.getGuiNode().detachChild(guiNode);
+		simpleApp.getViewPort().setBackgroundColor(ColorRGBA.Black);
+
+		// 清除坐标系
+		stateManager.detach(axisAppState);
+		
+		// 清除物理引擎
+		bulletAppState.getPhysicsSpace().removeAll(rootNode);
+		bulletAppState.getPhysicsSpace().remove(player);
+		stateManager.detach(bulletAppState);
+		
+		// 清除按键输入
+		InputManager inputManager = simpleApp.getInputManager();
+		inputManager.removeListener(myListener);
+		
 	}
 
 }

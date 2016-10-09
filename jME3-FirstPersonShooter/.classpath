@@ -7,7 +7,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-blender"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-core"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-desktop"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-jbullet"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-jogg"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-lwjgl"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-terrain"/>
@@ -22,5 +21,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/jME3-FirstPersonShooter/libs/ConsoleAppState/docs/ConsoleAppState-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-jbullet"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
