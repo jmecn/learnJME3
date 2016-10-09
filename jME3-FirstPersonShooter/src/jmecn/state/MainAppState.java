@@ -8,9 +8,12 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.light.DirectionalLight;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
@@ -33,6 +36,9 @@ public class MainAppState extends AbstractAppState {
 	public final static String QUIT_GAME = "quit";
 	
 	private Node guiNode = new Node("mainGui");
+	private Node rootNode = new Node("mainScene");
+	private Spatial model;
+	private DirectionalLight sun;
 	
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
@@ -41,6 +47,15 @@ public class MainAppState extends AbstractAppState {
 		simpleApp = (SimpleApplication)app;
 		
 		simpleApp.getGuiNode().attachChild(guiNode);
+		simpleApp.getRootNode().attachChild(rootNode);
+		
+		// 给主界面的背景添加一个3D场景
+		model = simpleApp.getAssetManager().loadModel("Models/Terrain/iceworld.blend");
+		rootNode.attachChild(model);
+		
+		sun = new DirectionalLight();
+		sun.setDirection(new Vector3f(-5, -6, 4).normalize());
+		rootNode.addLight(sun);
 		
 		// 初始化控制台
 		console = stateManager.getState(ConsoleAppState.class);
@@ -57,8 +72,9 @@ public class MainAppState extends AbstractAppState {
 		
     	// 初始化摄像机位置
     	Camera cam = simpleApp.getCamera();
-    	cam.setLocation(new Vector3f(0, 0, 0));
-		cam.lookAtDirection(new Vector3f(0, 0, 1), Vector3f.UNIT_Y);
+    	cam.setLocation(new Vector3f(30, 50, 30));
+		cam.lookAt(new Vector3f(0, 0, 0), Vector3f.UNIT_Y);
+		simpleApp.getFlyByCamera().setEnabled(false);
 		
 	    // 初始化Lemur GUI
 		GuiGlobals.initialize(app);
@@ -67,6 +83,12 @@ public class MainAppState extends AbstractAppState {
 		
 	}
 	
+	@Override
+	public void update(float tpf) {
+		// 让场景缓慢旋转
+		model.rotate(0, tpf * FastMath.DEG_TO_RAD, 0);
+	}
+
 	// 命令行指令监听器
 	private CommandListener commandListener = new CommandListener() {
 		@Override
@@ -106,6 +128,8 @@ public class MainAppState extends AbstractAppState {
 		// 创建一个窗口
 		Container myWindow = new Container();
 		guiNode.attachChild(myWindow);
+		
+		myWindow.scale(2);
 
 		// Put it somewhere that we will see it.
 		// Note: Lemur GUI elements grow down from the upper left corner.
@@ -147,9 +171,21 @@ public class MainAppState extends AbstractAppState {
     		console.appendConsole("MainAppState detached");
     		console.unregisterCommands(commandListener);
     	}
+    
+    	// 移除灯光
+    	rootNode.removeLight(sun);
+    	sun = null;
     	
+    	// 移除3D场景
+    	rootNode.detachChild(model);
+    	model = null;
+
+    	// 移除GUI元素
 		guiNode.detachAllChildren();
+		
 		simpleApp.getGuiNode().detachChild(guiNode);
+		simpleApp.getRootNode().detachChild(rootNode);
+		simpleApp.getFlyByCamera().setEnabled(true);
 	}
 	
 }

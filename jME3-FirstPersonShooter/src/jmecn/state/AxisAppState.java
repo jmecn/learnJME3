@@ -46,6 +46,8 @@ public class AxisAppState extends AbstractAppState {
 
 		initKeys();
 		showNodeAxes(200);
+		
+		toggleAxis();// 默认关闭坐标系
 	}
 
 	@Override
