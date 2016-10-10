@@ -1,4 +1,4 @@
-package jmecn.state;
+package net.jmecn.state;
 
 import strongdk.jme.appstate.console.CommandEvent;
 import strongdk.jme.appstate.console.CommandListener;

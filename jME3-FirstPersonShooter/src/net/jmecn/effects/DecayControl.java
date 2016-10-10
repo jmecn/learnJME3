@@ -1,4 +1,4 @@
-package jmecn.effects;
+package net.jmecn.effects;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.audio.AudioNode;

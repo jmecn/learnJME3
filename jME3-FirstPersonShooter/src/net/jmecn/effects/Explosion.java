@@ -1,4 +1,4 @@
-package jmecn.effects;
+package net.jmecn.effects;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.effect.ParticleEmitter;

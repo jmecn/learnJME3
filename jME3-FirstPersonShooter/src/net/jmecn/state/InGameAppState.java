@@ -1,6 +1,6 @@
-package jmecn.state;
+package net.jmecn.state;
 
-import jmecn.effects.DecayControl;
+import net.jmecn.effects.DecayControl;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -32,6 +32,8 @@ import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.ui.Picture;
+import com.jme3.util.SkyFactory;
+import com.jme3.util.SkyFactory.EnvMapType;
 
 /**
  * 游戏内的场景
@@ -116,6 +118,10 @@ public class InGameAppState extends AbstractAppState {
 			}
 		});
 
+		// 天空
+		Spatial sky = SkyFactory.createSky(simpleApp.getAssetManager(), "Textures/Sky/sky.jpg", EnvMapType.SphereMap);
+		rootNode.attachChild(sky);
+		
 		initAudio();
 		initSunLight();
 		initCrossHairs();
@@ -170,7 +176,7 @@ public class InGameAppState extends AbstractAppState {
 	 */
 	protected void initCrossHairs() {
 		Picture pic = new Picture("cross");
-		pic.setImage(simpleApp.getAssetManager(), "Texture/cross.png", true);
+		pic.setImage(simpleApp.getAssetManager(), "Interface/Images/cross.png", true);
 		pic.setWidth(1024);
 		pic.setHeight(768);
 		guiNode.attachChild(pic);

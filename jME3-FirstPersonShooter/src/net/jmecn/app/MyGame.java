@@ -1,6 +1,6 @@
-package jmecn.app;
+package net.jmecn.app;
 
-import jmecn.state.MainAppState;
+import net.jmecn.state.MainAppState;
 import strongdk.jme.appstate.console.ConsoleAppState;
 import strongdk.jme.appstate.console.ConsoleDefaultCommandsAppState;
 

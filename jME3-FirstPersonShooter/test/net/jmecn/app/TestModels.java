@@ -1,7 +1,7 @@
-package jmecn.app;
+package net.jmecn.app;
 
-import jmecn.effects.DecayControl;
-import jmecn.state.AxisAppState;
+import net.jmecn.effects.DecayControl;
+import net.jmecn.state.AxisAppState;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.audio.AudioNode;
@@ -21,6 +21,8 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
+import com.jme3.util.SkyFactory;
+import com.jme3.util.SkyFactory.EnvMapType;
 
 /**
  * 调试用的App，检查手雷在碰撞检测的时候为什么会离开地图。
@@ -60,6 +62,10 @@ public class TestModels extends SimpleApplication {
 			}
 		});
 
+		// 天空
+		Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/sky.jpg", EnvMapType.SphereMap);
+		rootNode.attachChild(sky);
+		
 		initCamera();
 		initSunLight();
 		initBullet();
