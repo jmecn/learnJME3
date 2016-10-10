@@ -16,10 +16,12 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/lemur"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/slf4j"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/groovy"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jme3-plugins"/>
 	<classpathentry kind="lib" path="libs/ConsoleAppState/libs/ConsoleAppState.jar" sourcepath="libs/ConsoleAppState/sources/strongdk-console-src.zip">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/jME3-FirstPersonShooter/libs/ConsoleAppState/docs/ConsoleAppState-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/zay-es"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

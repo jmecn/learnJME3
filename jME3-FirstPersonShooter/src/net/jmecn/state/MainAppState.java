@@ -8,6 +8,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.font.BitmapFont;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
@@ -120,26 +121,27 @@ public class MainAppState extends AbstractAppState {
 	@SuppressWarnings("unchecked")
 	private void initGUI() {
 		// Load the 'glass' style
-		BaseStyles.loadGlassStyle();
+		BaseStyles.loadStyleResources("Interface/Style/style.groovy");
 		
 		// Set 'glass' as the default style when not specified
 		GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+		
+		BitmapFont font = simpleApp.getAssetManager().loadFont("Interface/Font/font.fnt");
+		GuiGlobals.getInstance().getStyles().setDefault(font);
 		
 		// 创建一个窗口
 		Container myWindow = new Container();
 		guiNode.attachChild(myWindow);
 		
-		myWindow.scale(2);
-
 		// Put it somewhere that we will see it.
 		// Note: Lemur GUI elements grow down from the upper left corner.
 		myWindow.setLocalTranslation(450, 440, 0);
 
 		// 标题
-		myWindow.addChild(new Label("Main Menu"));
+		myWindow.addChild(new Label("菜单"));
 		
 		// 开始游戏
-		Button startBtn = myWindow.addChild(new Button(START_GAME));
+		Button startBtn = myWindow.addChild(new Button("开始游戏"));
 		startBtn.addClickCommands(new Command<Button>() {
 		        @Override
 		        public void execute(Button source) {
@@ -148,7 +150,7 @@ public class MainAppState extends AbstractAppState {
 		    });
 		
 		// 退出游戏
-		Button quitBtn = myWindow.addChild(new Button(QUIT_GAME));
+		Button quitBtn = myWindow.addChild(new Button("退出游戏"));
 		quitBtn.addClickCommands(new Command<Button>() {
 			@Override
 			public void execute(Button source) {

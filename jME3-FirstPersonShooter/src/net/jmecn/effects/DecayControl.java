@@ -33,8 +33,7 @@ public class DecayControl extends AbstractControl {
 		time = 0f;
 		this.boom = boom;
 		
-		explosion = new Explosion(simpleApp.getAssetManager(),
-				simpleApp.getRenderManager());
+		explosion = new Explosion(simpleApp.getAssetManager());
 	}
 
 	@Override

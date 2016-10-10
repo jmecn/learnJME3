@@ -1,5 +1,7 @@
 package net.jmecn.state;
 
+import net.jmecn.app.ModelFactory;
+import net.jmecn.core.Model;
 import net.jmecn.effects.DecayControl;
 
 import com.jme3.app.Application;
@@ -21,19 +23,15 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Sphere;
 import com.jme3.ui.Picture;
-import com.jme3.util.SkyFactory;
-import com.jme3.util.SkyFactory.EnvMapType;
 
 /**
  * 游戏内的场景
@@ -53,6 +51,7 @@ public class InGameAppState extends AbstractAppState {
 
 	private SimpleApplication simpleApp;
 	private Camera cam;
+	private ModelFactory modelFactory;
 
 	// 游戏内场景的结点
 	private Node rootNode = new Node("InGameScene");
@@ -68,14 +67,11 @@ public class InGameAppState extends AbstractAppState {
 	private BulletAppState bulletAppState;
 	private CharacterControl player;
 	private Node terrainModel;
-	private Geometry mark;
-
-	// 手雷
-	private RigidBodyControl ball_phy;
 
 	// 运动逻辑
 	private boolean left = false, right = false, forward = false,
 			backward = false, trigger = false, bomb = false;
+	private Vector3f camLoc = new Vector3f();
 	private Vector3f camDir = new Vector3f();
 	private Vector3f camLeft = new Vector3f();
 	private Vector3f walkDirection = new Vector3f();
@@ -92,6 +88,10 @@ public class InGameAppState extends AbstractAppState {
 		stateManager.attach(axisAppState);
 		
 		this.simpleApp = (SimpleApplication) app;
+		this.modelFactory = new ModelFactory(simpleApp.getAssetManager());
+		
+		
+		// 初始化摄像机位置
 		this.cam = simpleApp.getCamera();
 		cam.lookAtDirection(new Vector3f(-1, 0, 0), Vector3f.UNIT_Y);
 
@@ -102,24 +102,11 @@ public class InGameAppState extends AbstractAppState {
 		rootNode.attachChild(shootable);
 
 		// 加载地形
-		terrainModel = (Node) app.getAssetManager().loadModel("Models/Terrain/iceworld.blend");
-		terrainModel.scale(10);
+		terrainModel = modelFactory.getIceWorld();
 		shootable.attachChild(terrainModel);
 
-		terrainModel.breadthFirstTraversal(new SceneGraphVisitor() {
-			@Override
-			public void visit(Spatial spatial) {
-				// BlenderLoader导入的模型反光度都太高了，降低一点。
-				if (spatial instanceof Geometry) {
-					Geometry geom = (Geometry) spatial;
-					Material mat = geom.getMaterial();
-					mat.setFloat("Shininess", 0);
-				}
-			}
-		});
-
 		// 天空
-		Spatial sky = SkyFactory.createSky(simpleApp.getAssetManager(), "Textures/Sky/sky.jpg", EnvMapType.SphereMap);
+		Spatial sky = modelFactory.getSky();
 		rootNode.attachChild(sky);
 		
 		initAudio();
@@ -127,7 +114,6 @@ public class InGameAppState extends AbstractAppState {
 		initCrossHairs();
 		initBullet();
 		initInput();
-		initMark();
 	}
 
 	/* gun shot sound is to be triggered by a mouse click. */
@@ -200,16 +186,6 @@ public class InGameAppState extends AbstractAppState {
 
 		bulletAppState.getPhysicsSpace().add(terrainModel);
 		bulletAppState.getPhysicsSpace().add(player);
-	}
-
-	/** A red ball that marks the last spot that was "hit" by the "shot". */
-	protected void initMark() {
-		Sphere sphere = new Sphere(6, 6, 0.2f);
-		mark = new Geometry("BOOM!", sphere);
-		Material mark_mat = new Material(simpleApp.getAssetManager(),
-				"Common/MatDefs/Misc/Unshaded.j3md");
-		mark_mat.setColor("Color", ColorRGBA.Black);
-		mark.setMaterial(mark_mat);
 	}
 
 	protected void initInput() {
@@ -314,16 +290,20 @@ public class InGameAppState extends AbstractAppState {
 		if (results.size() > 0) {
 			CollisionResult closest = results.getClosestCollision();
 
+			Quaternion rotation = new Quaternion();
+			rotation.lookAt(cam.getDirection(), cam.getUp());
 			// 弹痕标记
-			Geometry newMark = mark.clone();
-			newMark.setLocalTranslation(closest.getContactPoint());
-			rootNode.attachChild(newMark);
+			Geometry mark = modelFactory.createCylinder(ColorRGBA.Yellow);
+			mark.scale(0.2f);
+			mark.setLocalTranslation(closest.getContactPoint());
+			mark.setLocalRotation(rotation);
+			
+			rootNode.attachChild(mark);
 			
 			// 利用目标的名字来判断是否是炸弹
 			Geometry target = closest.getGeometry();
 			String name = target.getName();
 			if (name.equals("BombGeom1")) {
-				
 				// 瞬间爆炸
 				Node parent = target.getParent().getParent().getParent();
 				DecayControl control = parent.getControl(DecayControl.class);
@@ -336,22 +316,22 @@ public class InGameAppState extends AbstractAppState {
 	 * 扔雷
 	 */
 	private void bomb() {
-		Vector3f loc = cam.getLocation();
-		loc.addLocal(cam.getDirection().mult(3));
+		camLoc.set(cam.getLocation());
+		camLoc.addLocal(cam.getDirection().mult(10));
 
 		// 导入炸弹模型
-		Node bomb = (Node)simpleApp.getAssetManager().loadModel("Models/Bomb/bomb.blend");
+		Spatial bomb = modelFactory.create(Model.BOMB);
 		
 		// 让手雷在5秒后消失，然后爆炸BOOM!!
 		DecayControl decayContorl = new DecayControl(audio_gun, simpleApp);
 		bomb.addControl(decayContorl);
 		
 		shootable.attachChild(bomb);
-		bomb.setLocalTranslation(loc);
-		ball_phy = new RigidBodyControl(0.5f);
+		bomb.setLocalTranslation(camLoc);
+		RigidBodyControl ball_phy = new RigidBodyControl(0.5f);
 		bomb.addControl(ball_phy);
 		bulletAppState.getPhysicsSpace().add(ball_phy);
-		ball_phy.setLinearVelocity(cam.getDirection().mult(50));
+		ball_phy.setLinearVelocity(cam.getDirection().mult(100).add(walkDirection));
 		ball_phy.setGravity(new Vector3f(0, -98f, 0));
 		
 	}
@@ -362,11 +342,6 @@ public class InGameAppState extends AbstractAppState {
 	private void quitGame() {
 		simpleApp.getStateManager().detach(InGameAppState.this);
 		simpleApp.getStateManager().attach(new MainAppState());
-	}
-
-	@Override
-	public void cleanup() {
-		super.cleanup();
 	}
 
 	@Override

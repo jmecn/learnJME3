@@ -30,7 +30,7 @@ public class MyGame extends SimpleApplication {
 		// 初始化游戏设置
 		AppSettings settings = new AppSettings(true);
 		settings.setResolution(1024, 768);
-		settings.setTitle("www.jmecn.net");
+		settings.setTitle("反恐精英 - www.jmecn.net");
 
 		setSettings(settings);
 		setShowSettings(false);// 不显示设置窗口

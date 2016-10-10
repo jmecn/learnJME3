@@ -35,8 +35,7 @@ public class Explosion extends Node {
 	private static final boolean POINT_SPRITE = true;
 	private static final Type EMITTER_TYPE = POINT_SPRITE ? Type.Point : Type.Triangle;
 
-	public Explosion(AssetManager assetManager,
-			RenderManager renderManager) {
+	public Explosion(AssetManager assetManager) {
 		super("explostion");
 		this.assetManager = assetManager;
 
@@ -48,7 +47,7 @@ public class Explosion extends Node {
 		createDebris();
 		createShockwave();
 		setLocalScale(10f);
-		renderManager.preloadScene(this);
+		//renderManager.preloadScene(this);
 
 		addControl(new MyControl());
 	}
