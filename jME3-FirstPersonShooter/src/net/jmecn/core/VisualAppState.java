@@ -22,18 +22,19 @@ import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
 
 public class VisualAppState extends AbstractAppState {
-	
+
 	private SimpleApplication simpleApp;
 	private Camera cam;
-	
-	// 实体系统
-    private EntityData ed;
-    private EntitySet entities;
 
-    // 场景图
-    private final Node rootNode;
-    private final Node guiNode;
-    private final Map<EntityId, Spatial> models;
+	// 实体系统
+	private EntityData ed;
+	private EntitySet entities;
+
+	// 场景图
+	private final Node rootNode;
+	private final Node guiNode;
+	private final Node shootable;
+	private final Map<EntityId, Spatial> models;
 	private ModelFactory modelFactory;
 
 	/**
@@ -42,28 +43,33 @@ public class VisualAppState extends AbstractAppState {
 	public VisualAppState() {
 		rootNode = new Node("VisualRootNode");
 		guiNode = new Node("VisualGuiNode");
-        models = new HashMap<EntityId, Spatial>();
-    }
-	
+		shootable = new Node("Shootable");
+		models = new HashMap<EntityId, Spatial>();
+	}
+
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 		this.simpleApp = (SimpleApplication) app;
-		
-		ed = this.simpleApp.getStateManager().getState(EntityDataState.class).getEntityData();
-        entities = ed.getEntities(Position.class, Model.class);
-        
+
+		ed = this.simpleApp.getStateManager().getState(EntityDataState.class)
+				.getEntityData();
+		entities = ed.getEntities(Position.class, Model.class);
+
 		// 初始化场景
-		simpleApp.getViewPort().setBackgroundColor(new ColorRGBA(0.75f, 0.875f, 1f, 1f));
+		simpleApp.getViewPort().setBackgroundColor(
+				new ColorRGBA(0.75f, 0.875f, 1f, 1f));
 		simpleApp.getRootNode().attachChild(rootNode);
 		simpleApp.getGuiNode().attachChild(guiNode);
+		rootNode.attachChild(shootable);
+
 		modelFactory = new ModelFactory(this.simpleApp.getAssetManager());
-		
-        // 初始化摄像机
-        cam = app.getCamera();
-        cam.setLocation(new Vector3f(200, 100, 80));
-        cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
-		
+
+		// 初始化摄像机
+		cam = app.getCamera();
+		cam.setLocation(new Vector3f(200, 100, 80));
+		cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
+
 		// 初始化光源
 		DirectionalLight dl = new DirectionalLight();
 		dl.setDirection(new Vector3f(-3, -5, -3).normalize());
@@ -79,51 +85,68 @@ public class VisualAppState extends AbstractAppState {
 	@Override
 	public void cleanup() {
 		entities.release();
-        entities = null;
+		entities = null;
 	}
 
 	@Override
 	public void update(float tpf) {
 		if (entities.applyChanges()) {
-            removeModels(entities.getRemovedEntities());
-            addModels(entities.getAddedEntities());
-            updateModels(entities.getChangedEntities());
-        }
+			removeModels(entities.getRemovedEntities());
+			addModels(entities.getAddedEntities());
+			updateModels(entities.getChangedEntities());
+		}
 	}
-	
-    private void removeModels(Set<Entity> entities) {
-        for (Entity e : entities) {
-            Spatial s = models.remove(e.getId());
-            s.removeFromParent();
-        }
-    }
 
-    private void addModels(Set<Entity> entities) {
-        for (Entity e : entities) {
-            Spatial s = createVisual(e);
-            models.put(e.getId(), s);
-            updateModelSpatial(e, s);
-            rootNode.attachChild(s);
-        }
-    }
+	private void removeModels(Set<Entity> entities) {
+		for (Entity e : entities) {
+			Spatial s = models.remove(e.getId());
+			s.removeFromParent();
+		}
+	}
 
-    private void updateModels(Set<Entity> entities) {
-        for (Entity e : entities) {
-            Spatial s = models.get(e.getId());
-            updateModelSpatial(e, s);
-        }
-    }
+	private void addModels(Set<Entity> entities) {
+		for (Entity e : entities) {
+			Spatial s = createVisual(e);
+			models.put(e.getId(), s);
+			updateModelSpatial(e, s);
 
-    private void updateModelSpatial(Entity e, Spatial s) {
-        Position p = e.get(Position.class);
-        s.setLocalTranslation(p.getLocation());
-    }
+			String name = e.get(Model.class).getName();
+			if (name.equals(Model.BOMB) || name.equals(Model.ICEWORLD)) {
+				shootable.attachChild(s);
+			} else {
+				rootNode.attachChild(s);
+			}
+		}
+	}
 
-    private Spatial createVisual(Entity e) {
-        Model model = e.get(Model.class);
-        return modelFactory.create(model.getName());
-    }
-	
+	private void updateModels(Set<Entity> entities) {
+		for (Entity e : entities) {
+			Spatial s = models.get(e.getId());
+			updateModelSpatial(e, s);
+		}
+	}
+
+	private void updateModelSpatial(Entity e, Spatial s) {
+		Position p = e.get(Position.class);
+		s.setLocalTranslation(p.getLocation());
+	}
+
+	private Spatial createVisual(Entity e) {
+		Model model = e.get(Model.class);
+		
+		String name = model.getName();
+		Spatial s = modelFactory.create(name);
+		
+		// 将模型添加到场景图中
+		if (name.equals(Model.BOMB) || name.equals(Model.ICEWORLD)) {
+			shootable.attachChild(s);
+		} else {
+			rootNode.attachChild(s);
+		}
+		
+		return s;
+	}
+
 	@Override
 	public void stateDetached(AppStateManager stateManager) {
 		// 退出游戏时要做清理工作
@@ -133,4 +156,15 @@ public class VisualAppState extends AbstractAppState {
 		simpleApp.getGuiNode().detachChild(guiNode);
 	}
 
+	/**
+	 * 获得可以被击中的物体。
+	 * @return
+	 */
+	public Node getShootable() {
+		return shootable;
+	}
+	
+	public Spatial getModel(EntityId id) {
+		return models.get(id);
+	}
 }

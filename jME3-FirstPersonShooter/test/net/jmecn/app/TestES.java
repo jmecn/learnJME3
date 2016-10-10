@@ -14,10 +14,10 @@ public class TestES extends SimpleApplication {
 	private TestES () {
 		super(new FlyCamAppState(),
 				new VisualAppState(),
-				new PlayerInputAppState(),
 				new CollisionAppState(),
-				new GameAppState(),
-                new EntityDataState());
+				new PlayerInputAppState(),
+				new EntityDataState(),
+				new GameAppState());
 	}
 	
 	@Override

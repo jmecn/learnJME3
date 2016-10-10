@@ -8,6 +8,11 @@ import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 
+/**
+ * ÓÎÏ·Ö÷Àà
+ * @author yanmaoyuan
+ *
+ */
 public class GameAppState extends AbstractAppState {
 
 	private EntityData ed;

@@ -124,9 +124,6 @@ public class PlayerInputAppState extends AbstractAppState {
 		
 		Movement movement = new Movement(walkDirection, moveSpeed);
 		
-		//player.setWalkDirection(walkDirection);
-		//cam.setLocation(player.getPhysicsLocation());
-
 		// 连续开枪
 		gunTime += tpf;
 		if (trigger) {
@@ -150,7 +147,6 @@ public class PlayerInputAppState extends AbstractAppState {
 		}
 	}
 	
-
 	/**
 	 * 开枪
 	 */
@@ -164,7 +160,7 @@ public class PlayerInputAppState extends AbstractAppState {
 	private void bomb() {
 		camLoc.set(cam.getLocation());
 		camLoc.addLocal(cam.getDirection().mult(10));
-		Vector3f linearVelocity = cam.getDirection().mult(100).add(walkDirection);
+		Vector3f linearVelocity = cam.getDirection().mult(100);
 		Vector3f gravity = new Vector3f(0, -98f, 0);
 
 		EntityId bomb = ed.createEntity();

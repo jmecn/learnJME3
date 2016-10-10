@@ -5,21 +5,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import net.jmecn.app.ModelFactory;
-
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
-import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
@@ -33,7 +28,6 @@ public class CollisionAppState extends AbstractAppState {
 
 	private SimpleApplication simpleApp;
 	private Camera cam;
-	private ModelFactory modelFactory;
 	
 	private final BulletAppState bulletAppState;
 	private RigidBodyControl terrain;
@@ -63,8 +57,6 @@ public class CollisionAppState extends AbstractAppState {
         
         movingPlayer = ed.getEntities(Player.class, Movement.class);
         
-        modelFactory = new ModelFactory(app.getAssetManager());
-        
         cam = app.getCamera();
 	}
 
@@ -85,13 +77,15 @@ public class CollisionAppState extends AbstractAppState {
 			}
 		}
 		
-		if (movingPlayer.applyChanges()) {
-			Entity e = movingPlayer.iterator().next();
-			Movement move = e.get(Movement.class);
-			player.setWalkDirection(move.getDirection().mult(move.getSpeed()));
+		if (player != null) {
+			if (movingPlayer.applyChanges()) {
+				Entity e = movingPlayer.iterator().next();
+				Movement move = e.get(Movement.class);
+				player.setWalkDirection(move.getDirection().mult(move.getSpeed()));
+			}
+			
+			cam.setLocation(player.getPhysicsLocation());
 		}
-		
-		cam.setLocation(player.getPhysicsLocation());
 	}
 
 	private void removeCollision(Set<Entity> entities) {
@@ -110,25 +104,32 @@ public class CollisionAppState extends AbstractAppState {
 			
 			String name = model.getName();
 			if (name.equals(Model.BOMB)) {
-				CollisionShape shape = new CylinderCollisionShape(new Vector3f(1, 3, 0.5f));
-				// 创造一个碰撞形
-				RigidBodyControl rigidBody = new RigidBodyControl(shape, collision.getMass());
+				
+				// 定义一个刚体
+				RigidBodyControl rigidBody = new RigidBodyControl(collision.getMass());
+				objects.put(e.getId(), rigidBody);
+
+				// 添加模型
+				Spatial bombModel = simpleApp.getStateManager().getState(VisualAppState.class).getModel(e.getId());
+				bombModel.addControl(rigidBody);
+
+				//  加入到物理空间
+				bulletAppState.getPhysicsSpace().add(bombModel);
+
+				// 设置物理参数
 				rigidBody.setLinearVelocity(collision.getLinearVelocity());
 				rigidBody.setAngularVelocity(collision.getAnglurVelocity());
 				rigidBody.setGravity(collision.getGravity());
-				objects.put(e.getId(), rigidBody);
-				bulletAppState.getPhysicsSpace().add(rigidBody);
-				
 				rigidBody.setPhysicsLocation(position.getLocation());
 			}
 			
 			if (name.equals(Model.ICEWORLD)) {
 				// 地形
 				terrain = new RigidBodyControl(0);
-				Node terrainModel = modelFactory.getIceWorld();
+				Spatial terrainModel = simpleApp.getStateManager().getState(VisualAppState.class).getModel(e.getId());
 				terrainModel.addControl(terrain);
-				
 				bulletAppState.getPhysicsSpace().add(terrainModel);
+				
 			}
 			
 			if (name.equals(Model.OTO)) {

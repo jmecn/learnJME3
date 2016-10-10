@@ -27,7 +27,6 @@ public class Collision implements EntityComponent {
 	
 	public Collision(float mass, Vector3f linearVelocity,
 			Vector3f anglurVelocity, Vector3f gravity) {
-		super();
 		this.mass = mass;
 		this.linearVelocity = linearVelocity;
 		this.anglurVelocity = anglurVelocity;
