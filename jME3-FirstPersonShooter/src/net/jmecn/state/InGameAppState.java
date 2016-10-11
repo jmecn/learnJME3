@@ -59,8 +59,8 @@ public class InGameAppState extends AbstractAppState {
 	private Node shootable = new Node("Shootable");
 
 	// 音效
-	private AudioNode audio_gun;
-	private AudioNode audio_bang;
+	private AudioNode audio_bomb;
+	private AudioNode audio_ak47;
 	private AudioNode audio_beep;
 
 	// 物理
@@ -118,19 +118,19 @@ public class InGameAppState extends AbstractAppState {
 
 	/* gun shot sound is to be triggered by a mouse click. */
 	private void initAudio() {
-		audio_gun = new AudioNode(simpleApp.getAssetManager(),
-				"Sound/Effects/Gun.wav", DataType.Buffer);
-		audio_gun.setPositional(true);
-		audio_gun.setLooping(false);
-		audio_gun.setVolume(2);
-		rootNode.attachChild(audio_gun);
+		audio_bomb = new AudioNode(simpleApp.getAssetManager(),
+				"Sound/weapons/explode3.wav", DataType.Buffer);
+		audio_bomb.setPositional(false);
+		audio_bomb.setLooping(false);
+		audio_bomb.setVolume(2);
+		rootNode.attachChild(audio_bomb);
 
-		audio_bang = new AudioNode(simpleApp.getAssetManager(),
-				"Sound/Effects/Bang.wav", DataType.Buffer);
-		audio_bang.setPositional(true);
-		audio_bang.setLooping(false);
-		audio_bang.setVolume(3);
-		rootNode.attachChild(audio_bang);
+		audio_ak47 = new AudioNode(simpleApp.getAssetManager(),
+				"Sound/weapons/ak47-1.wav", DataType.Buffer);
+		audio_ak47.setPositional(false);
+		audio_ak47.setLooping(false);
+		audio_ak47.setVolume(3);
+		rootNode.attachChild(audio_ak47);
 
 		audio_beep = new AudioNode(simpleApp.getAssetManager(),
 				"Sound/Effects/Beep.ogg", DataType.Buffer);
@@ -232,7 +232,7 @@ public class InGameAppState extends AbstractAppState {
 	};
 
 	private float gunTime = 0f;
-	public final static float GUN_COOLDOWN_TIME = 0.1f;// 枪管冷却时间
+	public final static float GUN_COOLDOWN_TIME = 0.2f;// 枪管冷却时间
 	private float bombTime = 0f;
 	public final static float BOMB_COOLDOWN_TIME = 1f;// 炸弹冷却时间
 
@@ -281,7 +281,7 @@ public class InGameAppState extends AbstractAppState {
 	 * 开枪
 	 */
 	private void shoot() {
-		audio_bang.playInstance();
+		audio_ak47.playInstance();
 
 		// 射线检测
 		CollisionResults results = new CollisionResults();
@@ -323,7 +323,7 @@ public class InGameAppState extends AbstractAppState {
 		Spatial bomb = modelFactory.create(Model.BOMB);
 		
 		// 让手雷在5秒后消失，然后爆炸BOOM!!
-		DecayControl decayContorl = new DecayControl(audio_gun, simpleApp);
+		DecayControl decayContorl = new DecayControl(audio_bomb, simpleApp);
 		bomb.addControl(decayContorl);
 		
 		shootable.attachChild(bomb);
