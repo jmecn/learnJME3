@@ -177,10 +177,10 @@ public class MainAppState extends BaseAppState {
 
 		// 根据摄像机的位置，将菜单居中
 		Camera cam = simpleApp.getCamera();
-		float menuScale = cam.getHeight()/720f;
+		float menuScale = cam.getHeight()/600f;
 
         Vector3f pref = menu.getPreferredSize();
-        float bias = (cam.getHeight() - (pref.y*menuScale)) * 0.35f;
+        float bias = (cam.getHeight() - (pref.y*menuScale)) * 0.1f;
         menu.setLocalTranslation(cam.getWidth() * 0.5f - pref.x * 0.5f * menuScale,
                                  cam.getHeight() * 0.5f + pref.y * 0.5f * menuScale + bias,
                                  10);

@@ -36,11 +36,11 @@ package net.jmecn.state;
 
 import com.google.common.base.Objects;
 import com.jme3.app.Application;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioNode;
 import com.jme3.audio.AudioSource;
 import com.jme3.audio.AudioData.DataType;
-import com.simsilica.lemur.event.BaseAppState;
 
 
 /**
@@ -116,11 +116,11 @@ public class MusicState extends BaseAppState
     }
 
     @Override
-    protected void enable() {
+    protected void onEnable() {
     }
 
     @Override
-    protected void disable() {
+    protected void onDisable() {
     }
     
     @Override
