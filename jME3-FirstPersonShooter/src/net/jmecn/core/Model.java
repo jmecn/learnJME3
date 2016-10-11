@@ -6,6 +6,7 @@ public class Model implements EntityComponent {
     
     public final static String ICEWORLD = "Models/Terrain/iceworld.blend";
     public final static String BOMB = "Models/Bomb/bomb.blend";
+    public final static String BULLET = "Bullet";
 	public static final String SKY = "Sky";
 	public static final String OTO = "Models/Oto/Oto.mesh.xml";
 

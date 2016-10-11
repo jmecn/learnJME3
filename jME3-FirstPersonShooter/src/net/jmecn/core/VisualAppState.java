@@ -5,11 +5,13 @@ import java.util.Map;
 import java.util.Set;
 
 import net.jmecn.app.ModelFactory;
+import net.jmecn.effects.DecayControl;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
+import com.jme3.audio.AudioNode;
+import com.jme3.audio.AudioData.DataType;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -21,7 +23,7 @@ import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
 
-public class VisualAppState extends AbstractAppState {
+public class VisualAppState extends BaseAppState {
 
 	private SimpleApplication simpleApp;
 	private Camera cam;
@@ -31,9 +33,11 @@ public class VisualAppState extends AbstractAppState {
 	private EntitySet entities;
 
 	// 场景图
-	private final Node rootNode;
 	private final Node guiNode;
+	private final Node rootNode;
 	private final Node shootable;
+	private AudioNode audio_bomb;
+	
 	private final Map<EntityId, Spatial> models;
 	private ModelFactory modelFactory;
 
@@ -44,23 +48,21 @@ public class VisualAppState extends AbstractAppState {
 		rootNode = new Node("VisualRootNode");
 		guiNode = new Node("VisualGuiNode");
 		shootable = new Node("Shootable");
+		
 		models = new HashMap<EntityId, Spatial>();
 	}
 
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	protected void initialize(Application app) {
 		this.simpleApp = (SimpleApplication) app;
 
-		ed = this.simpleApp.getStateManager().getState(EntityDataState.class)
-				.getEntityData();
+		ed = getStateManager().getState(EntityDataState.class).getEntityData();
 		entities = ed.getEntities(Position.class, Model.class);
 
 		// 初始化场景
-		simpleApp.getViewPort().setBackgroundColor(
-				new ColorRGBA(0.75f, 0.875f, 1f, 1f));
-		simpleApp.getRootNode().attachChild(rootNode);
-		simpleApp.getGuiNode().attachChild(guiNode);
+		simpleApp.getViewPort().setBackgroundColor(new ColorRGBA(0.75f, 0.875f, 1f, 1f));
+		rootNode.detachAllChildren();
+		guiNode.detachAllChildren();
 		rootNode.attachChild(shootable);
 
 		modelFactory = new ModelFactory(this.simpleApp.getAssetManager());
@@ -80,12 +82,35 @@ public class VisualAppState extends AbstractAppState {
 		dl.setDirection(new Vector3f(3, -5, 3).normalize());
 		dl.setColor(new ColorRGBA(.4f, .4f, .4f, 0.2f));
 		rootNode.addLight(dl);
+		
+		
+		// TODO ???
+		audio_bomb = new AudioNode(simpleApp.getAssetManager(),
+				"Sound/weapons/explode3.wav", DataType.Buffer);
+		audio_bomb.setPositional(false);
+		audio_bomb.setLooping(false);
+		audio_bomb.setVolume(2);
+		rootNode.attachChild(audio_bomb);
 	}
 
 	@Override
-	public void cleanup() {
+	protected void cleanup(Application app) {
 		entities.release();
 		entities = null;
+	}
+	
+
+	@Override
+	protected void onEnable() {
+		simpleApp.getRootNode().attachChild(rootNode);
+		simpleApp.getGuiNode().attachChild(guiNode);
+	}
+
+	@Override
+	protected void onDisable() {
+		// 退出游戏时要做清理工作
+		simpleApp.getRootNode().detachChild(rootNode);
+		simpleApp.getGuiNode().detachChild(guiNode);
 	}
 
 	@Override
@@ -129,6 +154,7 @@ public class VisualAppState extends AbstractAppState {
 	private void updateModelSpatial(Entity e, Spatial s) {
 		Position p = e.get(Position.class);
 		s.setLocalTranslation(p.getLocation());
+		s.setLocalRotation(p.getRotation());
 	}
 
 	private Spatial createVisual(Entity e) {
@@ -136,6 +162,11 @@ public class VisualAppState extends AbstractAppState {
 		
 		String name = model.getName();
 		Spatial s = modelFactory.create(name);
+		
+		// TODO ???
+		if (name.equals(Model.BOMB)) {
+			s.addControl(new DecayControl(audio_bomb, simpleApp));
+		}
 		
 		// 将模型添加到场景图中
 		if (name.equals(Model.BOMB) || name.equals(Model.ICEWORLD)) {
@@ -145,15 +176,6 @@ public class VisualAppState extends AbstractAppState {
 		}
 		
 		return s;
-	}
-
-	@Override
-	public void stateDetached(AppStateManager stateManager) {
-		// 退出游戏时要做清理工作
-		rootNode.detachAllChildren();
-		guiNode.detachAllChildren();
-		simpleApp.getRootNode().detachChild(rootNode);
-		simpleApp.getGuiNode().detachChild(guiNode);
 	}
 
 	/**
@@ -167,4 +189,5 @@ public class VisualAppState extends AbstractAppState {
 	public Spatial getModel(EntityId id) {
 		return models.get(id);
 	}
+
 }

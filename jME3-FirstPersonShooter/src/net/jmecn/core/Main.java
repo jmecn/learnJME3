@@ -13,7 +13,7 @@ import com.jme3.app.StatsAppState;
 public class Main extends SimpleApplication {
 
 	private Main() {
-		super(new StatsAppState(), new FlyCamAppState(), new VisualAppState(),
+		super(new StatsAppState(), new FlyCamAppState(), new ShootState(), new VisualAppState(),
 				new CollisionAppState(), new PlayerInputAppState(),
 				new EntityDataState(), new GameAppState());
 	}

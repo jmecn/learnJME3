@@ -41,6 +41,9 @@ public class ModelFactory {
 			return getIceWorld();
 		else if (name.equals(Model.SKY))
 			return getSky();
+		else if (name.equals(Model.BULLET)) {
+			return createCylinder(ColorRGBA.Yellow).scale(0.2f);
+		}
 		else
 			return assetManager.loadModel(name);
 	}

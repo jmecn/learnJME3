@@ -1,23 +1,33 @@
 package net.jmecn.core;
 
+import net.jmecn.effects.DecayControl;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
 
-public class PlayerInputAppState extends AbstractAppState {
+public class PlayerInputAppState extends BaseAppState {
 
 	private final static String LEFT = "left";
 	private final static String RIGHT = "right";
@@ -31,7 +41,7 @@ public class PlayerInputAppState extends AbstractAppState {
 	private SimpleApplication simpleApp;
 	private Camera cam;
 	private EntityData ed;
-	private EntitySet player;
+	private EntityId player;
 	
 	// 运动逻辑
 	private boolean left = false, right = false, forward = false,
@@ -48,17 +58,14 @@ public class PlayerInputAppState extends AbstractAppState {
 	public final static float BOMB_COOLDOWN_TIME = 1f;// 炸弹冷却时间
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
+	protected void initialize(Application app) {
 
-		super.initialize(stateManager, app);
 		this.simpleApp = (SimpleApplication) app;
 		this.cam = app.getCamera();
 
-		ed = this.simpleApp.getStateManager().getState(EntityDataState.class)
-				.getEntityData();
-		player = ed.getEntities(Player.class, Position.class);
+		ed = getStateManager().getState(EntityDataState.class).getEntityData();
 
-		InputManager inputManager = simpleApp.getInputManager();
+		InputManager inputManager = app.getInputManager();
 
 		inputManager.addMapping(LEFT, new KeyTrigger(KeyInput.KEY_A));
 		inputManager.addMapping(RIGHT, new KeyTrigger(KeyInput.KEY_D));
@@ -102,6 +109,15 @@ public class PlayerInputAppState extends AbstractAppState {
 
 	@Override
 	public void update(float tpf) {
+		// 检查玩家是否已经创建
+		if (player == null) {
+			GameAppState gameState = getStateManager().getState(GameAppState.class);
+			if (gameState != null) {
+				player = gameState.getPlayer();
+			}
+		}
+		
+		if (player == null) return;
 		
 		// 人物行走
 		camDir.set(cam.getDirection()).multLocal(0.6f);
@@ -123,58 +139,40 @@ public class PlayerInputAppState extends AbstractAppState {
 		walkDirection.normalizeLocal();
 		
 		Movement movement = new Movement(walkDirection, moveSpeed);
+		ed.setComponent(player, movement);
 		
 		// 连续开枪
 		gunTime += tpf;
 		if (trigger) {
 			if (gunTime >= GUN_COOLDOWN_TIME) {
 				gunTime = 0f;
-				shoot();
+				
+				ed.setComponent(player, new Shoot(cam.getLocation(), cam.getDirection()));
 			}
 		}
 
 		bombTime += tpf;
 		if (bomb) {
 			if (bombTime >= BOMB_COOLDOWN_TIME) {
-				bombTime = 0;
-				bomb();
+				bombTime = 0f;
+				
+				camLoc.set(cam.getLocation());
+				camLoc.addLocal(cam.getDirection().mult(10));
+				Vector3f linearVelocity = cam.getDirection().mult(100);
+				Vector3f gravity = new Vector3f(0, -98f, 0);
+
+				EntityId bomb = ed.createEntity();
+				ed.setComponents(bomb, 
+					new Model(Model.BOMB),
+					new Collision(0.5f, linearVelocity, new Vector3f(0, 0, 0), gravity),
+					new Position(camLoc));
 			}
 		}
 		
-		player.applyChanges();
-		for (Entity e : player) {
-			e.set(movement);
-		}
 	}
 	
-	/**
-	 * 开枪
-	 */
-	private void shoot() {
-		// 射线检测
-	}
-
-	/**
-	 * 扔雷
-	 */
-	private void bomb() {
-		camLoc.set(cam.getLocation());
-		camLoc.addLocal(cam.getDirection().mult(10));
-		Vector3f linearVelocity = cam.getDirection().mult(100);
-		Vector3f gravity = new Vector3f(0, -98f, 0);
-
-		EntityId bomb = ed.createEntity();
-		ed.setComponents(bomb, 
-			new Model(Model.BOMB),
-			new Collision(0.5f, linearVelocity, new Vector3f(0, 0, 0), gravity),
-			new Position(camLoc));
-	}
-
 	@Override
-	public void cleanup() {
-		super.cleanup();
-		player.release();
-		player = null;
+	protected void cleanup(Application app) {
 	}
 	
 	/**
@@ -182,5 +180,15 @@ public class PlayerInputAppState extends AbstractAppState {
 	 */
 	private void quitGame() {
 		simpleApp.stop();
+	}
+
+	@Override
+	protected void onEnable() {
+		
+	}
+
+	@Override
+	protected void onDisable() {
+		
 	}
 }
