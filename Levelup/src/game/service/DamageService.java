@@ -39,9 +39,14 @@ public class DamageService implements Service {
 				float delta = damage.getDelta();
 				Health hp = e.get(Health.class);
 				
-				String dealerName = ed.getComponent(dealer, Name.class).getName();
+				log.info("Dealer id="+dealer);
 				
-				log.info(dealerName + "攻击了" + name + ", 造成了" + (int)delta + "点伤害.");
+				Name dealerName = ed.getComponent(dealer, Name.class);
+				if (dealerName != null) {
+					log.info(dealerName.getName() + "攻击了" + name + ", 造成了" + (int)delta + "点伤害.");
+				} else {
+					log.info("[未知生物]攻击了" + name + ", 造成了" + (int)delta + "点伤害.");
+				}
 				
 				// 死亡
 				if (delta > hp.getCurrentHp()) {

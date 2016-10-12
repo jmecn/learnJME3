@@ -1,6 +1,6 @@
 package net.jmecn.app;
 
-import net.jmecn.core.Model;
+import net.jmecn.components.Model;
 import net.jmecn.effects.Explosion;
 
 import com.jme3.asset.AssetManager;
@@ -41,6 +41,8 @@ public class ModelFactory {
 			return getIceWorld();
 		else if (name.equals(Model.SKY))
 			return getSky();
+		else if (name.equals(Model.EXPLOSION))
+			return getExplosion();
 		else if (name.equals(Model.BULLET)) {
 			return createCylinder(ColorRGBA.Yellow).scale(0.2f);
 		}
@@ -78,8 +80,7 @@ public class ModelFactory {
 	 * @return
 	 */
 	public Spatial getSky() {
-		return SkyFactory.createSky(assetManager, "Textures/Sky/sky.jpg",
-				EnvMapType.SphereMap);
+		return SkyFactory.createSky(assetManager, "Textures/Sky/sky.jpg", EnvMapType.SphereMap);
 	}
 
 	/**

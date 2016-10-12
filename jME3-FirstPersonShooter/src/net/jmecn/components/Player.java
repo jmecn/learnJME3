@@ -1,4 +1,4 @@
-package net.jmecn.core;
+package net.jmecn.components;
 
 import com.simsilica.es.EntityComponent;
 

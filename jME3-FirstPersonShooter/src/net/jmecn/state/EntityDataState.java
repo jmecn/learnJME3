@@ -1,4 +1,4 @@
-package net.jmecn.core;
+package net.jmecn.state;
 
 import com.jme3.app.state.AbstractAppState;
 import com.simsilica.es.EntityData;

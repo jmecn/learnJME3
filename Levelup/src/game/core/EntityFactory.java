@@ -85,7 +85,7 @@ public class EntityFactory {
 	/**
 	 * 怪物的名字
 	 */
-	static String names[] = {"小独角兽", "蘑菇精", "兔妖"};
+	static String names[] = {"史莱姆", "哥布林", "半人马"};
 
 	/**
 	 * 创建怪物实体

@@ -1,6 +1,8 @@
 package net.jmecn.effects;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioNode;
+import com.jme3.audio.AudioData.DataType;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh.Type;
 import com.jme3.effect.shapes.EmitterSphereShape;
@@ -26,19 +28,14 @@ public class Explosion extends Node {
 	private float speed = 1f;
 	private float time = 0;
 	private int state = 0;
-	private ParticleEmitter flame, flash, spark, roundspark, smoketrail,
-			debris, shockwave;
+	private ParticleEmitter flame, flash, spark, roundspark, smoketrail, debris, shockwave;
 
-	private static final int COUNT_FACTOR = 1;
-	private static final float COUNT_FACTOR_F = 1f;
-
-	private static final boolean POINT_SPRITE = true;
-	private static final Type EMITTER_TYPE = POINT_SPRITE ? Type.Point : Type.Triangle;
-
+	private AudioNode audio_bomb;
 	public Explosion(AssetManager assetManager) {
 		super("explostion");
 		this.assetManager = assetManager;
 
+		createSound();
 		createFlame();
 		createFlash();
 		createSpark();
@@ -47,15 +44,23 @@ public class Explosion extends Node {
 		createDebris();
 		createShockwave();
 		setLocalScale(10f);
-		//renderManager.preloadScene(this);
 
 		addControl(new MyControl());
 	}
+	
+	private void createSound() {
+		audio_bomb = new AudioNode(assetManager, "Sound/weapons/explode3.wav", DataType.Buffer);
+		audio_bomb.setPositional(true);
+		audio_bomb.setLooping(false);
+		audio_bomb.setVolume(1);
+		audio_bomb.playInstance();
+		attachChild(audio_bomb);
+	}
 
 	private void createFlame() {
-		flame = new ParticleEmitter("Flame", EMITTER_TYPE, 32 * COUNT_FACTOR);
+		flame = new ParticleEmitter("Flame", Type.Point, 32);
 		flame.setSelectRandomImage(true);
-		flame.setStartColor(new ColorRGBA(1f, 0.4f, 0.05f, (float) (1f / COUNT_FACTOR_F)));
+		flame.setStartColor(new ColorRGBA(1f, 0.4f, 0.05f, 1));
 		flame.setEndColor(new ColorRGBA(.4f, .22f, .12f, 0f));
 		flame.setStartSize(1.3f);
 		flame.setEndSize(2f);
@@ -70,16 +75,15 @@ public class Explosion extends Node {
 		flame.setImagesY(2);
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
 		mat.setTexture("Texture", assetManager.loadTexture("Effects/Explosion/flame.png"));
-		mat.setBoolean("PointSprite", POINT_SPRITE);
+		mat.setBoolean("PointSprite", true);
 		flame.setMaterial(mat);
 		attachChild(flame);
 	}
 
 	private void createFlash() {
-		flash = new ParticleEmitter("Flash", EMITTER_TYPE, 24 * COUNT_FACTOR);
+		flash = new ParticleEmitter("Flash", Type.Point, 24);
 		flash.setSelectRandomImage(true);
-		flash.setStartColor(new ColorRGBA(1f, 0.8f, 0.36f,
-				(float) (1f / COUNT_FACTOR_F)));
+		flash.setStartColor(new ColorRGBA(1f, 0.8f, 0.36f, 1));
 		flash.setEndColor(new ColorRGBA(1f, 0.8f, 0.36f, 0f));
 		flash.setStartSize(.1f);
 		flash.setEndSize(3.0f);
@@ -92,22 +96,17 @@ public class Explosion extends Node {
 		flash.getParticleInfluencer().setVelocityVariation(1);
 		flash.setImagesX(2);
 		flash.setImagesY(2);
-		Material mat = new Material(assetManager,
-				"Common/MatDefs/Misc/Particle.j3md");
-		mat.setTexture("Texture",
-				assetManager.loadTexture("Effects/Explosion/flash.png"));
-		mat.setBoolean("PointSprite", POINT_SPRITE);
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+		mat.setTexture("Texture", assetManager.loadTexture("Effects/Explosion/flash.png"));
+		mat.setBoolean("PointSprite", true);
 		flash.setMaterial(mat);
 		attachChild(flash);
 	}
 
 	private void createRoundSpark() {
-		roundspark = new ParticleEmitter("RoundSpark", EMITTER_TYPE,
-				20 * COUNT_FACTOR);
-		roundspark.setStartColor(new ColorRGBA(1f, 0.29f, 0.34f,
-				(float) (1.0 / COUNT_FACTOR_F)));
-		roundspark.setEndColor(new ColorRGBA(0, 0, 0,
-				(float) (0.5f / COUNT_FACTOR_F)));
+		roundspark = new ParticleEmitter("RoundSpark", Type.Point, 20);
+		roundspark.setStartColor(new ColorRGBA(1f, 0.29f, 0.34f, 1));
+		roundspark.setEndColor(new ColorRGBA(0, 0, 0, 0.5f));
 		roundspark.setStartSize(1.2f);
 		roundspark.setEndSize(1.8f);
 		roundspark.setShape(new EmitterSphereShape(Vector3f.ZERO, 2f));
@@ -119,19 +118,16 @@ public class Explosion extends Node {
 		roundspark.getParticleInfluencer().setVelocityVariation(.5f);
 		roundspark.setImagesX(1);
 		roundspark.setImagesY(1);
-		Material mat = new Material(assetManager,
-				"Common/MatDefs/Misc/Particle.j3md");
-		mat.setTexture("Texture",
-				assetManager.loadTexture("Effects/Explosion/roundspark.png"));
-		mat.setBoolean("PointSprite", POINT_SPRITE);
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+		mat.setTexture("Texture", assetManager.loadTexture("Effects/Explosion/roundspark.png"));
+		mat.setBoolean("PointSprite", true);
 		roundspark.setMaterial(mat);
 		attachChild(roundspark);
 	}
 
 	private void createSpark() {
-		spark = new ParticleEmitter("Spark", Type.Triangle, 30 * COUNT_FACTOR);
-		spark.setStartColor(new ColorRGBA(1f, 0.8f, 0.36f,
-				(float) (1.0f / COUNT_FACTOR_F)));
+		spark = new ParticleEmitter("Spark", Type.Triangle, 30);
+		spark.setStartColor(new ColorRGBA(1f, 0.8f, 0.36f, 1));
 		spark.setEndColor(new ColorRGBA(1f, 0.8f, 0.36f, 0f));
 		spark.setStartSize(.5f);
 		spark.setEndSize(.5f);
@@ -154,15 +150,12 @@ public class Explosion extends Node {
 	}
 
 	private void createSmokeTrail() {
-		smoketrail = new ParticleEmitter("SmokeTrail", Type.Triangle,
-				22 * COUNT_FACTOR);
-		smoketrail.setStartColor(new ColorRGBA(1f, 0.8f, 0.36f,
-				(float) (1.0f / COUNT_FACTOR_F)));
+		smoketrail = new ParticleEmitter("SmokeTrail", Type.Triangle, 22);
+		smoketrail.setStartColor(new ColorRGBA(1f, 0.8f, 0.36f, 1.0f));
 		smoketrail.setEndColor(new ColorRGBA(1f, 0.8f, 0.36f, 0f));
 		smoketrail.setStartSize(.2f);
 		smoketrail.setEndSize(1f);
 
-		// smoketrail.setShape(new EmitterSphereShape(Vector3f.ZERO, 1f));
 		smoketrail.setFacingVelocity(true);
 		smoketrail.setParticlesPerSec(0);
 		smoketrail.setGravity(0, 1, 0);
@@ -181,17 +174,15 @@ public class Explosion extends Node {
 	}
 
 	private void createDebris() {
-		debris = new ParticleEmitter("Debris", Type.Triangle, 15 * COUNT_FACTOR);
+		debris = new ParticleEmitter("Debris", Type.Triangle, 15);
 		debris.setSelectRandomImage(true);
 		debris.setRandomAngle(true);
 		debris.setRotateSpeed(FastMath.TWO_PI * 4);
-		debris.setStartColor(new ColorRGBA(1f, 0.59f, 0.28f,
-				(float) (1.0f / COUNT_FACTOR_F)));
+		debris.setStartColor(new ColorRGBA(1f, 0.59f, 0.28f, 1.0f));
 		debris.setEndColor(new ColorRGBA(.5f, 0.5f, 0.5f, 0f));
 		debris.setStartSize(.2f);
 		debris.setEndSize(.2f);
 
-		// debris.setShape(new EmitterSphereShape(Vector3f.ZERO, .05f));
 		debris.setParticlesPerSec(0);
 		debris.setGravity(0, 12f, 0);
 		debris.setLowLife(1.4f);
@@ -209,12 +200,9 @@ public class Explosion extends Node {
 	}
 
 	private void createShockwave() {
-		shockwave = new ParticleEmitter("Shockwave", Type.Triangle,
-				1 * COUNT_FACTOR);
-		// shockwave.setRandomAngle(true);
+		shockwave = new ParticleEmitter("Shockwave", Type.Triangle, 1);
 		shockwave.setFaceNormal(Vector3f.UNIT_Y);
-		shockwave.setStartColor(new ColorRGBA(.48f, 0.17f, 0.01f,
-				(float) (.8f / COUNT_FACTOR_F)));
+		shockwave.setStartColor(new ColorRGBA(.48f, 0.17f, 0.01f, 0.8f));
 		shockwave.setEndColor(new ColorRGBA(.48f, 0.17f, 0.01f, 0f));
 
 		shockwave.setStartSize(0f);
@@ -228,10 +216,8 @@ public class Explosion extends Node {
 		shockwave.getParticleInfluencer().setVelocityVariation(0f);
 		shockwave.setImagesX(1);
 		shockwave.setImagesY(1);
-		Material mat = new Material(assetManager,
-				"Common/MatDefs/Misc/Particle.j3md");
-		mat.setTexture("Texture",
-				assetManager.loadTexture("Effects/Explosion/shockwave.png"));
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+		mat.setTexture("Texture", assetManager.loadTexture("Effects/Explosion/shockwave.png"));
 		shockwave.setMaterial(mat);
 		attachChild(shockwave);
 	}
@@ -265,8 +251,7 @@ public class Explosion extends Node {
 				shockwave.killAllParticles();
 				
 				// ÒÆ³ýÕâ¸öControl
-				Node node = spatial.getParent();
-				node.detachChild(spatial);
+				spatial.removeFromParent();
 				removeControl(this);
 			}
 		}

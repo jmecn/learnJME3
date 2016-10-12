@@ -1,17 +1,16 @@
-package net.jmecn.core;
+package net.jmecn.state;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import net.jmecn.app.ModelFactory;
-import net.jmecn.effects.DecayControl;
+import net.jmecn.components.Model;
+import net.jmecn.components.Position;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.audio.AudioNode;
-import com.jme3.audio.AudioData.DataType;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -33,10 +32,7 @@ public class VisualAppState extends BaseAppState {
 	private EntitySet entities;
 
 	// 场景图
-	private final Node guiNode;
 	private final Node rootNode;
-	private final Node shootable;
-	private AudioNode audio_bomb;
 	
 	private final Map<EntityId, Spatial> models;
 	private ModelFactory modelFactory;
@@ -46,15 +42,13 @@ public class VisualAppState extends BaseAppState {
 	 */
 	public VisualAppState() {
 		rootNode = new Node("VisualRootNode");
-		guiNode = new Node("VisualGuiNode");
-		shootable = new Node("Shootable");
 		
 		models = new HashMap<EntityId, Spatial>();
 	}
 
 	@Override
 	protected void initialize(Application app) {
-		this.simpleApp = (SimpleApplication) app;
+		simpleApp = (SimpleApplication) app;
 
 		ed = getStateManager().getState(EntityDataState.class).getEntityData();
 		entities = ed.getEntities(Position.class, Model.class);
@@ -62,15 +56,13 @@ public class VisualAppState extends BaseAppState {
 		// 初始化场景
 		simpleApp.getViewPort().setBackgroundColor(new ColorRGBA(0.75f, 0.875f, 1f, 1f));
 		rootNode.detachAllChildren();
-		guiNode.detachAllChildren();
-		rootNode.attachChild(shootable);
 
-		modelFactory = new ModelFactory(this.simpleApp.getAssetManager());
+		modelFactory = new ModelFactory(simpleApp.getAssetManager());
 
 		// 初始化摄像机
 		cam = app.getCamera();
 		cam.setLocation(new Vector3f(200, 100, 80));
-		cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
+		cam.lookAtDirection(Vector3f.UNIT_Z, Vector3f.UNIT_Y);
 
 		// 初始化光源
 		DirectionalLight dl = new DirectionalLight();
@@ -82,15 +74,6 @@ public class VisualAppState extends BaseAppState {
 		dl.setDirection(new Vector3f(3, -5, 3).normalize());
 		dl.setColor(new ColorRGBA(.4f, .4f, .4f, 0.2f));
 		rootNode.addLight(dl);
-		
-		
-		// TODO ???
-		audio_bomb = new AudioNode(simpleApp.getAssetManager(),
-				"Sound/weapons/explode3.wav", DataType.Buffer);
-		audio_bomb.setPositional(false);
-		audio_bomb.setLooping(false);
-		audio_bomb.setVolume(2);
-		rootNode.attachChild(audio_bomb);
 	}
 
 	@Override
@@ -103,14 +86,12 @@ public class VisualAppState extends BaseAppState {
 	@Override
 	protected void onEnable() {
 		simpleApp.getRootNode().attachChild(rootNode);
-		simpleApp.getGuiNode().attachChild(guiNode);
 	}
 
 	@Override
 	protected void onDisable() {
 		// 退出游戏时要做清理工作
 		simpleApp.getRootNode().detachChild(rootNode);
-		simpleApp.getGuiNode().detachChild(guiNode);
 	}
 
 	@Override
@@ -135,12 +116,7 @@ public class VisualAppState extends BaseAppState {
 			models.put(e.getId(), s);
 			updateModelSpatial(e, s);
 
-			String name = e.get(Model.class).getName();
-			if (name.equals(Model.BOMB) || name.equals(Model.ICEWORLD)) {
-				shootable.attachChild(s);
-			} else {
-				rootNode.attachChild(s);
-			}
+			rootNode.attachChild(s);
 		}
 	}
 
@@ -163,27 +139,7 @@ public class VisualAppState extends BaseAppState {
 		String name = model.getName();
 		Spatial s = modelFactory.create(name);
 		
-		// TODO ???
-		if (name.equals(Model.BOMB)) {
-			s.addControl(new DecayControl(audio_bomb, simpleApp));
-		}
-		
-		// 将模型添加到场景图中
-		if (name.equals(Model.BOMB) || name.equals(Model.ICEWORLD)) {
-			shootable.attachChild(s);
-		} else {
-			rootNode.attachChild(s);
-		}
-		
 		return s;
-	}
-
-	/**
-	 * 获得可以被击中的物体。
-	 * @return
-	 */
-	public Node getShootable() {
-		return shootable;
 	}
 	
 	public Spatial getModel(EntityId id) {

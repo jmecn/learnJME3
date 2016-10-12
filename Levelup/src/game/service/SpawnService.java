@@ -102,6 +102,7 @@ public class SpawnService implements Service {
 			if (id != null) {
 				mothers.remove(e.getId());
 				// 复制一份数据，只更新当前数量。
+				log.info("Id="+id);
 				SpawnPoint point = ed.getComponent(id, SpawnPoint.class);
 				int max = point.getMaximumCount();
 				int count = point.getCurrentCount() - 1;

@@ -276,6 +276,7 @@ public class ViewService extends Canvas implements Service {
 	 */
 	@Override
 	public void update(Graphics g) {
+		
 		paint(g);
 	}
 

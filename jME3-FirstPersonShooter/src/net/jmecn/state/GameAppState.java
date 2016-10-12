@@ -1,4 +1,10 @@
-package net.jmecn.core;
+package net.jmecn.state;
+
+import net.jmecn.components.Collision;
+import net.jmecn.components.Model;
+import net.jmecn.components.Player;
+import net.jmecn.components.Position;
+import net.jmecn.components.Shootable;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -33,7 +39,8 @@ public class GameAppState extends BaseAppState {
 		this.ed.setComponents(world,
 				new Position(new Vector3f(0, 0, 0)),
 				new Model(Model.ICEWORLD),
-				new Collision());
+				new Collision(),
+				new Shootable());
 
 		EntityId sky = ed.createEntity();
 		this.ed.setComponents(sky,

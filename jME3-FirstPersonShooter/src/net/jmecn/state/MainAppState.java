@@ -8,6 +8,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.light.DirectionalLight;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
@@ -90,6 +91,12 @@ public class MainAppState extends BaseAppState {
 
 		// 禁用FlyCamera
 		simpleApp.getFlyByCamera().setEnabled(false);
+		
+		Camera cam = simpleApp.getCamera();
+		cam.setLocation(new Vector3f(20, 10, 20));
+		cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
+		
+		simpleApp.getViewPort().setBackgroundColor(ColorRGBA.Black);
 	}
 
 	@Override
@@ -175,7 +182,7 @@ public class MainAppState extends BaseAppState {
 		menu.addChild(multi);
 		menu.addChild(quit);
 
-		// 根据摄像机的位置，将菜单居中
+		// 根据摄像机的位置，将菜单居中。
 		Camera cam = simpleApp.getCamera();
 		float menuScale = cam.getHeight()/600f;
 
@@ -206,7 +213,8 @@ public class MainAppState extends BaseAppState {
 	 */
 	private void startGame() {
 		setEnabled(false);
-		simpleApp.getStateManager().attach(new InGameAppState());
+		
+		simpleApp.getStateManager().attachAll(new SingleGameState());
 	}
 
 	/**

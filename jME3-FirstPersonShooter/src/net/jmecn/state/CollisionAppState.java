@@ -1,9 +1,15 @@
-package net.jmecn.core;
+package net.jmecn.state;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import net.jmecn.components.Collision;
+import net.jmecn.components.Model;
+import net.jmecn.components.Movement;
+import net.jmecn.components.Player;
+import net.jmecn.components.Position;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -50,7 +56,6 @@ public class CollisionAppState extends AbstractAppState {
 		
 		this.simpleApp = (SimpleApplication) app;
 		stateManager.attach(bulletAppState);
-		bulletAppState.setDebugEnabled(true);
 
 		ed = this.simpleApp.getStateManager().getState(EntityDataState.class).getEntityData();
         entities = ed.getEntities(Collision.class, Model.class, Position.class);

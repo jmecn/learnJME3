@@ -1,7 +1,7 @@
 package net.jmecn.state;
 
 import net.jmecn.app.ModelFactory;
-import net.jmecn.core.Model;
+import net.jmecn.components.Model;
 import net.jmecn.effects.DecayControl;
 
 import com.jme3.app.Application;

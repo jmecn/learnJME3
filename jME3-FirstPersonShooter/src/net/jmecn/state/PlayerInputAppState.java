@@ -1,31 +1,28 @@
-package net.jmecn.core;
+package net.jmecn.state;
 
-import net.jmecn.effects.DecayControl;
+
+import net.jmecn.components.Collision;
+import net.jmecn.components.Model;
+import net.jmecn.components.Movement;
+import net.jmecn.components.Position;
+import net.jmecn.components.Shoot;
+import net.jmecn.components.Shootable;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
+import com.jme3.audio.AudioData.DataType;
+import com.jme3.audio.AudioNode;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
-import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
-import com.simsilica.es.EntitySet;
 
 public class PlayerInputAppState extends BaseAppState {
 
@@ -39,6 +36,7 @@ public class PlayerInputAppState extends BaseAppState {
 	private final static String ESC = "esc";// 退出游戏
 
 	private SimpleApplication simpleApp;
+	private AudioNode ak47;
 	private Camera cam;
 	private EntityData ed;
 	private EntityId player;
@@ -53,9 +51,10 @@ public class PlayerInputAppState extends BaseAppState {
 	private float moveSpeed = 2f;
 
 	private float gunTime = 0f;
-	public final static float GUN_COOLDOWN_TIME = 0.1f;// 枪管冷却时间
+	public final static float GUN_COOLDOWN_TIME = 0.18f;// 枪管冷却时间
 	private float bombTime = 0f;
 	public final static float BOMB_COOLDOWN_TIME = 1f;// 炸弹冷却时间
+	
 	
 	@Override
 	protected void initialize(Application app) {
@@ -65,6 +64,11 @@ public class PlayerInputAppState extends BaseAppState {
 
 		ed = getStateManager().getState(EntityDataState.class).getEntityData();
 
+		ak47 = new AudioNode(app.getAssetManager(), "Sound/weapons/ak47-1.wav", DataType.Buffer);
+		ak47.setPositional(false);
+		ak47.setLooping(false);
+		ak47.setVolume(2);
+		
 		InputManager inputManager = app.getInputManager();
 
 		inputManager.addMapping(LEFT, new KeyTrigger(KeyInput.KEY_A));
@@ -76,8 +80,7 @@ public class PlayerInputAppState extends BaseAppState {
 		inputManager.addMapping(BOMB, new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
 		inputManager.addMapping(ESC, new KeyTrigger(KeyInput.KEY_ESCAPE));
 
-		inputManager.addListener(myListener, LEFT, RIGHT, FORWARD, BACKWARD,
-				JUMP, TRIGGER, BOMB, ESC);
+		inputManager.addListener(myListener, LEFT, RIGHT, FORWARD, BACKWARD, JUMP, TRIGGER, BOMB, ESC);
 	}
 	
 	/**
@@ -147,6 +150,7 @@ public class PlayerInputAppState extends BaseAppState {
 			if (gunTime >= GUN_COOLDOWN_TIME) {
 				gunTime = 0f;
 				
+				ak47.playInstance();
 				ed.setComponent(player, new Shoot(cam.getLocation(), cam.getDirection()));
 			}
 		}
@@ -165,7 +169,8 @@ public class PlayerInputAppState extends BaseAppState {
 				ed.setComponents(bomb, 
 					new Model(Model.BOMB),
 					new Collision(0.5f, linearVelocity, new Vector3f(0, 0, 0), gravity),
-					new Position(camLoc));
+					new Position(camLoc),
+					new Shootable());
 			}
 		}
 		
@@ -179,16 +184,17 @@ public class PlayerInputAppState extends BaseAppState {
 	 * 退出游戏
 	 */
 	private void quitGame() {
-		simpleApp.stop();
+		getStateManager().detach(getStateManager().getState(SingleGameState.class));
+		getStateManager().getState(MainAppState.class).setEnabled(true);
 	}
 
 	@Override
 	protected void onEnable() {
-		
+		simpleApp.getRootNode().attachChild(ak47);
 	}
 
 	@Override
 	protected void onDisable() {
-		
+		ak47.removeFromParent();
 	}
 }

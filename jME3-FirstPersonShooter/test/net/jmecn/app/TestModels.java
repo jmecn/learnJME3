@@ -27,7 +27,7 @@ import com.jme3.util.SkyFactory.EnvMapType;
 /**
  * 调试用的App，检查手雷在碰撞检测的时候为什么会离开地图。
  * 无论是使用 jbullet还是bullet-native，手雷都有一定几率穿过模型。可能是从缝隙穿过去了？
- * @author yuanmaoyuan
+ * @author yanmaoyuan
  *
  */
 public class TestModels extends SimpleApplication {
