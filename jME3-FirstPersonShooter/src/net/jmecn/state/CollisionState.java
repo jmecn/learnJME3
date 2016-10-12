@@ -13,8 +13,8 @@ import net.jmecn.components.Position;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
@@ -30,7 +30,7 @@ import com.simsilica.es.EntitySet;
  * 基于BulletAppState的碰撞检测
  * @author yanmaoyuan
  */
-public class CollisionAppState extends AbstractAppState {
+public class CollisionState extends BaseAppState {
 
 	private SimpleApplication simpleApp;
 	private Camera cam;
@@ -45,17 +45,16 @@ public class CollisionAppState extends AbstractAppState {
 
 	private Map<EntityId, RigidBodyControl> objects;
 	
-	public CollisionAppState() {
+	public CollisionState() {
 		bulletAppState = new BulletAppState();
 		
 		objects = new HashMap<EntityId, RigidBodyControl>();
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
+	public void initialize(Application app) {
 		
 		this.simpleApp = (SimpleApplication) app;
-		stateManager.attach(bulletAppState);
 
 		ed = this.simpleApp.getStateManager().getState(EntityDataState.class).getEntityData();
         entities = ed.getEntities(Collision.class, Model.class, Position.class);
@@ -115,7 +114,7 @@ public class CollisionAppState extends AbstractAppState {
 				objects.put(e.getId(), rigidBody);
 
 				// 添加模型
-				Spatial bombModel = simpleApp.getStateManager().getState(VisualAppState.class).getModel(e.getId());
+				Spatial bombModel = simpleApp.getStateManager().getState(ModelState.class).getModel(e.getId());
 				bombModel.addControl(rigidBody);
 
 				//  加入到物理空间
@@ -131,10 +130,9 @@ public class CollisionAppState extends AbstractAppState {
 			if (name.equals(Model.ICEWORLD)) {
 				// 地形
 				terrain = new RigidBodyControl(0);
-				Spatial terrainModel = simpleApp.getStateManager().getState(VisualAppState.class).getModel(e.getId());
+				Spatial terrainModel = simpleApp.getStateManager().getState(ModelState.class).getModel(e.getId());
 				terrainModel.addControl(terrain);
 				bulletAppState.getPhysicsSpace().add(terrainModel);
-				
 			}
 			
 			if (name.equals(Model.OTO)) {
@@ -152,8 +150,7 @@ public class CollisionAppState extends AbstractAppState {
 	}
 	
 	@Override
-	public void cleanup() {
-		super.cleanup();
+	public void cleanup(Application app) {
 		entities.release();
         entities = null;
         
@@ -166,6 +163,19 @@ public class CollisionAppState extends AbstractAppState {
 		super.stateDetached(stateManager);
 		
 		stateManager.detach(bulletAppState);
+	}
+
+	@Override
+	protected void onEnable() {
+		getStateManager().attach(bulletAppState);
+		entities.applyChanges();
+		addCollision(entities);
+	}
+
+	@Override
+	protected void onDisable() {
+		getStateManager().detach(bulletAppState);
+		removeCollision(entities);
 	}
 
 }

@@ -2,6 +2,7 @@ package net.jmecn.state;
 
 import java.util.Set;
 
+import net.jmecn.components.Decay;
 import net.jmecn.components.Model;
 import net.jmecn.components.Position;
 import net.jmecn.components.Shoot;
@@ -31,15 +32,14 @@ public class ShootState extends BaseAppState {
 	private EntitySet shootings;
 	private EntitySet shootables;
 	
-	VisualAppState visual;
+	ModelState visual;
 	@Override
 	protected void initialize(Application app) {
 		ed = getStateManager().getState(EntityDataState.class).getEntityData();
-		visual = getStateManager().getState(VisualAppState.class);
+		visual = getStateManager().getState(ModelState.class);
 		
 		shootings = ed.getEntities(Shoot.class);
 		shootables = ed.getEntities(Model.class, Shootable.class, Position.class);
-		
 	}
 	
 	@Override
@@ -106,20 +106,15 @@ public class ShootState extends BaseAppState {
 				EntityId bulletMark = ed.createEntity();
 				ed.setComponents(bulletMark,
 						new Position(closest.getContactPoint(), rotation),
-						new Model(Model.BULLET));
+						new Model(Model.BULLET),
+						new Decay(10000));
 				
 				// 判断被命中的物体类型
 				Model model = ed.getComponent(closestId, Model.class);
-				Position position = ed.getComponent(closestId, Position.class);
 				
 				if (model.getName().equals(Model.BOMB)) {
-					ed.removeEntity(closestId);
-					
-					EntityId explosion = ed.createEntity();
-					ed.setComponents(
-							explosion,
-							new Model(Model.EXPLOSION),
-							new Position(position.getLocation()));
+					ed.setComponent(closestId, new Decay(0));
+					//ed.removeEntity(closestId);
 				}
 			}
 			

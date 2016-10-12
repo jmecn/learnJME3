@@ -6,10 +6,14 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.jme3.ui.Picture;
+import com.simsilica.es.Entity;
 
 public class HudState extends BaseAppState {
 
 	private Node guiNode;
+	
+	private Entity player;
+	private boolean dirty = false;
 	
 	public HudState() {
 		guiNode = new Node("Hud");
@@ -43,5 +47,22 @@ public class HudState extends BaseAppState {
 	protected void onDisable() {
 		guiNode.removeFromParent();
 	}
+	
+	public void setPlayer(Entity player) {
+		this.player = player;
+		updatePlayer();
+	}
+	
+    public void updatePlayer() {
+        dirty = true;
+    }
+	
+    @Override
+    public void update( float tpf ) {
+        if( dirty ) {
+        	dirty = false;
+        	// ¸üÐÂHUD
+        }
+    }
 
 }

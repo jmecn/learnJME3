@@ -1,7 +1,9 @@
 package net.jmecn.state;
 
 
+import net.jmecn.app.PlayerFunctions;
 import net.jmecn.components.Collision;
+import net.jmecn.components.Decay;
 import net.jmecn.components.Model;
 import net.jmecn.components.Movement;
 import net.jmecn.components.Position;
@@ -13,6 +15,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.audio.AudioData.DataType;
 import com.jme3.audio.AudioNode;
+import com.jme3.input.CameraInput;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -21,10 +24,13 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
+import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
+import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.input.InputMapper;
 
-public class PlayerInputAppState extends BaseAppState {
+public class InputState extends BaseAppState {
 
 	private final static String LEFT = "left";
 	private final static String RIGHT = "right";
@@ -55,7 +61,6 @@ public class PlayerInputAppState extends BaseAppState {
 	private float bombTime = 0f;
 	public final static float BOMB_COOLDOWN_TIME = 1f;// 炸弹冷却时间
 	
-	
 	@Override
 	protected void initialize(Application app) {
 
@@ -69,8 +74,18 @@ public class PlayerInputAppState extends BaseAppState {
 		ak47.setLooping(false);
 		ak47.setVolume(2);
 		
+		
+		// TODO use lemur input insteadof jme input
+		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
+		inputMapper.addDelegate(PlayerFunctions.F_EXIT, this, "quitGame");
+
 		InputManager inputManager = app.getInputManager();
 
+		inputManager.deleteMapping(CameraInput.FLYCAM_FORWARD);
+		inputManager.deleteMapping(CameraInput.FLYCAM_BACKWARD);
+		inputManager.deleteMapping(CameraInput.FLYCAM_STRAFELEFT);
+		inputManager.deleteMapping(CameraInput.FLYCAM_STRAFERIGHT);
+		inputManager.deleteMapping(CameraInput.FLYCAM_RISE);
 		inputManager.addMapping(LEFT, new KeyTrigger(KeyInput.KEY_A));
 		inputManager.addMapping(RIGHT, new KeyTrigger(KeyInput.KEY_D));
 		inputManager.addMapping(FORWARD, new KeyTrigger(KeyInput.KEY_W));
@@ -112,16 +127,6 @@ public class PlayerInputAppState extends BaseAppState {
 
 	@Override
 	public void update(float tpf) {
-		// 检查玩家是否已经创建
-		if (player == null) {
-			GameAppState gameState = getStateManager().getState(GameAppState.class);
-			if (gameState != null) {
-				player = gameState.getPlayer();
-			}
-		}
-		
-		if (player == null) return;
-		
 		// 人物行走
 		camDir.set(cam.getDirection()).multLocal(0.6f);
 		camLeft.set(cam.getLeft()).multLocal(0.4f);
@@ -170,7 +175,8 @@ public class PlayerInputAppState extends BaseAppState {
 					new Model(Model.BOMB),
 					new Collision(0.5f, linearVelocity, new Vector3f(0, 0, 0), gravity),
 					new Position(camLoc),
-					new Shootable());
+					new Shootable(),
+					new Decay(5000));
 			}
 		}
 		
@@ -180,12 +186,16 @@ public class PlayerInputAppState extends BaseAppState {
 	protected void cleanup(Application app) {
 	}
 	
+	public void setPlayer(Entity player) {
+		this.player = player.getId();
+	}
 	/**
 	 * 退出游戏
 	 */
-	private void quitGame() {
+	public void quitGame() {
 		getStateManager().detach(getStateManager().getState(SingleGameState.class));
-		getStateManager().getState(MainAppState.class).setEnabled(true);
+		MainAppState main = getStateManager().getState(MainAppState.class);
+		if (main != null) main.setEnabled(true);
 	}
 
 	@Override

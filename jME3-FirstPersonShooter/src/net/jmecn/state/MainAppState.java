@@ -214,7 +214,7 @@ public class MainAppState extends BaseAppState {
 	private void startGame() {
 		setEnabled(false);
 		
-		simpleApp.getStateManager().attachAll(new SingleGameState());
+		simpleApp.getStateManager().attach(new SingleGameState());
 	}
 
 	/**

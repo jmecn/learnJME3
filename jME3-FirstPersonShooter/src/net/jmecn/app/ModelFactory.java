@@ -13,6 +13,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
 import com.jme3.util.SkyFactory.EnvMapType;
 
@@ -92,6 +93,9 @@ public class ModelFactory {
 		return new Explosion(assetManager);
 	}
 
+	public Material getUnshadedMaterial() {
+		return new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+	}
 	/**
 	 * 创建一个正方体
 	 * 
@@ -100,8 +104,7 @@ public class ModelFactory {
 	 */
 	public Geometry createBox(ColorRGBA color) {
 		Geometry spatial = new Geometry("Box", new Box(1, 1, 1));
-		Material mat = new Material(assetManager,
-				"Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = getUnshadedMaterial();
 		mat.setColor("Color", color);
 		spatial.setMaterial(mat);
 		return spatial;
@@ -115,8 +118,7 @@ public class ModelFactory {
 	 */
 	public Geometry createSphere(ColorRGBA color) {
 		Geometry spatial = new Geometry("Sphere", new Sphere(6, 6, 1));
-		Material mat = new Material(assetManager,
-				"Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = getUnshadedMaterial();
 		mat.setColor("Color", color);
 		spatial.setMaterial(mat);
 		return spatial;
@@ -131,8 +133,7 @@ public class ModelFactory {
 	public Geometry createCylinder(ColorRGBA color) {
 		Geometry spatial = new Geometry("Cylinder", new Cylinder(2, 6, 1, 4,
 				true));
-		Material mat = new Material(assetManager,
-				"Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = getUnshadedMaterial();
 		mat.setColor("Color", color);
 		spatial.setMaterial(mat);
 

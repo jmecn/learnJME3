@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import net.jmecn.app.ModelFactory;
 import net.jmecn.components.Model;
 import net.jmecn.components.Position;
@@ -22,8 +24,10 @@ import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
 
-public class VisualAppState extends BaseAppState {
+public class ModelState extends BaseAppState {
 
+	static Logger log = Logger.getLogger(ModelState.class);
+	
 	private SimpleApplication simpleApp;
 	private Camera cam;
 
@@ -40,7 +44,7 @@ public class VisualAppState extends BaseAppState {
 	/**
 	 * 初始化
 	 */
-	public VisualAppState() {
+	public ModelState() {
 		rootNode = new Node("VisualRootNode");
 		
 		models = new HashMap<EntityId, Spatial>();
@@ -86,17 +90,20 @@ public class VisualAppState extends BaseAppState {
 	@Override
 	protected void onEnable() {
 		simpleApp.getRootNode().attachChild(rootNode);
+		entities.applyChanges();
+		addModels(entities);
 	}
 
 	@Override
 	protected void onDisable() {
-		// 退出游戏时要做清理工作
-		simpleApp.getRootNode().detachChild(rootNode);
+		rootNode.removeFromParent();
+		removeModels(entities);
 	}
 
 	@Override
 	public void update(float tpf) {
 		if (entities.applyChanges()) {
+			log.info("Model Counts: " + entities.size());
 			removeModels(entities.getRemovedEntities());
 			addModels(entities.getAddedEntities());
 			updateModels(entities.getChangedEntities());
