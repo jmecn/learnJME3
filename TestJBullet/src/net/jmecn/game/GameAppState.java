@@ -1,13 +1,20 @@
 package net.jmecn.game;
 
+import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -19,8 +26,11 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Cylinder;
 
 /**
@@ -30,6 +40,8 @@ import com.jme3.scene.shape.Cylinder;
  */
 public class GameAppState extends BaseAppState {
 
+	boolean useHullCollision = true;
+	
 	public static void main(String[] args) {
 		SimpleApplication app = new SimpleApplication() {
 			@Override
@@ -37,6 +49,8 @@ public class GameAppState extends BaseAppState {
 				stateManager.attachAll(
 						new ScreenshotAppState("", System.currentTimeMillis()),
 						new GameAppState());
+				
+				flyCam.setMoveSpeed(100);
 			}
 		};
 		app.start();
@@ -62,6 +76,8 @@ public class GameAppState extends BaseAppState {
 	private BulletAppState bulletAppState;
 	private RigidBodyControl terrain;
 	private CharacterControl player;
+	
+	private List<RigidBodyControl> terrainHulls;
 
 	// Walking parameters
 	private boolean left = false, right = false, forward = false, backward = false, trigger = false;
@@ -77,6 +93,7 @@ public class GameAppState extends BaseAppState {
 		
 		bulletAppState = new BulletAppState();
 		bulletAppState.setDebugEnabled(debugEnabled);
+		terrainHulls = new ArrayList<RigidBodyControl>();
 		
 		camLoc = new Vector3f();
 		camDir = new Vector3f();
@@ -101,16 +118,29 @@ public class GameAppState extends BaseAppState {
 		 * Initialize Bullet Physics
 		 */
 		// Terrain
-		this.terrain = new RigidBodyControl(0);
-		model.addControl(terrain);
+		if (useHullCollision) {
+			model.breadthFirstTraversal(new SceneGraphVisitor() {
+				@Override
+				public void visit(Spatial spatial) {
+					if (spatial instanceof Geometry) {
+						Mesh mesh = ((Geometry) spatial).getMesh();
+						terrainHulls.add(new RigidBodyControl(new HullCollisionShape(mesh), 0));
+					}
+				}
+			});
+		} else {
+			CollisionShape shape = CollisionShapeFactory.createMeshShape(model);
+			terrain = new RigidBodyControl(shape, 0);
+		}
+		
 
 		// Player
 		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(10f, 40f, 1);
 		player = new CharacterControl(capsuleShape, 50f);
 		player.setJumpSpeed(60);
 		player.setFallSpeed(60);
-		player.setGravity(98f);
-		
+		player.setGravity(9.8f);
+		player.setPhysicsLocation(new Vector3f(200, 20, 80));
 		
 		/**
 		 * Initialize input
@@ -124,6 +154,19 @@ public class GameAppState extends BaseAppState {
 		inputManager.addMapping(BULLET_DEBUG, new KeyTrigger(KeyInput.KEY_F4));
 		inputManager.addMapping(TRIGGER, new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
 	}
+	
+    protected float[] getPoints(Mesh mesh) {
+        FloatBuffer vertices = mesh.getFloatBuffer(Type.Position);
+        vertices.rewind();
+        int components = mesh.getVertexCount() * 3;
+        float[] pointsArray = new float[components];
+        for (int i = 0; i < components; i += 3) {
+            pointsArray[i] = vertices.get();
+            pointsArray[i + 1] = vertices.get();
+            pointsArray[i + 2] = vertices.get();
+        }
+        return pointsArray;
+    }
 
 	/**
 	 * Create a cylinder
@@ -189,7 +232,7 @@ public class GameAppState extends BaseAppState {
 		walkDirection.y = 0;
 		walkDirection.normalizeLocal().multLocal(moveSpeed);
 		player.setWalkDirection(walkDirection);
-		cam.setLocation(player.getPhysicsLocation());
+		//cam.setLocation(player.getPhysicsLocation());
 
 		/**
 		 * Left click
@@ -211,7 +254,7 @@ public class GameAppState extends BaseAppState {
 				bulletAppState.getPhysicsSpace().add(control);
 				
 				control.setLinearVelocity(cam.getDirection().mult(100).add(walkDirection));
-				control.setGravity(new Vector3f(0, -98f, 0));
+				control.setGravity(new Vector3f(0, -9.8f, 0));
 			}
 		}
 	}
@@ -225,7 +268,16 @@ public class GameAppState extends BaseAppState {
 		simpleApp.getRootNode().attachChild(rootNode);
 		
 		getStateManager().attach(bulletAppState);
-		bulletAppState.getPhysicsSpace().add(terrain);
+		
+		// terrain
+		if (useHullCollision) {
+			for(RigidBodyControl control : terrainHulls) {
+				bulletAppState.getPhysicsSpace().add(control);
+			}
+		} else {
+			bulletAppState.getPhysicsSpace().add(terrain);
+		}
+		// player
 		bulletAppState.getPhysicsSpace().add(player);
 		
 		simpleApp.getInputManager().addListener(myListener,
@@ -237,8 +289,16 @@ public class GameAppState extends BaseAppState {
 	protected void onDisable() {
 		rootNode.removeFromParent();
 
-		bulletAppState.getPhysicsSpace().remove(terrain);
+		// player
 		bulletAppState.getPhysicsSpace().remove(player);
+		// terrain
+		if (useHullCollision) {
+			for(RigidBodyControl control : terrainHulls) {
+				bulletAppState.getPhysicsSpace().remove(control);
+			}
+		} else {
+			bulletAppState.getPhysicsSpace().remove(terrain);
+		}
 		getStateManager().detach(bulletAppState);
 		
 		simpleApp.getInputManager().removeListener(myListener);
