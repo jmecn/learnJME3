@@ -1,8 +1,6 @@
 package net.jmecn.game;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -11,7 +9,6 @@ import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -28,7 +25,6 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
-import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Cylinder;
@@ -40,7 +36,7 @@ import com.jme3.scene.shape.Cylinder;
  */
 public class GameAppState extends BaseAppState {
 
-	boolean useHullCollision = false;
+	boolean useHullCollision = true;
 	
 	public static void main(String[] args) {
 		SimpleApplication app = new SimpleApplication() {
@@ -77,8 +73,6 @@ public class GameAppState extends BaseAppState {
 	private RigidBodyControl terrain;
 	private CharacterControl player;
 	
-	private List<RigidBodyControl> terrainHulls;
-
 	// Walking parameters
 	private boolean left = false, right = false, forward = false, backward = false, trigger = false;
 	
@@ -93,7 +87,6 @@ public class GameAppState extends BaseAppState {
 		
 		bulletAppState = new BulletAppState();
 		bulletAppState.setDebugEnabled(debugEnabled);
-		terrainHulls = new ArrayList<RigidBodyControl>();
 		
 		camLoc = new Vector3f();
 		camDir = new Vector3f();
@@ -119,15 +112,8 @@ public class GameAppState extends BaseAppState {
 		 */
 		// Terrain
 		if (useHullCollision) {
-			model.breadthFirstTraversal(new SceneGraphVisitor() {
-				@Override
-				public void visit(Spatial spatial) {
-					if (spatial instanceof Geometry) {
-						Mesh mesh = ((Geometry) spatial).getMesh();
-						terrainHulls.add(new RigidBodyControl(new HullCollisionShape(mesh), 0));
-					}
-				}
-			});
+			CollisionShape shape = CollisionShapeFactory.createDynamicMeshShape(model);
+			terrain = new RigidBodyControl(shape, 0);
 		} else {
 			CollisionShape shape = CollisionShapeFactory.createMeshShape(model);
 			terrain = new RigidBodyControl(shape, 0);
@@ -232,7 +218,7 @@ public class GameAppState extends BaseAppState {
 		walkDirection.y = 0;
 		walkDirection.normalizeLocal().multLocal(moveSpeed);
 		player.setWalkDirection(walkDirection);
-		cam.setLocation(player.getPhysicsLocation());
+		//cam.setLocation(player.getPhysicsLocation());
 
 		/**
 		 * Left click
@@ -268,16 +254,7 @@ public class GameAppState extends BaseAppState {
 		simpleApp.getRootNode().attachChild(rootNode);
 		
 		getStateManager().attach(bulletAppState);
-		
-		// terrain
-		if (useHullCollision) {
-			for(RigidBodyControl control : terrainHulls) {
-				bulletAppState.getPhysicsSpace().add(control);
-			}
-		} else {
-			bulletAppState.getPhysicsSpace().add(terrain);
-		}
-		// player
+		bulletAppState.getPhysicsSpace().add(terrain);
 		bulletAppState.getPhysicsSpace().add(player);
 		
 		simpleApp.getInputManager().addListener(myListener,
@@ -289,16 +266,8 @@ public class GameAppState extends BaseAppState {
 	protected void onDisable() {
 		rootNode.removeFromParent();
 
-		// player
 		bulletAppState.getPhysicsSpace().remove(player);
-		// terrain
-		if (useHullCollision) {
-			for(RigidBodyControl control : terrainHulls) {
-				bulletAppState.getPhysicsSpace().remove(control);
-			}
-		} else {
-			bulletAppState.getPhysicsSpace().remove(terrain);
-		}
+		bulletAppState.getPhysicsSpace().remove(terrain);
 		getStateManager().detach(bulletAppState);
 		
 		simpleApp.getInputManager().removeListener(myListener);
