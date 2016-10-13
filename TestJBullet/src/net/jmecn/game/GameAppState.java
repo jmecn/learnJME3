@@ -40,7 +40,7 @@ import com.jme3.scene.shape.Cylinder;
  */
 public class GameAppState extends BaseAppState {
 
-	boolean useHullCollision = true;
+	boolean useHullCollision = false;
 	
 	public static void main(String[] args) {
 		SimpleApplication app = new SimpleApplication() {
@@ -232,7 +232,7 @@ public class GameAppState extends BaseAppState {
 		walkDirection.y = 0;
 		walkDirection.normalizeLocal().multLocal(moveSpeed);
 		player.setWalkDirection(walkDirection);
-		//cam.setLocation(player.getPhysicsLocation());
+		cam.setLocation(player.getPhysicsLocation());
 
 		/**
 		 * Left click
