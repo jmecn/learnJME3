@@ -36,7 +36,7 @@ import com.jme3.scene.shape.Cylinder;
  */
 public class GameAppState extends BaseAppState {
 
-	boolean useHullCollision = true;
+	boolean useHullCollision = false;
 	
 	public static void main(String[] args) {
 		SimpleApplication app = new SimpleApplication() {
@@ -118,7 +118,6 @@ public class GameAppState extends BaseAppState {
 			CollisionShape shape = CollisionShapeFactory.createMeshShape(model);
 			terrain = new RigidBodyControl(shape, 0);
 		}
-		
 
 		// Player
 		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(10f, 40f, 1);
@@ -218,7 +217,10 @@ public class GameAppState extends BaseAppState {
 		walkDirection.y = 0;
 		walkDirection.normalizeLocal().multLocal(moveSpeed);
 		player.setWalkDirection(walkDirection);
-		//cam.setLocation(player.getPhysicsLocation());
+		
+		if (!useHullCollision) {
+			cam.setLocation(player.getPhysicsLocation());
+		}
 
 		/**
 		 * Left click
