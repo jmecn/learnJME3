@@ -52,6 +52,8 @@ public class Explosion extends Node {
 		audio_bomb = new AudioNode(assetManager, "Sound/weapons/explode3.wav", DataType.Buffer);
 		audio_bomb.setPositional(true);
 		audio_bomb.setLooping(false);
+		audio_bomb.setRefDistance(50);
+		audio_bomb.setReverbEnabled(true);
 		audio_bomb.setVolume(1);
 		audio_bomb.playInstance();
 		attachChild(audio_bomb);

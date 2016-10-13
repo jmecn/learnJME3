@@ -7,7 +7,6 @@ import strongdk.jme.appstate.console.ConsoleAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
@@ -39,7 +38,6 @@ public class MainAppState extends BaseAppState {
 	// 3D场景
 	private Node rootNode = new Node("mainScene");
 	private Spatial model;
-	private DirectionalLight sun;
 
 	// GUI
 	private Node guiNode = new Node("mainGui");
@@ -93,7 +91,7 @@ public class MainAppState extends BaseAppState {
 		simpleApp.getFlyByCamera().setEnabled(false);
 		
 		Camera cam = simpleApp.getCamera();
-		cam.setLocation(new Vector3f(20, 10, 20));
+		cam.setLocation(new Vector3f(200, 400, 200));
 		cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
 		
 		simpleApp.getViewPort().setBackgroundColor(ColorRGBA.Black);
@@ -126,17 +124,8 @@ public class MainAppState extends BaseAppState {
 	private void init3DScene() {
 		// 给主界面的背景添加一个3D场景
 		model = simpleApp.getAssetManager().loadModel(
-				"Models/Terrain/iceworld.blend");
+				"Models/Terrain/iceworld.j3o");
 		rootNode.attachChild(model);
-
-		sun = new DirectionalLight();
-		sun.setDirection(new Vector3f(-5, -6, 4).normalize());
-		rootNode.addLight(sun);
-
-		// 初始化摄像机位置
-		Camera cam = simpleApp.getCamera();
-		cam.setLocation(new Vector3f(30, 50, 30));
-		cam.lookAt(new Vector3f(0, 0, 0), Vector3f.UNIT_Y);
 	}
 
 	/**

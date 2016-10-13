@@ -103,7 +103,6 @@ public class ModelState extends BaseAppState {
 	@Override
 	public void update(float tpf) {
 		if (entities.applyChanges()) {
-			log.info("Model Counts: " + entities.size());
 			removeModels(entities.getRemovedEntities());
 			addModels(entities.getAddedEntities());
 			updateModels(entities.getChangedEntities());

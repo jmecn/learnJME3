@@ -8,12 +8,10 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.Sphere;
-import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
 import com.jme3.util.SkyFactory.EnvMapType;
 
@@ -58,19 +56,6 @@ public class ModelFactory {
 	 */
 	public Node getIceWorld() {
 		Node iceworld = (Node) assetManager.loadModel(Model.ICEWORLD);
-		iceworld.scale(10);
-
-		iceworld.breadthFirstTraversal(new SceneGraphVisitor() {
-			@Override
-			public void visit(Spatial spatial) {
-				// BlenderLoader导入的模型反光度都太高了，降低一点。
-				if (spatial instanceof Geometry) {
-					Geometry geom = (Geometry) spatial;
-					Material mat = geom.getMaterial();
-					mat.setFloat("Shininess", 0);
-				}
-			}
-		});
 
 		return iceworld;
 	}
