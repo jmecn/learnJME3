@@ -124,7 +124,7 @@ public class GameAppState extends BaseAppState {
 		player = new CharacterControl(capsuleShape, 50f);
 		player.setJumpSpeed(60);
 		player.setFallSpeed(60);
-		player.setGravity(9.8f);
+		player.setGravity(98f);
 		player.setPhysicsLocation(new Vector3f(200, 20, 80));
 		
 		/**
@@ -240,6 +240,9 @@ public class GameAppState extends BaseAppState {
 				RigidBodyControl control = new RigidBodyControl(0.5f);
 				bomb.addControl(control);
 				bulletAppState.getPhysicsSpace().add(control);
+				// avoid pass through the wall
+                control.setCcdSweptSphereRadius(.1f);
+                control.setCcdMotionThreshold(0.001f);
 				
 				control.setLinearVelocity(cam.getDirection().mult(100).add(walkDirection));
 				control.setGravity(new Vector3f(0, -9.8f, 0));
