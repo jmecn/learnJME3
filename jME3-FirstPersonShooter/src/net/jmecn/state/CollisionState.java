@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.jmecn.components.Collision;
+import net.jmecn.components.Jump;
 import net.jmecn.components.Model;
 import net.jmecn.components.Movement;
 import net.jmecn.components.Player;
@@ -42,6 +43,7 @@ public class CollisionState extends BaseAppState {
 	private EntityData ed;
 	private EntitySet entities;
 	private EntitySet movingPlayer;
+	private EntitySet jumpPlayer;
 
 	private Map<EntityId, RigidBodyControl> objects;
 	
@@ -60,6 +62,7 @@ public class CollisionState extends BaseAppState {
         entities = ed.getEntities(Collision.class, Model.class, Position.class);
         
         movingPlayer = ed.getEntities(Player.class, Movement.class);
+        jumpPlayer = ed.getEntities(Player.class, Jump.class);
         
         cam = app.getCamera();
 	}
@@ -86,6 +89,10 @@ public class CollisionState extends BaseAppState {
 				Entity e = movingPlayer.iterator().next();
 				Movement move = e.get(Movement.class);
 				player.setWalkDirection(move.getDirection().mult(move.getSpeed()));
+			}
+			
+			if (jumpPlayer.applyChanges()) {
+				player.jump();
 			}
 			
 			cam.setLocation(player.getPhysicsLocation());
@@ -156,6 +163,9 @@ public class CollisionState extends BaseAppState {
         
         movingPlayer.release();
         movingPlayer = null;
+        
+        jumpPlayer.release();
+        jumpPlayer = null;
 	}
 
 	@Override

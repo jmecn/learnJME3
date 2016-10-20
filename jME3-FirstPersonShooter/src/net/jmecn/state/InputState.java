@@ -4,6 +4,7 @@ package net.jmecn.state;
 import net.jmecn.app.PlayerFunctions;
 import net.jmecn.components.Collision;
 import net.jmecn.components.Decay;
+import net.jmecn.components.Jump;
 import net.jmecn.components.Model;
 import net.jmecn.components.Movement;
 import net.jmecn.components.Position;
@@ -112,8 +113,8 @@ public class InputState extends BaseAppState {
 				forward = isPressed;
 			} else if (name.equals(BACKWARD)) {
 				backward = isPressed;
-			} else if (name.equals(JUMP)) {
-				//player.jump();
+			} else if (name.equals(JUMP) && isPressed) {
+				ed.setComponent(player, new Jump());
 			} else if (name.equals(TRIGGER)) {
 				trigger = isPressed;
 			} else if (name.equals(BOMB)) {
